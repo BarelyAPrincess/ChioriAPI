@@ -1,0 +1,25 @@
+*.class
+
+# Package Files #
+*.war
+*.ear
+/bin/
+/*/bin/
+/bin.lck
+.classpath
+.project
+.settings
+/lib/META-INF
+/nbproject/private/
+/build/
+/*/build/
+/manifest.mf
+/config.yaml
+/*.key
+/*.crt
+/logs
+/.metadata
+/plugins
+/.gradle/
+/.groovy/
+/tmp
