@@ -13,9 +13,9 @@ import java.util.logging.Logger;
 
 import com.chiorichan.AppController;
 
-public class SubLog extends Logger
+public class ChildLogger extends Logger
 {
-	protected SubLog( String id )
+	protected ChildLogger( String id )
 	{
 		super( id, null );
 	}

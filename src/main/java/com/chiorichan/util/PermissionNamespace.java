@@ -21,27 +21,27 @@ public class PermissionNamespace extends Namespace
 	{
 		super( namespace );
 	}
-	
+
 	public PermissionNamespace( String namespace )
 	{
 		super( namespace );
 	}
-	
+
 	public Permission createPermission()
 	{
-		return PermissionManager.INSTANCE.createNode( getNamespace() );
+		return PermissionManager.instance().createNode( getNamespace() );
 	}
-	
+
 	public Permission createPermission( PermissionType type )
 	{
-		return PermissionManager.INSTANCE.createNode( getNamespace(), type );
+		return PermissionManager.instance().createNode( getNamespace(), type );
 	}
-	
+
 	public Permission getPermission()
 	{
-		return PermissionManager.INSTANCE.getNode( getNamespace() );
+		return PermissionManager.instance().getNode( getNamespace() );
 	}
-	
+
 	public boolean matches( Permission perm )
 	{
 		return matches( perm.getNamespace() );

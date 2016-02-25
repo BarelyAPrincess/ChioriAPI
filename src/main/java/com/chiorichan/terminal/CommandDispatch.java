@@ -96,7 +96,7 @@ public final class CommandDispatch
 				{
 					CommandIssuedEvent event = new CommandIssuedEvent( command.command, permissible );
 
-					EventBus.INSTANCE.callEvent( event );
+					EventBus.instance().callEvent( event );
 
 					if ( event.isCancelled() )
 					{

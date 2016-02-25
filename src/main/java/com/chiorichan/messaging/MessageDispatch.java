@@ -20,7 +20,7 @@ import com.chiorichan.account.Account;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventException;
-import com.chiorichan.event.server.MessageEvent;
+import com.chiorichan.event.account.MessageEvent;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -30,12 +30,12 @@ import com.google.common.collect.Sets;
 public class MessageDispatch
 {
 	private static final Map<MessageChannel, List<MessageReceiver>> channels = Maps.newConcurrentMap();
-	
+
 	public static Collection<MessageReceiver> channelRecipents( MessageChannel channel )
 	{
 		return Collections.unmodifiableList( channels.get( channel ) );
 	}
-	
+
 	public static void channelRegister( MessageChannel channel, MessageReceiver receiver )
 	{
 		if ( channels.containsKey( channel ) )
@@ -43,19 +43,19 @@ public class MessageDispatch
 		else
 			channels.put( channel, new ArrayList<MessageReceiver>( Arrays.asList( receiver ) ) );
 	}
-	
+
 	public static void channelUnregister( MessageChannel channel, MessageReceiver... receivers )
 	{
 		if ( channels.containsKey( channel ) )
 			channels.get( channel ).removeAll( Arrays.asList( receivers ) );
 	}
-	
+
 	public static void sendMessage( MessageBuilder builder ) throws MessageException
 	{
 		MessageEvent event = new MessageEvent( builder.getSender(), builder.compileReceivers(), builder.getMessages() );
 		try
 		{
-			EventBus.INSTANCE.callEventWithException( event );
+			EventBus.instance().callEventWithException( event );
 		}
 		catch ( EventException e )
 		{
@@ -65,19 +65,19 @@ public class MessageDispatch
 			for ( MessageReceiver dest : event.getRecipients() )
 				dest.sendMessage( event.getSender(), event.getMessages() );
 	}
-	
+
 	/**
 	 * Attempts to send specified object to every initialized Account
-	 * 
+	 *
 	 * @param excludedAcct
-	 *            Ignore this account when sending
+	 *             Ignore this account when sending
 	 * @param objs
-	 *            The objects to send
+	 *             The objects to send
 	 */
 	public static void sendMessage( Object... objs ) throws MessageException
 	{
 		Set<MessageReceiver> recipients = Sets.newHashSet();
-		for ( Account acct : AccountManager.INSTANCE.getAccounts() )
+		for ( Account acct : AccountManager.instance().getAccounts() )
 			if ( acct.meta().isInitialized() )
 				for ( MessageReceiver receiver : acct.instance().getAttachments() )
 					recipients.add( receiver );

@@ -11,6 +11,7 @@ package com.chiorichan.terminal.commands;
 import java.util.Arrays;
 
 import com.chiorichan.AppController;
+import com.chiorichan.AppLoader;
 import com.chiorichan.account.Account;
 import com.chiorichan.account.AccountAttachment;
 import com.chiorichan.account.AccountManager;
@@ -54,7 +55,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				sender.sendMessage( "Uptime: " + AppController.uptime() );
+				sender.sendMessage( "Uptime: " + AppLoader.uptime() );
 				return true;
 			}
 		} );
@@ -117,7 +118,7 @@ public abstract class BuiltinCommand extends Command
 						return false;
 					}
 
-					Account user = AccountManager.INSTANCE.getAccountPartial( args[0] );
+					Account user = AccountManager.instance().getAccountPartial( args[0] );
 
 					if ( user != null )
 					{
@@ -176,7 +177,7 @@ public abstract class BuiltinCommand extends Command
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
 				if ( sender.getEntity().isOp() )
-					AppController.reload( "The application is reloading by request of acct " + sender.getId() );
+					AppController.reloadApplication( "The application is reloading by request of acct " + sender.getId() );
 				else
 					sender.sendMessage( EnumColor.RED + "Only server operators can request the server to restart." );
 				return true;
@@ -189,7 +190,7 @@ public abstract class BuiltinCommand extends Command
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
 				if ( sender.getEntity().isOp() )
-					AppController.stop( "The application is shutting down by request of acct " + sender.getId() );
+					AppController.stopApplication( "The application is shutting down by request of acct " + sender.getId() );
 				else
 					sender.sendMessage( EnumColor.RED + "Only server operators can request the server to stop." );
 				return true;
@@ -207,7 +208,7 @@ public abstract class BuiltinCommand extends Command
 						sender.sendMessage( EnumColor.RED + "You must specify which account you wish to deop." );
 					else
 					{
-						PermissibleEntity entity = PermissionManager.INSTANCE.getEntity( args[0], false );
+						PermissibleEntity entity = PermissionManager.instance().getEntity( args[0], false );
 						if ( entity == null )
 							sender.sendMessage( EnumColor.RED + "We could not find an entity by that id." );
 						entity.removePermission( PermissionDefault.OP.getNode(), References.format() );
@@ -232,7 +233,7 @@ public abstract class BuiltinCommand extends Command
 						sender.sendMessage( EnumColor.RED + "You must specify which account you wish to op." );
 					else
 					{
-						PermissibleEntity entity = PermissionManager.INSTANCE.getEntity( args[0], false );
+						PermissibleEntity entity = PermissionManager.instance().getEntity( args[0], false );
 						if ( entity == null )
 							sender.sendMessage( EnumColor.RED + "We could not find an entity by that id." );
 						entity.addPermission( PermissionDefault.OP.getNode(), true, null );
@@ -264,9 +265,9 @@ public abstract class BuiltinCommand extends Command
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
 				sender.sendMessage( EnumColor.AQUA + "Forcing Save..." );
-				AccountManager.INSTANCE.save();
-				PermissionManager.INSTANCE.saveData();
-				AppController.saveConfig();
+				AccountManager.instance().save();
+				PermissionManager.instance().saveData();
+				AppController.config().saveConfig();
 				sender.sendMessage( EnumColor.AQUA + "Complete." );
 				return true;
 			}

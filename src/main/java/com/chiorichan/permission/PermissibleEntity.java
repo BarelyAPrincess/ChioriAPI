@@ -102,7 +102,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void addPermission( String node, Object val, References refs )
 	{
-		Permission perm = PermissionManager.INSTANCE.getNode( node );
+		Permission perm = PermissionManager.instance().getNode( node );
 		if ( perm == null )
 			throw new PermissionException( String.format( "The permission node %s is non-existent, you must create it first.", node ) );
 		addPermission( perm, val, refs );
@@ -140,7 +140,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void addTimedPermission( String perm, Object val, References refs, int lifeTime )
 	{
-		addTimedPermission( PermissionManager.INSTANCE.createNode( perm ), val, refs, lifeTime );
+		addTimedPermission( PermissionManager.instance().createNode( perm ), val, refs, lifeTime );
 	}
 
 	public PermissionResult checkPermission( Permission perm )
@@ -182,7 +182,7 @@ public abstract class PermissibleEntity implements ProviderChild
 	public PermissionResult checkPermission( String perm, References ref )
 	{
 		perm = PermissionManager.parseNode( perm );
-		Permission permission = PermissionManager.INSTANCE.createNode( perm );
+		Permission permission = PermissionManager.instance().createNode( perm );
 		PermissionResult result = checkPermission( permission, ref );
 
 		return result;
@@ -368,7 +368,7 @@ public abstract class PermissibleEntity implements ProviderChild
 	private String getMatchingExpression( Collection<Permission> permissions, String permission )
 	{
 		for ( Permission exp : permissions )
-			if ( PermissionManager.INSTANCE.getMatcher().isMatches( exp, permission ) )
+			if ( PermissionManager.instance().getMatcher().isMatches( exp, permission ) )
 				return exp.getNamespace();
 		return null;
 	}
@@ -577,7 +577,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public boolean isWhitelisted()
 	{
-		if ( !PermissionManager.INSTANCE.hasWhitelist() || PermissionManager.allowOps && isOp() )
+		if ( !PermissionManager.instance().hasWhitelist() || PermissionManager.allowOps && isOp() )
 			return true;
 
 		PermissionResult result = checkPermission( PermissionDefault.WHITELISTED.getNode() );
@@ -595,17 +595,17 @@ public abstract class PermissibleEntity implements ProviderChild
 			if ( entry.getValue().isExpired() )
 			{
 				timedGroups.remove( entry.getKey() );
-				EventBus.INSTANCE.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDGROUP_EXPIRED ) );
+				EventBus.instance().callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDGROUP_EXPIRED ) );
 			}
 		for ( Entry<ChildPermission, TimedReferences> entry : timedPermissions.entrySet() )
 			if ( entry.getValue().isExpired() )
 			{
 				timedPermissions.remove( entry.getKey() );
-				EventBus.INSTANCE.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDPERMISSION_EXPIRED ) );
+				EventBus.instance().callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDPERMISSION_EXPIRED ) );
 			}
 		for ( PermissionResult cache : cachedResults.values() )
 			cache.recalculatePermissions();
-		EventBus.INSTANCE.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.PERMISSIONS_CHANGED ) );
+		EventBus.instance().callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.PERMISSIONS_CHANGED ) );
 	}
 
 	public void reload()
@@ -655,7 +655,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void removeGroup( String group, References refs )
 	{
-		removeGroup( PermissionManager.INSTANCE.getGroup( group ), refs );
+		removeGroup( PermissionManager.instance().getGroup( group ), refs );
 	}
 
 	public final void removePermission( Permission perm, References refs )
@@ -668,7 +668,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void removePermission( String permission, References refs )
 	{
-		removePermission( PermissionManager.INSTANCE.getNode( permission ), refs );
+		removePermission( PermissionManager.instance().getNode( permission ), refs );
 	}
 
 	/**
@@ -697,7 +697,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void removeTimedPermission( String perm, References refs )
 	{
-		removeTimedPermission( PermissionManager.INSTANCE.getNode( perm ), refs );
+		removeTimedPermission( PermissionManager.instance().getNode( perm ), refs );
 	}
 
 	/**

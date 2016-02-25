@@ -17,30 +17,30 @@ import java.util.logging.Level;
 
 import joptsimple.OptionSet;
 
-import org.joda.time.Duration;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
-
+import com.chiorichan.account.AccountManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventRegistrar;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.services.ServiceRegisterEvent;
 import com.chiorichan.event.services.ServiceUnregisterEvent;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.lang.StartupException;
+import com.chiorichan.lang.ExceptionReport;
+import com.chiorichan.lang.IException;
+import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.lang.RunLevel;
 import com.chiorichan.logger.DefaultLogFormatter;
 import com.chiorichan.logger.Log;
-import com.chiorichan.logger.LogManager;
 import com.chiorichan.logger.LoggerOutputStream;
-import com.chiorichan.services.AppManager;
+import com.chiorichan.permission.PermissionManager;
+import com.chiorichan.plugin.PluginManager;
 import com.chiorichan.services.ObjectContext;
 import com.chiorichan.services.RegisteredServiceProvider;
 import com.chiorichan.services.ServicePriority;
 import com.chiorichan.services.ServiceProvider;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
+import com.chiorichan.tasks.Timings;
 import com.chiorichan.terminal.CommandDispatch;
-import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.Versioning;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -52,30 +52,24 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 
 	public static int lastFiveTick = -1;
 	public static int currentTick = ( int ) ( System.currentTimeMillis() / 50 );
-	public static long startTime = System.currentTimeMillis();
-	public static Thread primaryThread;
 
+	public static Thread primaryThread;
 	protected static AppController instance;
 	protected static final ExecutorService pool = Executors.newCachedThreadPool();
+
 	protected static final AppConfig config = new AppConfig();
-
 	private static boolean isRunning = false;
-
 	private static final Map<Class<?>, List<RegisteredServiceProvider<?, ServiceProvider>>> providers = new HashMap<>();
 
-	private static final Map<Class<?>, Object> managers = new HashMap<>();
+	private static String stopReason = null;
+
+	private static boolean willRestart = false;
 
 	public static AppConfig config()
 	{
 		if ( !config.isConfigLoaded() )
 			config.loadConfig( new File( "config.yaml" ), "com/chiorichan/config.yaml" );
 		return config;
-	}
-
-	@Override
-	public static String getName()
-	{
-		return Versioning.getProduct() + " " + Versioning.getVersion();
 	}
 
 	/**
@@ -141,36 +135,24 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		};
 	}
 
-	protected static void handleException( StartupException t )
+
+
+	public static void handleExceptions( Throwable... ts )
 	{
-		if ( t.getCause() != null )
-			t.getCause().printStackTrace();
-		else
-			t.printStackTrace();
+		ExceptionReport report = new ExceptionReport();
+		for ( Throwable t : ts )
+			if ( t instanceof IException )
+				report.addException( ( IException ) t );
+			else
+				report.addException( ReportingLevel.E_ERROR, t );
 
-		// TODO Make it so this exception (and possibly other critical exceptions) are reported to
-		// us without user interaction. Should also find a way that the log can be sent along with it.
-
-		safeLog( Level.SEVERE, EnumColor.RED + "" + EnumColor.NEGATIVE + "THE SERVER FAILED TO START, CHECK THE LOGS AND TRY AGAIN (" + ( System.currentTimeMillis() - startTime ) + "ms)!" );
-	}
-
-
-
-	protected static void handleException( Throwable t )
-	{
-		t.printStackTrace();
-		safeLog( Level.WARNING, EnumColor.RED + "" + EnumColor.NEGATIVE + "**** WE ENCOUNTERED AN UNEXPECTED EXCEPTION ****" );
-	}
-
-	public static <T extends AppManager> instance( Class<T> clz )
-	{
-		Object obj = managers.get( clz );
-		if ( obj == null )
+		if ( report.hasNonIgnorableExceptions() )
 		{
-			obj = ObjectFunc.initClass( clz );
-			managers.
+			ExceptionReport.printExceptions( report.getNotIgnorableExceptions() );
+			stopApplication( "WE ENCOUNTERED AN UNEXPECTED EXCEPTION (" + AppLoader.uptime() + "ms)!" );
+
+			// TODO Pass that this was a crash
 		}
-		return obj;
 	}
 
 	public final static boolean isPrimaryThread()
@@ -229,49 +211,39 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		EventBus.instance().callEvent( new ServiceRegisterEvent<T>( registeredProvider ) );
 	}
 
-	public static void reload( String string )
+	public static void reloadApplication( String reason )
 	{
-		// TODO Auto-generated method stub
-	}
-
-	protected static void safeLog( Level l, String msg )
-	{
-		if ( Log.get() == null )
+		if ( !AppLoader.isWatchdogRunning() )
 		{
-			msg = EnumColor.transAltColors( msg );
-
-			if ( l.intValue() >= Level.WARNING.intValue() )
-				System.err.println( msg );
-			else
-				System.out.println( msg );
+			Log.get().highlight( "Server can not be restarted without Watchdog running." );
+			return;
 		}
-		else
-			Log.get().log( l, msg );
+
+		if ( reason == null )
+			Log.get().highlight( "Server is restarting, be back soon... :D" );
+		else if ( !reason.isEmpty() )
+			Log.get().highlight( reason );
+
+		stopReason = reason;
+		willRestart = true;
+		isRunning = false;
 	}
 
-	public static void saveConfig()
+	public static void stopApplication( String reason )
 	{
-		// TODO Auto-generated method stub
+		// Log.get().warning( EnumColor.RED + "" + EnumColor.NEGATIVE + "CHECK THE LOGS AND TRY AGAIN " );
 
+		if ( reason == null )
+			Log.get().highlight( "Stopping... Goodbye!" );
+		else if ( !reason.isEmpty() )
+			Log.get().highlight( "Stopping for Reason: " + reason );
+
+		stopReason = reason;
+		willRestart = false;
+		isRunning = false;
 	}
-
-	public static void stop( String string )
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	public static String uptime()
-	{
-		Duration duration = new Duration( System.currentTimeMillis() - startTime );
-		PeriodFormatter formatter = new PeriodFormatterBuilder().appendDays().appendSuffix( " Day(s) " ).appendHours().appendSuffix( " Hour(s) " ).appendMinutes().appendSuffix( " Minute(s) " ).appendSeconds().appendSuffix( " Second(s)" ).toFormatter();
-		return formatter.print( duration.toPeriod() );
-	}
-
-	private LogManager logManager;
 
 	private OptionSet options;
-
 	public boolean useColors = true;
 
 	public AppLoader loader;
@@ -286,14 +258,50 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		if ( options.has( "nocolor" ) )
 			useColors = false;
 
-		logManager = new LogManager();
-
 		ConsoleHandler consoleHandler = new ConsoleHandler();
 		consoleHandler.setFormatter( new DefaultLogFormatter() );
-		logManager.addHandler( consoleHandler );
+		Log.addHandler( consoleHandler );
 
 		System.setOut( new PrintStream( new LoggerOutputStream( Log.get( "SysOut" ).getLogger(), Level.INFO ), true ) );
 		System.setErr( new PrintStream( new LoggerOutputStream( Log.get( "SysErr" ).getLogger(), Level.SEVERE ), true ) );
+	}
+
+	private void finalShutdown()
+	{
+		Object timing = new Object();
+		Timings.start( timing );
+
+		loader.runLevel( RunLevel.SHUTDOWN );
+
+		pool.shutdown();
+
+		Log.get().info( "Shutting Down Plugin Manager..." );
+		PluginManager.instance().shutdown();
+
+		Log.get().info( "Shutting Down Permission Manager..." );
+		PermissionManager.instance().saveData();
+
+		Log.get().info( "Shutting Down Account Manager..." );
+		AccountManager.instance().shutdown( stopReason );
+
+		Log.get().info( "Shutting Down Task Manager..." );
+		TaskManager.instance().shutdown();
+
+		Log.get().info( "Saving Configuration..." );
+		AppController.config().saveConfig();
+
+		Log.get().info( "Clearing Excess Cache..." );
+		long keepHistory = config().getLong( "advanced.cache.keepHistory", 30L );
+		config().clearCache( keepHistory );
+
+		loader.runLevel( RunLevel.DISPOSED );
+
+		Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Shutdown Completed! It took " + Timings.finish( timing ) + "ms!" );
+
+		if ( willRestart )
+			System.exit( 99 );
+		else
+			System.exit( 0 );
 	}
 
 	/**
@@ -308,6 +316,12 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		{
 			return ImmutableSet.<Class<?>> copyOf( providers.keySet() );
 		}
+	}
+
+	@Override
+	public String getName()
+	{
+		return Versioning.getProduct() + " " + Versioning.getVersion();
 	}
 
 	/**
@@ -429,23 +443,21 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 					j -= 50L;
 
 					CommandDispatch.handleCommands();
-					TaskManager.INSTANCE.heartbeat( currentTick );
+					TaskManager.instance().heartbeat( currentTick );
 				}
 
 				if ( !isRunning() )
 					break;
-
 				Thread.sleep( 1L );
 			}
 		}
 		catch ( Throwable t )
 		{
-			Log.get().severe( "There was a severe exception thrown by the main tick loop", t );
+			handleExceptions( t );
 		}
 		finally
 		{
-			pool.shutdown();
-			loader.dispose();
+			finalShutdown();
 		}
 	}
 
@@ -474,9 +486,10 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 	 * @param provider
 	 *             The service provider implementation
 	 */
-	public void serviceUnregister( Class<?> service, Object provider )
+	@SuppressWarnings( {"rawtypes", "unchecked"} )
+	public void serviceUnregister( Class<?> service, ServiceProvider provider )
 	{
-		ArrayList<ServiceUnregisterEvent> unregisteredEvents = new ArrayList<ServiceUnregisterEvent>();
+		ArrayList<ServiceUnregisterEvent<?>> unregisteredEvents = new ArrayList<ServiceUnregisterEvent<?>>();
 		synchronized ( providers )
 		{
 			Iterator<Map.Entry<Class<?>, List<RegisteredServiceProvider<?, ServiceProvider>>>> it = providers.entrySet().iterator();
@@ -521,8 +534,8 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 			{
 			}
 		}
-		for ( ServiceUnregisterEvent event : unregisteredEvents )
-			EventBus.INSTANCE.callEvent( event );
+		for ( ServiceUnregisterEvent<?> event : unregisteredEvents )
+			EventBus.instance().callEvent( event );
 	}
 
 	/**
@@ -531,9 +544,10 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 	 * @param provider
 	 *             The service provider implementation
 	 */
+	@SuppressWarnings( {"rawtypes", "unchecked"} )
 	public void serviceUnregister( Object provider )
 	{
-		ArrayList<ServiceUnregisterEvent> unregisteredEvents = new ArrayList<ServiceUnregisterEvent>();
+		ArrayList<ServiceUnregisterEvent<?>> unregisteredEvents = new ArrayList<ServiceUnregisterEvent<?>>();
 		synchronized ( providers )
 		{
 			Iterator<Map.Entry<Class<?>, List<RegisteredServiceProvider<?, ServiceProvider>>>> it = providers.entrySet().iterator();
@@ -573,8 +587,8 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 			{
 			}
 		}
-		for ( ServiceUnregisterEvent event : unregisteredEvents )
-			EventBus.INSTANCE.callEvent( event );
+		for ( ServiceUnregisterEvent<?> event : unregisteredEvents )
+			EventBus.instance().callEvent( event );
 	}
 
 	/**
@@ -626,7 +640,7 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 			}
 		}
 		for ( ServiceUnregisterEvent<?> event : unregisteredEvents )
-			EventBus.INSTANCE.callEvent( event );
+			EventBus.instance().callEvent( event );
 	}
 
 	public void setLoader( AppLoader loader )

@@ -13,17 +13,18 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.chiorichan.AppController;
 import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountPermissible;
 import com.chiorichan.account.AccountType;
+import com.chiorichan.account.LocationService;
 import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
-import com.chiorichan.services.ServiceProvider;
 import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.Versioning;
 
@@ -62,12 +63,6 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 	public abstract void finish();
 
 	@Override
-	public AccountLocation getCollective()
-	{
-		return ServiceProvider.getProvider( AccountLocation.class ).getDefaultChild();
-	}
-
-	@Override
 	public PermissibleEntity getEntity()
 	{
 		return meta().getEntity();
@@ -88,6 +83,12 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 	public Collection<String> getIpAddresses()
 	{
 		return Arrays.asList( getIpAddr() );
+	}
+
+	@Override
+	public AccountLocation getLocation()
+	{
+		return ( ( LocationService ) AppController.getService( AccountLocation.class ) ).getDefaultLocation();
 	}
 
 	@Override

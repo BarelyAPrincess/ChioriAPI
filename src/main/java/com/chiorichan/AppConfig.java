@@ -3,6 +3,8 @@ package com.chiorichan;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,23 +16,26 @@ import com.chiorichan.configuration.ConfigurationOptions;
 import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.configuration.InvalidConfigurationException;
 import com.chiorichan.configuration.file.YamlConfiguration;
+import com.chiorichan.datastore.DatastoreManager;
+import com.chiorichan.datastore.sql.bases.H2SQLDatastore;
+import com.chiorichan.datastore.sql.bases.MySQLDatastore;
+import com.chiorichan.datastore.sql.bases.SQLDatastore;
+import com.chiorichan.datastore.sql.bases.SQLiteDatastore;
 import com.chiorichan.logger.Log;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.Ticks;
+import com.chiorichan.util.FileFunc;
 
 public class AppConfig implements Configuration
 {
-	private static File tmpFileDirectory;
-	private static File logFileDirectory;
+	private static String clientId;
+	private static File cacheDirectory;
+	private static File tmpDirectory;
+	private static File logDirectory;
 	private static File lockFile;
 
-	public static File getLogsFileDirectory()
-	{
-		if ( logFileDirectory == null )
-			throw new IllegalStateException( "Logs directory appears to be null, was getLogsFileDirectory() called before the server finished inialization?" );
+	private SQLDatastore fwDatabase = null;
 
-		return logFileDirectory;
-	}
 	private File loadedLocation = null;
 
 	private YamlConfiguration yaml = new YamlConfiguration();
@@ -53,16 +58,6 @@ public class AppConfig implements Configuration
 		yaml.addDefaults( defaults );
 	}
 
-	public File applicationDirectory()
-	{
-
-	}
-
-	public String cacheDirectory()
-	{
-
-	}
-
 	public void clearCache( File path, long keepHistory )
 	{
 		Validate.notNull( path );
@@ -77,6 +72,11 @@ public class AppConfig implements Configuration
 				f.delete();
 			else if ( f.isDirectory() )
 				clearCache( f, keepHistory );
+	}
+
+	public void clearCache( long keepHistory )
+	{
+		clearCache( getTempFileDirectory(), keepHistory );
 	}
 
 	@Override
@@ -112,6 +112,22 @@ public class AppConfig implements Configuration
 	public Object get( String path, Object def )
 	{
 		return yaml.get( path, def );
+	}
+
+	/**
+	 * @return The server jar file
+	 */
+	public File getApplicationJar()
+	{
+		try
+		{
+			return new File( URLDecoder.decode( AppLoader.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8" ) );
+		}
+		catch ( UnsupportedEncodingException e )
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
@@ -150,6 +166,13 @@ public class AppConfig implements Configuration
 		return yaml.getByteList( path );
 	}
 
+	public File getCacheDirectory()
+	{
+		if ( cacheDirectory == null )
+			cacheDirectory = getDirectory( "cache", "temp" );
+		return cacheDirectory;
+	}
+
 	public String getClientId()
 	{
 		return clientId;
@@ -185,6 +208,18 @@ public class AppConfig implements Configuration
 		return yaml.getCurrentPath();
 	}
 
+	public SQLDatastore getDatabase()
+	{
+		return fwDatabase;
+	}
+
+	public SQLDatastore getDatabaseWithException()
+	{
+		if ( fwDatabase == null )
+			throw new IllegalStateException( "The Server Database is unconfigured. See config option 'server.database.type' in server config 'server.yaml'." );
+		return fwDatabase;
+	}
+
 	@Override
 	public Configuration getDefaults()
 	{
@@ -195,6 +230,12 @@ public class AppConfig implements Configuration
 	public ConfigurationSection getDefaultSection()
 	{
 		return yaml.getDefaultSection();
+	}
+
+	public File getDirectory( String configKey, String defPath )
+	{
+		String dir = AppLoader.options().has( configKey ) ? ( String ) AppLoader.options().valueOf( "plugins" ) : AppController.config().getString( "directories." + configKey, "plugins" );
+		return FileFunc.isAbsolute( dir ) ? new File( dir ) : new File( getRootDirectory(), dir );
 	}
 
 	@Override
@@ -263,6 +304,14 @@ public class AppConfig implements Configuration
 		return yaml.getList( path, def );
 	}
 
+	public File getLogsFileDirectory()
+	{
+		if ( logDirectory == null )
+			throw new IllegalStateException( "Logs directory appears to be null, was getLogsFileDirectory() called before the server finished inialization?" );
+
+		return logDirectory;
+	}
+
 	@Override
 	public long getLong( String path )
 	{
@@ -305,6 +354,11 @@ public class AppConfig implements Configuration
 		return yaml.getRoot();
 	}
 
+	public File getRootDirectory()
+	{
+		return getApplicationJar().getParentFile();
+	}
+
 	@Override
 	public List<Short> getShortList( String path )
 	{
@@ -335,6 +389,25 @@ public class AppConfig implements Configuration
 		return yaml.getStringList( path, def );
 	}
 
+	public File getTempFileDirectory()
+	{
+		if ( tmpDirectory == null )
+			throw new IllegalStateException( "Temp directory appears to be null, was getTempFileDirectory() called before the server finished inialization?" );
+
+		FileFunc.patchDirectory( tmpDirectory );
+
+		return tmpDirectory;
+	}
+
+	public File getTempFileDirectory( String subdir )
+	{
+		File file = new File( getTempFileDirectory(), subdir );
+
+		FileFunc.patchDirectory( file );
+
+		return file;
+	}
+
 	@Override
 	public Map<String, Object> getValues( boolean deep )
 	{
@@ -345,6 +418,40 @@ public class AppConfig implements Configuration
 	public boolean has( String path )
 	{
 		return yaml.has( path );
+	}
+
+	public void initDatabase()
+	{
+		switch ( getString( "server.database.type", "sqlite" ).toLowerCase() )
+		{
+			case "sqlite":
+			{
+				fwDatabase = new SQLiteDatastore( getString( "server.database.dbfile", "server.db" ) );
+				break;
+			}
+			case "mysql":
+			{
+				String host = getString( "server.database.host", "localhost" );
+				String port = getString( "server.database.port", "3306" );
+				String database = getString( "server.database.database", "chiorifw" );
+				String username = getString( "server.database.username", "fwuser" );
+				String password = getString( "server.database.password", "fwpass" );
+
+				fwDatabase = new MySQLDatastore( database, username, password, host, port );
+				break;
+			}
+			case "h2":
+			{
+				fwDatabase = new H2SQLDatastore( getString( "server.database.dbfile", "server.db" ) );
+				break;
+			}
+			case "none":
+			case "":
+				Log.get( DatastoreManager.instance() ).warning( "The Server Database is unconfigured, some features maybe not function as expected. See config option 'server.database.type' in server config 'server.yaml'." );
+				break;
+			default:
+				Log.get( DatastoreManager.instance() ).severe( "We are sorry, the Database Engine currently only supports mysql and sqlite but we found '" + getString( "server.database.type", "sqlite" ).toLowerCase() + "', please change 'server.database.type' to 'mysql' or 'sqlite' in server config 'server.yaml'" );
+		}
 	}
 
 	@Override
@@ -449,7 +556,7 @@ public class AppConfig implements Configuration
 		// TODO Targeted key path saves
 		// TODO Save only changed values, so manual edits are not overridden
 
-		TaskManager.INSTANCE.runTaskWithTimeout( AppController.instance, Ticks.MINUTE, new Runnable()
+		TaskManager.instance().runTaskWithTimeout( AppController.instance, Ticks.MINUTE, new Runnable()
 		{
 			@Override
 			public void run()

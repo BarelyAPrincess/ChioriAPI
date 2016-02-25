@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.Scanner;
 
 import com.chiorichan.account.AccountAttachment;
-import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountInstance;
+import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.AccountPermissible;
 import com.chiorichan.account.AccountType;
@@ -21,12 +21,13 @@ import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
+import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.logger.Log;
 import com.chiorichan.logger.LogSource;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
-import com.chiorichan.permission.lang.PermissionBackendException;
+import com.chiorichan.services.AppManager;
 import com.chiorichan.util.ObjectFunc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -35,23 +36,12 @@ import com.google.common.collect.Lists;
  * Provides the console output of the server.
  * We also attach the Root Account here
  */
-public class ApplicationTerminal extends AccountPermissible implements AccountAttachment, LogSource
+public class ApplicationTerminal extends AccountPermissible implements AccountAttachment, LogSource, ServiceManager
 {
-	public static final ApplicationTerminal INSTANCE = new ApplicationTerminal();
-	private static boolean isInitialized = false;
-
-	public static void init() throws PermissionBackendException
+	public static ApplicationTerminal terminal()
 	{
-		if ( isInitialized )
-			throw new IllegalStateException( "The Application Terminal has already been initialized." );
-
-		assert INSTANCE != null;
-
-		INSTANCE.init0();
-
-		isInitialized = true;
+		return AppManager.manager( ApplicationTerminal.class ).instance();
 	}
-
 
 	private ApplicationTerminal()
 	{
@@ -62,18 +52,6 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	protected void failedLogin( AccountResult result )
 	{
 		// Do Nothing
-	}
-
-	@Override
-	public AccountLocation getCollective()
-	{
-		return AccountType.ACCOUNT_ROOT.getCollective();
-	}
-
-	@Override
-	public String getCollectiveId()
-	{
-		return AccountType.ACCOUNT_ROOT.getCollectiveId();
 	}
 
 	@Override
@@ -107,6 +85,12 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	}
 
 	@Override
+	public AccountLocation getLocation()
+	{
+		return AccountType.ACCOUNT_ROOT.getLocation();
+	}
+
+	@Override
 	public String getLoggerId()
 	{
 		return "Console";
@@ -130,7 +114,8 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 		return def;
 	}
 
-	public void init0()
+	@Override
+	public void init() throws ApplicationException
 	{
 
 	}

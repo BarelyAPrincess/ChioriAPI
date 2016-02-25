@@ -30,7 +30,6 @@ import com.chiorichan.event.EventPriority;
 import com.chiorichan.event.EventRegistrar;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.logger.Log;
-import com.chiorichan.logger.LogSource;
 import com.chiorichan.permission.backend.file.FileBackend;
 import com.chiorichan.permission.backend.memory.MemoryBackend;
 import com.chiorichan.permission.backend.sql.SQLBackend;
@@ -49,7 +48,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class PermissionManager implements EventRegistrar, TaskRegistrar, LogSource, ServiceManager, ServiceProvider
+public class PermissionManager implements EventRegistrar, TaskRegistrar, ServiceManager, ServiceProvider
 {
 	static boolean allowOps = true;
 	static boolean debugMode = false;
@@ -712,7 +711,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, LogSour
 	 */
 	protected void registerTask( TimerTask task, int delay )
 	{
-		TaskManager.INSTANCE.scheduleAsyncDelayedTask( this, delay * 50, task );
+		TaskManager.instance().scheduleAsyncDelayedTask( this, delay * 50, task );
 	}
 
 	public void reload() throws PermissionBackendException

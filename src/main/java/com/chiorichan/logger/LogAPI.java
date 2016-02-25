@@ -28,18 +28,21 @@ public interface LogAPI
 
 	void panic( Throwable e );
 
+	void panic( String var1, Object... objs );
+
+	void panic( String var1, Throwable t );
+
 	void severe( String s );
 
 	void severe( String s, Throwable t );
 
 	void severe( Throwable t );
 
+	void severe( String s, Object... objs );
+
 	void warning( String s );
 
 	void warning( String s, Object... objs );
 
 	void warning( String s, Throwable t );
-
-	void exceptions( Throwable... throwables );
-
 }

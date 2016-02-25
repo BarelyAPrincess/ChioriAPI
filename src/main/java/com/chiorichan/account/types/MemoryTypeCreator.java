@@ -11,7 +11,7 @@ package com.chiorichan.account.types;
 import java.util.Arrays;
 import java.util.List;
 
-import com.chiorichan.Loader;
+import com.chiorichan.ApplicationTerminal;
 import com.chiorichan.account.AccountContext;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.AccountPermissible;
@@ -133,7 +133,7 @@ public class MemoryTypeCreator extends AccountTypeCreator
 		{
 			entity.addPermission( PermissionDefault.OP.getNode(), true, null );
 			entity.setVirtual( true );
-			meta.instance().registerAttachment( Loader.console() );
+			meta.instance().registerAttachment( ApplicationTerminal.terminal() );
 		}
 
 		if ( meta.context().creator() == this && AccountType.isNoneAccount( meta ) )

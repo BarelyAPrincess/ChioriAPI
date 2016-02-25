@@ -60,8 +60,8 @@ public final class AccountType
 
 	static
 	{
-		AccountManager.INSTANCE.accounts.put( ACCOUNT_NONE );
-		AccountManager.INSTANCE.accounts.put( ACCOUNT_ROOT );
+		AccountManager.instance().accounts.put( ACCOUNT_NONE );
+		AccountManager.instance().accounts.put( ACCOUNT_ROOT );
 	}
 
 	public static Collection<AccountType> getAccountTypes()

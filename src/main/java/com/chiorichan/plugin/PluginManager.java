@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppController;
-import com.chiorichan.AppLoader;
 import com.chiorichan.ServiceManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
@@ -44,26 +43,23 @@ import com.chiorichan.lang.UnknownDependencyException;
 import com.chiorichan.libraries.Libraries;
 import com.chiorichan.libraries.MavenReference;
 import com.chiorichan.logger.Log;
-import com.chiorichan.logger.LogSource;
 import com.chiorichan.plugin.loader.JavaPluginLoader;
 import com.chiorichan.plugin.loader.Plugin;
 import com.chiorichan.plugin.loader.PluginClassLoader;
 import com.chiorichan.plugin.loader.PluginLoader;
+import com.chiorichan.services.AppManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.util.FileFunc;
 import com.google.common.collect.Maps;
 
-public class PluginManager implements Listener, ServiceManager, EventRegistrar, TaskRegistrar, LogSource
+public class PluginManager implements Listener, ServiceManager, EventRegistrar, TaskRegistrar
 {
-	public static final PluginManager INSTANCE = new PluginManager();
-	private static boolean isInitialized = false;
-
 	private static File updateDirectory = null;
 
 	public static Log getLogger()
 	{
-		return Log.get( INSTANCE );
+		return AppManager.manager( PluginManager.class ).getLogger();
 	}
 
 	/**
@@ -71,19 +67,17 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 */
 	public static File getPluginsDirectory()
 	{
-		return ( File ) AppLoader.options().valueOf( "plugins" );
+		return AppController.config().getDirectory( "plugins", "plugins" );
 	}
 
-	public static void init()
+	public static File getUpdateDirectory()
 	{
-		if ( isInitialized )
-			throw new IllegalStateException( "The Plugin Manager has already been initialized." );
+		return AppController.config().getDirectory( "update", "plugins/update" );
+	}
 
-		assert INSTANCE != null;
-
-		INSTANCE.init0();
-
-		isInitialized = true;
+	public static PluginManager instance()
+	{
+		return AppManager.manager( PluginManager.class ).instance();
 	}
 
 	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<Pattern, PluginLoader>();
@@ -145,7 +139,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 			try
 			{
-				TaskManager.INSTANCE.cancelTasks( plugin );
+				TaskManager.instance().cancelTasks( plugin );
 			}
 			catch ( NoClassDefFoundError ex )
 			{
@@ -323,12 +317,10 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		return plugins.toArray( new Plugin[0] );
 	}
 
-	/**
-	 * Registers with the event bus to we can load plugins in their correct order.
-	 */
-	private void init0()
+	@Override
+	public void init()
 	{
-		EventBus.INSTANCE.registerEvents( this, this );
+		EventBus.instance().registerEvents( this, this );
 	}
 
 	@Override
@@ -434,8 +426,8 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		List<Plugin> result = new ArrayList<Plugin>();
 		Set<Pattern> filters = fileAssociations.keySet();
 
-		if ( !AppController.config().cacheDirectory().equals( "" ) )
-			updateDirectory = new File( directory, AppController.config().cacheDirectory() );
+		if ( updateDirectory == null )
+			updateDirectory = getUpdateDirectory();
 
 		Map<String, File> plugins = new HashMap<String, File>();
 		Map<String, Collection<MavenReference>> libraries = Maps.newHashMap();

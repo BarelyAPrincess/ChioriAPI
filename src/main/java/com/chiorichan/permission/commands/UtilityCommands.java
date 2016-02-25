@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import com.chiorichan.Loader;
-import com.chiorichan.configuration.file.FileConfiguration;
+import com.chiorichan.AppController;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissibleGroup;
@@ -35,7 +34,7 @@ public class UtilityCommands extends PermissionBaseCommand
 	{
 		if ( !args.containsKey( key ) )
 			return def;
-		
+
 		try
 		{
 			return Integer.parseInt( args.get( key ) );
@@ -46,7 +45,7 @@ public class UtilityCommands extends PermissionBaseCommand
 			return Integer.MIN_VALUE;
 		}
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "commit [type] [id]", permission = "permissions.manage.commit", description = "Commit all permission changes to the backend" )
 	public void commit( TerminalEntity sender, Map<String, String> args )
 	{
@@ -54,7 +53,7 @@ public class UtilityCommands extends PermissionBaseCommand
 			switch ( args.get( "type" ) )
 			{
 				case "entity":
-					PermissibleEntity entity = PermissionManager.INSTANCE.getEntity( args.get( "id" ) );
+					PermissibleEntity entity = PermissionManager.instance().getEntity( args.get( "id" ) );
 					if ( entity == null )
 						sender.sendMessage( EnumColor.RED + "We could not find an entity with id `" + args.get( "id" ) + "`!" );
 					else
@@ -64,7 +63,7 @@ public class UtilityCommands extends PermissionBaseCommand
 					}
 					break;
 				case "group":
-					PermissibleGroup group = PermissionManager.INSTANCE.getGroup( args.get( "id" ) );
+					PermissibleGroup group = PermissionManager.instance().getGroup( args.get( "id" ) );
 					if ( group == null )
 						sender.sendMessage( EnumColor.RED + "We could not find a group with id `" + args.get( "id" ) + "`!" );
 					else
@@ -74,7 +73,7 @@ public class UtilityCommands extends PermissionBaseCommand
 					}
 					break;
 				case "permission":
-					Permission perm = PermissionManager.INSTANCE.getNode( args.get( "id" ) );
+					Permission perm = PermissionManager.instance().getNode( args.get( "id" ) );
 					if ( perm == null )
 						sender.sendMessage( EnumColor.RED + "We could not find a permission with namespace `" + args.get( "id" ) + "`!" );
 					else
@@ -86,14 +85,14 @@ public class UtilityCommands extends PermissionBaseCommand
 			}
 		else
 		{
-			PermissionManager.INSTANCE.saveData();
+			PermissionManager.instance().saveData();
 			sender.sendMessage( EnumColor.AQUA + "Wonderful news, we successfully committed any changes to the backend!" );
 		}
-		
+
 		// Force backend to finally flush changes
-		PermissionManager.INSTANCE.getBackend().commit();
+		PermissionManager.instance().getBackend().commit();
 	}
-	
+
 	@SuppressWarnings( "unchecked" )
 	@CommandHandler( name = "pex", syntax = "config <node> [value]", permission = "permissions.manage.config", description = "Print or set <node> [value]" )
 	public void config( TerminalEntity sender, Map<String, String> args )
@@ -101,16 +100,14 @@ public class UtilityCommands extends PermissionBaseCommand
 		String nodeName = args.get( "node" );
 		if ( nodeName == null || nodeName.isEmpty() )
 			return;
-		
-		FileConfiguration config = Loader.getConfig();
-		
+
 		if ( args.get( "value" ) != null )
 		{
-			config.set( nodeName, parseValue( args.get( "value" ) ) );
-			Loader.saveConfig();
+			AppController.config().set( nodeName, parseValue( args.get( "value" ) ) );
+			AppController.config().saveConfig();
 		}
-		
-		Object node = config.get( nodeName );
+
+		Object node = AppController.config().get( nodeName );
 		if ( node instanceof Map )
 		{
 			sender.sendMessage( "Node \"" + nodeName + "\": " );
@@ -120,28 +117,28 @@ public class UtilityCommands extends PermissionBaseCommand
 		else if ( node instanceof List )
 		{
 			sender.sendMessage( "Node \"" + nodeName + "\": " );
-			for ( String item : ( ( List<String> ) node ) )
+			for ( String item : ( List<String> ) node )
 				sender.sendMessage( " - " + item );
 		}
 		else
 			sender.sendMessage( "Node \"" + nodeName + "\" = \"" + node + "\"" );
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "dump <backend> <filename>", permission = "permissions.dump", description = "Dump users/groups to selected <backend> format" )
 	public void dumpData( TerminalEntity sender, Map<String, String> args )
 	{
 		try
 		{
 			PermissionBackend backend = PermissionBackend.getBackendWithException( args.get( "backend" ) );
-			
+
 			File dstFile = new File( args.get( "filename" ) );
-			
+
 			FileOutputStream outStream = new FileOutputStream( dstFile );
-			
+
 			backend.dumpData( new OutputStreamWriter( outStream, "UTF-8" ) );
-			
+
 			outStream.close();
-			
+
 			sender.sendMessage( EnumColor.WHITE + "[Permissions] Data dumped in \"" + dstFile.getName() + "\" " );
 		}
 		catch ( IOException e )
@@ -159,31 +156,31 @@ public class UtilityCommands extends PermissionBaseCommand
 			// t.printStackTrace();
 		}
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "backend", permission = "permissions.manage.backend", description = "Print currently used backend" )
 	public void getBackend( TerminalEntity sender, Map<String, String> args )
 	{
-		sender.sendMessage( "Current backend: " + PermissionManager.INSTANCE.getBackend() );
+		sender.sendMessage( "Current backend: " + PermissionManager.instance().getBackend() );
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "hierarchy [ref]", permission = "permissions.manage.users", description = "Print complete user/group hierarchy" )
 	public void printHierarchy( TerminalEntity sender, Map<String, String> args )
 	{
 		sender.sendMessage( "Entity/Group inheritance hierarchy:" );
 		sendMessage( sender, this.printHierarchy( null, autoCompleteRef( args.get( "world" ) ), 0 ) );
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "reload [id]", permission = "permissions.manage.reload", description = "Reload permissions and groups from backend" )
 	public void reload( TerminalEntity sender, Map<String, String> args )
 	{
 		if ( args.containsKey( "id" ) )
 		{
-			PermissibleEntity entity = PermissionManager.INSTANCE.getEntity( args.get( "id" ), false );
-			
+			PermissibleEntity entity = PermissionManager.instance().getEntity( args.get( "id" ), false );
+
 			if ( entity == null )
 			{
-				PermissibleGroup group = PermissionManager.INSTANCE.getGroup( args.get( "id" ), false );
-				
+				PermissibleGroup group = PermissionManager.instance().getGroup( args.get( "id" ), false );
+
 				if ( group == null )
 					sender.sendMessage( EnumColor.RED + "We could not find anything with id `" + args.get( "id" ) + "`!" );
 				else
@@ -201,7 +198,7 @@ public class UtilityCommands extends PermissionBaseCommand
 		else
 			try
 			{
-				PermissionManager.INSTANCE.reload();
+				PermissionManager.instance().reload();
 				sender.sendMessage( EnumColor.AQUA + "Wonderful news, we successfully reloaded all entities and groups from the backend!" );
 			}
 			catch ( PermissionBackendException e )
@@ -210,7 +207,7 @@ public class UtilityCommands extends PermissionBaseCommand
 				PermissionManager.getLogger().log( Level.WARNING, "Failed to reload permissions when " + sender.getDisplayName() + " ran `pex reload`", e );
 			}
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "report", permission = "permissions.manage.reportbug", description = "Create an issue template to report an issue" )
 	public void report( TerminalEntity sender, Map<String, String> args )
 	{
@@ -220,16 +217,16 @@ public class UtilityCommands extends PermissionBaseCommand
 		 * sender.sendMessage( ConsoleColor.RED + "NOTE: A GitHub account is necessary to report issues. Create one at https://github.com/" );
 		 */
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "backend <backend>", permission = "permissions.manage.backend", description = "Change permission backend on the fly (Use with caution!)" )
 	public void setBackend( TerminalEntity sender, Map<String, String> args )
 	{
 		if ( args.get( "backend" ) == null )
 			return;
-		
+
 		try
 		{
-			PermissionManager.INSTANCE.setBackend( args.get( "backend" ) );
+			PermissionManager.instance().setBackend( args.get( "backend" ) );
 			sender.sendMessage( EnumColor.WHITE + "Permission backend changed!" );
 		}
 		catch ( RuntimeException e )
@@ -248,51 +245,51 @@ public class UtilityCommands extends PermissionBaseCommand
 			PermissionManager.getLogger().log( Level.WARNING, "Backend initialization failed when " + sender.getDisplayName() + " was initializing " + args.get( "backend" ), e );
 		}
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "help [page] [count]", permission = "permissions.manage", description = "PermissionManager commands help" )
 	public void showHelp( TerminalEntity sender, Map<String, String> args )
 	{
 		List<CommandBinding> commands = command.getCommands();
-		
+
 		int count = tryGetInt( sender, args, "count", 8 );
 		int page = tryGetInt( sender, args, "page", 1 );
-		
+
 		if ( page == Integer.MIN_VALUE || count == Integer.MIN_VALUE )
 			return; // method already prints error message
-			
+
 		if ( page < 1 )
 		{
 			sender.sendMessage( EnumColor.RED + "Page couldn't be lower than 1" );
 			return;
 		}
-		
+
 		int totalPages = ( int ) Math.ceil( commands.size() / count );
-		
+
 		sender.sendMessage( EnumColor.BLUE + "PermissionManager" + EnumColor.WHITE + " commands (page " + EnumColor.GOLD + page + "/" + totalPages + EnumColor.WHITE + "): " );
-		
+
 		int base = count * ( page - 1 );
-		
+
 		for ( int i = base; i < base + count; i++ )
 		{
 			if ( i >= commands.size() )
 				break;
-			
+
 			CommandHandler command = commands.get( i ).getMethodAnnotation();
 			String commandName = String.format( "/%s %s", command.name(), command.syntax() ).replace( "<", EnumColor.BOLD.toString() + EnumColor.RED + "<" ).replace( ">", ">" + EnumColor.RESET + EnumColor.GOLD.toString() ).replace( "[", EnumColor.BOLD.toString() + EnumColor.BLUE + "[" ).replace( "]", "]" + EnumColor.RESET + EnumColor.GOLD.toString() );
-			
-			
+
+
 			sender.sendMessage( EnumColor.GOLD + commandName );
 			sender.sendMessage( EnumColor.AQUA + "    " + command.description() );
 		}
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "toggle debug", permission = "permissions.debug", description = "Enable/disable debug mode" )
 	public void toggleFeature( TerminalEntity sender, Map<String, String> args )
 	{
 		PermissionManager.setDebug( !PermissionManager.isDebug() );
-		
+
 		String debugStatusMessage = "[Permissions] Debug mode " + ( PermissionManager.isDebug() ? "enabled" : "disabled" );
-		
+
 		sender.sendMessage( debugStatusMessage );
 		PermissionManager.getLogger().warning( debugStatusMessage );
 	}

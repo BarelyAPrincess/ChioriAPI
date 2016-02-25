@@ -8,7 +8,9 @@
  */
 package com.chiorichan.event.application;
 
+import com.chiorichan.AppController;
 import com.chiorichan.event.EventBus;
+import com.chiorichan.event.EventException;
 import com.chiorichan.lang.RunLevel;
 import com.chiorichan.logger.Log;
 
@@ -44,6 +46,13 @@ public class RunlevelEvent extends ApplicationEvent
 
 		Log.get().fine( "Application Runlevel has been changed to '" + level.name() + "'" );
 
-		EventBus.INSTANCE.callEvent( this );
+		try
+		{
+			EventBus.instance().callEventWithException( this );
+		}
+		catch ( EventException e )
+		{
+			AppController.handleExceptions( e );
+		}
 	}
 }

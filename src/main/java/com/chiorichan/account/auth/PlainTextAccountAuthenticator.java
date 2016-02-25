@@ -12,13 +12,13 @@ import java.sql.SQLException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.chiorichan.Loader;
+import com.chiorichan.AppController;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.AccountPermissible;
 import com.chiorichan.account.AccountType;
-import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
+import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.datastore.sql.SQLExecute;
 import com.chiorichan.datastore.sql.bases.SQLDatastore;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
@@ -36,13 +36,13 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 			super( PlainTextAccountAuthenticator.this, result, meta );
 		}
 	}
-	
-	private final SQLDatastore db = Loader.getDatabase();
-	
+
+	private final SQLDatastore db = AppController.config().getDatabase();
+
 	PlainTextAccountAuthenticator()
 	{
 		super( "plaintext" );
-		
+
 		try
 		{
 			if ( !db.table( "accounts_plaintext" ).exists() )
@@ -53,7 +53,7 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public AccountCredentials authorize( AccountMeta acct, AccountPermissible perm ) throws AccountException
 	{
@@ -62,33 +62,33 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 		 */
 		throw new AccountException( AccountDescriptiveReason.FEATURE_NOT_IMPLEMENTED, acct );
 	}
-	
+
 	@Override
 	public AccountCredentials authorize( AccountMeta acct, Object... creds ) throws AccountException
 	{
 		if ( creds.length < 1 || ! ( creds[0] instanceof String ) )
 			throw new AccountException( AccountDescriptiveReason.INTERNAL_ERROR, acct );
-		
+
 		String pass = ( String ) creds[0];
-		
+
 		if ( acct == null )
 			throw new AccountException( AccountDescriptiveReason.INCORRECT_LOGIN, AccountType.ACCOUNT_NONE );
-		
+
 		if ( pass == null || pass.isEmpty() )
 			throw new AccountException( AccountDescriptiveReason.EMPTY_CREDENTIALS, acct );
-		
+
 		String acctId = acct.getId();
 		String password = null;
 		try
 		{
 			SQLExecute<SQLQuerySelect> select = db.table( "accounts_plaintext" ).select().where( "acctId" ).matches( acctId ).limit( 1 ).execute().result();
-			
+
 			if ( select == null || select.rowCount() < 1 )
 				throw new AccountException( AccountDescriptiveReason.PASSWORD_UNSET, acct );
-			
+
 			if ( select.getInt( "expires" ) > -1 && select.getInt( "expires" ) < Timings.epoch() )
 				throw new AccountException( AccountDescriptiveReason.EXPIRED_LOGIN, acct );
-			
+
 			password = select.getString( "password" );
 		}
 		catch ( AccountException e )
@@ -107,14 +107,14 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 		{
 			throw new AccountException( AccountDescriptiveReason.INTERNAL_ERROR, e, acct );
 		}
-		
+
 		// TODO Encrypt all passwords
 		if ( password.equals( pass ) || password.equals( DigestUtils.md5Hex( pass ) ) || DigestUtils.md5Hex( password ).equals( pass ) )
 			return new PlainTextAccountCredentials( AccountDescriptiveReason.LOGIN_SUCCESS, acct );
 		else
 			throw new AccountException( AccountDescriptiveReason.INCORRECT_LOGIN, acct );
 	}
-	
+
 	/**
 	 * Similar to {@link #setPassword(AccountMeta, String, int)} except password never expires
 	 */
@@ -122,10 +122,10 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 	{
 		setPassword( acct, password, -1 );
 	}
-	
+
 	/**
 	 * Sets the Account Password which is stored in a separate table for security
-	 * 
+	 *
 	 * @param acct
 	 *            The Account to set password for
 	 * @param password
@@ -143,7 +143,7 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 				AccountManager.getLogger().severe( "We had an unknown issue inserting password for acctId '" + acct.getId() + "' into the database!" );
 				return false;
 			}
-			
+
 			// db.queryUpdate( "INSERT INTO `accounts_plaintext` (`acctId`,`password`,`expires`) VALUES ('" + acct.getId() + "','" + password + "','" + expires + "');" );
 		}
 		catch ( SQLException e )

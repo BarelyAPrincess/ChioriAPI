@@ -43,14 +43,14 @@ public class DefaultLogFormatter extends Formatter
 	@Override
 	public String format( LogRecord record )
 	{
-		if ( AppController.getConfig() != null && !formatConfigLoaded )
+		if ( AppController.config() != null && !formatConfigLoaded )
 		{
-			dateFormat = new SimpleDateFormat( AppController.getConfig().getString( "console.dateFormat", "MM-dd" ) );
-			timeFormat = new SimpleDateFormat( AppController.getConfig().getString( "console.timeFormat", "HH:mm:ss.SSS" ) );
+			dateFormat = new SimpleDateFormat( AppController.config().getString( "console.dateFormat", "MM-dd" ) );
+			timeFormat = new SimpleDateFormat( AppController.config().getString( "console.timeFormat", "HH:mm:ss.SSS" ) );
 			formatConfigLoaded = true;
 		}
 
-		String style = AppController.getConfig() == null ? "&r&7%dt %tm [%lv&7]&f" : AppController.getConfig().getString( "console.style", "&r&7[&d%ct&7] %dt %tm [%lv&7]&f" );
+		String style = AppController.config() == null ? "&r&7%dt %tm [%lv&7]&f" : AppController.config().getString( "console.style", "&r&7[&d%ct&7] %dt %tm [%lv&7]&f" );
 
 		Throwable ex = record.getThrown();
 
@@ -103,7 +103,7 @@ public class DefaultLogFormatter extends Formatter
 			style += writer;
 		}
 
-		if ( !AppController.useColors || !useColor )
+		if ( !useColor )
 			return EnumColor.removeAltColors( style );
 		else
 			return EnumColor.transAltColors( style );

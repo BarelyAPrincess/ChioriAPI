@@ -22,7 +22,7 @@ public abstract class Permissible
 	public final boolean checkEntity()
 	{
 		if ( AccountType.isNoneAccount( entity ) )
-			PermissionManager.INSTANCE.getEntity( this );
+			PermissionManager.instance().getEntity( this );
 
 		if ( entity == null )
 			entity = AccountType.ACCOUNT_NONE.getEntity();
@@ -81,13 +81,13 @@ public abstract class Permissible
 	public final PermissionResult checkPermission( String perm )
 	{
 		perm = PermissionManager.parseNode( perm );
-		return checkPermission( PermissionManager.INSTANCE.getNode( perm ) );
+		return checkPermission( PermissionManager.instance().getNode( perm ) );
 	}
 
 	public final PermissionResult checkPermission( String perm, References refs )
 	{
 		perm = PermissionManager.parseNode( perm );
-		return checkPermission( PermissionManager.INSTANCE.getNode( perm ), refs );
+		return checkPermission( PermissionManager.instance().getNode( perm ), refs );
 	}
 
 	public final PermissionResult checkPermission( Permission perm, References refs )
@@ -119,13 +119,13 @@ public abstract class Permissible
 	public final PermissionResult requirePermission( String req, References refs ) throws PermissionDeniedException
 	{
 		req = PermissionManager.parseNode( req );
-		return requirePermission( PermissionManager.INSTANCE.createNode( req ), refs );
+		return requirePermission( PermissionManager.instance().createNode( req ), refs );
 	}
 
 	public final PermissionResult requirePermission( String req, String... refs ) throws PermissionDeniedException
 	{
 		req = PermissionManager.parseNode( req );
-		return requirePermission( PermissionManager.INSTANCE.createNode( req ), References.format( refs ) );
+		return requirePermission( PermissionManager.instance().createNode( req ), References.format( refs ) );
 	}
 
 	public final PermissionResult requirePermission( Permission req, String... refs ) throws PermissionDeniedException

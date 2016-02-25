@@ -1,18 +1,98 @@
 package com.chiorichan.logger;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.chiorichan.AppController;
 import com.chiorichan.lang.EnumColor;
+import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.Versioning;
 
 public class Log implements LogAPI
 {
 	private static final Set<Log> loggers = new HashSet<>();
-	private static final Logger logger = Logger.getLogger( "" );
+	private static final Logger rootLogger = Logger.getLogger( "" );
+
+	static
+	{
+		for ( Handler h : rootLogger.getHandlers() )
+			rootLogger.removeHandler( h );
+	}
+
+	public static void addFileHandler( String filename, boolean useColor, int archiveLimit, Level level )
+	{
+		try
+		{
+			File log = new File( AppController.config().logsDirectory(), filename + ".log" );
+
+			if ( log.exists() )
+			{
+				if ( archiveLimit > 0 )
+					FileFunc.gzFile( log, new File( AppController.config().logsDirectory(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
+				log.delete();
+			}
+
+			cleanupLogs( "-" + filename + ".log.gz", archiveLimit );
+
+			FileHandler fileHandler = new FileHandler( log.getAbsolutePath() );
+			fileHandler.setLevel( level );
+			fileHandler.setFormatter( new DefaultLogFormatter( useColor ) );
+
+			addHandler( fileHandler );
+		}
+		catch ( Exception e )
+		{
+			get().severe( "Failed to log to '" + filename + ".log'", e );
+		}
+	}
+
+	public static void addHandler( Handler h )
+	{
+		rootLogger.addHandler( h );
+	}
+
+	private static void cleanupLogs( final String suffix, int limit )
+	{
+		File[] files = AppController.config().logsDirectory().listFiles( new FilenameFilter()
+		{
+			@Override
+			public boolean accept( File dir, String name )
+			{
+				return name.toLowerCase().endsWith( suffix );
+			}
+		} );
+
+		if ( files.length < 1 )
+			return;
+
+		// Delete all logs, no archiving!
+		if ( limit < 1 )
+		{
+			for ( File f : files )
+				f.delete();
+			return;
+		}
+
+		FileFunc.SortableFile[] sfiles = new FileFunc.SortableFile[files.length];
+
+		for ( int i = 0; i < files.length; i++ )
+			sfiles[i] = new FileFunc.SortableFile( files[i] );
+
+		Arrays.sort( sfiles );
+
+		if ( sfiles.length > limit )
+			for ( int i = 0; i < sfiles.length - limit; i++ )
+				sfiles[i].f.delete();
+	}
 
 	public static Log get()
 	{
@@ -45,6 +125,16 @@ public class Log implements LogAPI
 		return log;
 	}
 
+	public static Logger getRootLogger()
+	{
+		return rootLogger;
+	}
+
+	public static void removeHandler( Handler h )
+	{
+		rootLogger.removeHandler( h );
+	}
+
 	private final Logger logger;
 	private final String id;
 
@@ -58,16 +148,16 @@ public class Log implements LogAPI
 	 */
 	protected Log( String id )
 	{
+		this.id = id;
 		Logger logger = Logger.getLogger( id );
 
 		if ( logger == null )
-			logger = new SubLog( id );
+			logger = new ChildLogger( id );
 
-		logger.setParent( getLogManager().getParent() );
+		logger.setParent( getRootLogger() );
 		logger.setLevel( Level.ALL );
 
-		this.id = id;
-		Log.logger = logger;
+		this.logger = logger;
 	}
 
 	@Override
@@ -79,20 +169,6 @@ public class Log implements LogAPI
 		for ( Object var2 : var1 )
 			if ( var2 != null )
 				info( EnumColor.NEGATIVE + "" + EnumColor.YELLOW + " >>>>   " + var2.toString() + "   <<<< " );
-	}
-
-	@Override
-	public void exceptions( Throwable... throwables )
-	{
-		for ( Throwable t : throwables )
-			if ( e.errorLevel().isEnabledLevel() )
-				if ( e.isScriptingException() )
-				{
-					ScriptTraceElement element = e.getScriptTrace()[0];
-					severe( String.format( EnumColor.NEGATIVE + "" + EnumColor.RED + "Exception %s thrown in file '%s' at line %s:%s, message '%s'", e.getClass().getName(), element.context().filename(), element.getLineNumber(), element.getColumnNumber() > 0 ? element.getColumnNumber() : 0, e.getMessage() ) );
-				}
-				else
-					severe( String.format( EnumColor.NEGATIVE + "" + EnumColor.RED + "Exception %s thrown in file '%s' at line %s, message '%s'", e.getClass().getName(), e.getStackTrace()[0].getFileName(), e.getStackTrace()[0].getLineNumber(), e.getMessage() ) );
 	}
 
 	@Override
@@ -173,20 +249,40 @@ public class Log implements LogAPI
 	public void panic( String var1 )
 	{
 		severe( var1 );
-		AppController.stop( var1 );
+		AppController.stopApplication( var1 );
+	}
+
+	@Override
+	public void panic( String var1, Object... objs )
+	{
+		severe( var1, objs );
+		AppController.stopApplication( String.format( var1, objs ) );
+	}
+
+	@Override
+	public void panic( String var1, Throwable t )
+	{
+		severe( var1, t );
+		AppController.stopApplication( var1 );
 	}
 
 	@Override
 	public void panic( Throwable e )
 	{
 		severe( e );
-		AppController.stop( "The server is stopping due to a severe error!" );
+		AppController.stopApplication( "The server is stopping due to a severe error!" );
 	}
 
 	@Override
 	public void severe( String s )
 	{
 		log( Level.SEVERE, EnumColor.RED + s );
+	}
+
+	@Override
+	public void severe( String s, Object... objs )
+	{
+		log( Level.SEVERE, EnumColor.RED + s, objs );
 	}
 
 	@Override
@@ -208,9 +304,9 @@ public class Log implements LogAPI
 	}
 
 	@Override
-	public void warning( String s, Object... aobject )
+	public void warning( String s, Object... objs )
 	{
-		log( Level.WARNING, EnumColor.GOLD + s, aobject );
+		log( Level.WARNING, EnumColor.GOLD + s, objs );
 	}
 
 	@Override

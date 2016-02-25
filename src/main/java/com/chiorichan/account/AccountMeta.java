@@ -212,7 +212,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 		if ( keepInMemory )
 			strongReference = account;
 
-		AccountManager.INSTANCE.fireAccountLoad( this );
+		AccountManager.instance().fireAccountLoad( this );
 
 		return account;
 	}

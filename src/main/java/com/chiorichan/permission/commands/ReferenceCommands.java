@@ -26,47 +26,47 @@ public class ReferenceCommands extends PermissionBaseCommand
 	public void refPrintInheritance( TerminalEntity sender, Map<String, String> args )
 	{
 		References refs = autoCompleteRef( args.get( "ref" ) );
-		PermissionManager manager = PermissionManager.INSTANCE;
+		PermissionManager manager = PermissionManager.instance();
 		Collection<String> parentReferences = manager.getRefInheritance( refs.join() );
 		if ( parentReferences == null )
 		{
 			sender.sendMessage( "Specified ref \"" + args.get( "ref" ) + "\" not found." );
 			return;
 		}
-		
+
 		sender.sendMessage( "Reference " + refs + " inherit:" );
 		if ( parentReferences.size() == 0 )
 		{
 			sender.sendMessage( "nothing :3" );
 			return;
 		}
-		
+
 		for ( String parentReference : parentReferences )
 		{
 			// Collection<String> parents = manager.getRefInheritance( parentReference );
 			String output = "  " + parentReference;
 			if ( parentReferences.size() > 0 )
 				output += EnumColor.GREEN + " [" + EnumColor.WHITE + Joiner.on( ", " ).join( parentReferences ) + EnumColor.GREEN + "]";
-			
+
 			sender.sendMessage( output );
 		}
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "ref <ref> inherit <parentReferences>", description = "Set <parentReferences> for <ref>", permission = "permissions.manage.refs.inheritance" )
 	public void refSetInheritance( TerminalEntity sender, Map<String, String> args )
 	{
 		References refs = autoCompleteRef( args.get( "ref" ) );
-		PermissionManager manager = PermissionManager.INSTANCE;
+		PermissionManager manager = PermissionManager.instance();
 		/*
-		 * if ( ReferenceManager.INSTANCE.getReferenceById( refs ) == null )
+		 * if ( ReferenceManager.instance().getReferenceById( refs ) == null )
 		 * {
 		 * sender.sendMessage( "Specified ref \"" + args.get( "ref" ) + "\" not found." );
 		 * return;
 		 * }
-		 * 
+		 *
 		 * TODO Check for references once they are front loaded
 		 */
-		
+
 		List<String> parents = new ArrayList<String>();
 		String parentReferences = args.get( "parentReferences" );
 		if ( parentReferences.contains( "," ) )
@@ -78,25 +78,25 @@ public class ReferenceCommands extends PermissionBaseCommand
 			}
 		else
 			parents.add( parentReferences.trim() );
-		
+
 		manager.setRefInheritance( refs.join(), parents );
-		
+
 		sender.sendMessage( "Reference " + refs + " inherits " + Joiner.on( ", " ).join( parents ) );
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "refs", description = "Print loaded refs", isPrimary = true, permission = "permissions.manage.refs" )
 	public void refsTree( TerminalEntity sender, Map<String, String> args )
 	{
-		PermissionManager manager = PermissionManager.INSTANCE;
-		
+		PermissionManager manager = PermissionManager.instance();
+
 		sender.sendMessage( "References on server: " );
-		for ( String ref : PermissionManager.INSTANCE.getReferences() )
+		for ( String ref : PermissionManager.instance().getReferences() )
 		{
 			Collection<String> parentReferences = manager.getRefInheritance( ref );
 			String output = "  " + ref;
 			if ( parentReferences.size() > 0 )
 				output += EnumColor.GREEN + " [" + EnumColor.WHITE + Joiner.on( ", " ).join( parentReferences ) + EnumColor.GREEN + "]";
-			
+
 			sender.sendMessage( output );
 		}
 	}

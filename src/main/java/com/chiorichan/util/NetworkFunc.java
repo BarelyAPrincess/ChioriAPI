@@ -303,7 +303,7 @@ public class NetworkFunc
 			HttpURLConnection con = ( HttpURLConnection ) urlObj.openConnection();
 			con.setRequestMethod( "POST" );
 
-			String urlParameters = "v=1&tid=UA-60405654-1&cid=" + AppController.clientId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
+			String urlParameters = "v=1&tid=UA-60405654-1&cid=" + AppController.config().getClientId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
 
 			con.setDoOutput( true );
 			DataOutputStream wr = new DataOutputStream( con.getOutputStream() );

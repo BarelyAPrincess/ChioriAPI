@@ -27,4 +27,6 @@ public interface IException
 	 *         Did this method successfully handle the reporting of this exception. On false, the application will make up it's own conclusion.
 	 */
 	boolean handle( ExceptionReport report, ExceptionContext context );
+
+	boolean isIgnorable();
 }

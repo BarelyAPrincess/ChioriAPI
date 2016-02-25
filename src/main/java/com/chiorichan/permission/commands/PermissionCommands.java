@@ -32,29 +32,29 @@ public class PermissionCommands extends PermissionBaseCommand
 			sender.sendMessage( EnumColor.RED + "You must specify a permission node!" );
 			return;
 		}
-		
+
 		PermissionType type = args.containsKey( "type" ) && !args.get( "type" ).isEmpty() ? PermissionType.valueOf( args.get( "type" ) ) : PermissionType.DEFAULT;
-		
+
 		if ( type == null )
 		{
 			sender.sendMessage( EnumColor.RED + "We could not find a permission type that matches '" + args.get( "type" ) + "'!" );
 			return;
 		}
-		
+
 		PermissionNamespace ns = new PermissionNamespace( args.get( "node" ) );
-		
+
 		ns.createPermission( type );
-		
+
 		sender.sendMessage( EnumColor.AQUA + "Good news everybody, we successfully created permission node '" + ns.getNamespace() + "' with type '" + type.name() + "'!" );
 	}
-	
+
 	@CommandHandler( name = "pex", syntax = "perm list [parent]", permission = "permissions.manage.permissions", description = "List all permissions" )
 	public void permsList( AccountAttachment sender, Map<String, String> args )
 	{
 		if ( args.containsKey( "parent" ) )
 		{
-			Permission root = PermissionManager.INSTANCE.getNode( args.get( "parent" ) );
-			
+			Permission root = PermissionManager.instance().getNode( args.get( "parent" ) );
+
 			if ( root == null )
 				sender.sendMessage( EnumColor.RED + "There was no such permission '" + args.get( "parent" ) + "'!" );
 			else
@@ -65,8 +65,8 @@ public class PermissionCommands extends PermissionBaseCommand
 		}
 		else
 		{
-			Collection<Permission> perms = PermissionManager.INSTANCE.getRootNodes();
-			
+			Collection<Permission> perms = PermissionManager.instance().getRootNodes();
+
 			sender.sendMessage( EnumColor.WHITE + "Permissions stack dump:" );
 			for ( Permission root : perms )
 				root.debugPermissionStack( 0 );

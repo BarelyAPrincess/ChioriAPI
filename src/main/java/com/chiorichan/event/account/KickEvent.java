@@ -63,7 +63,7 @@ public class KickEvent extends AccountEvent implements Cancellable, SelfHandling
 
 	public AccountResult fire()
 	{
-		EventBus.INSTANCE.callEvent( this );
+		EventBus.instance().callEvent( this );
 		return result;
 	}
 

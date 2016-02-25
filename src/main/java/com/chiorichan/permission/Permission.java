@@ -31,12 +31,12 @@ public final class Permission implements Comparable<Permission>
 
 	public Permission( Namespace ns )
 	{
-		this( ns.getLocalName(), PermissionType.DEFAULT, ns.getNodeCount() <= 1 ? null : PermissionManager.INSTANCE.createNode( ns.getParent() ) );
+		this( ns.getLocalName(), PermissionType.DEFAULT, ns.getNodeCount() <= 1 ? null : PermissionManager.instance().createNode( ns.getParent() ) );
 	}
 
 	public Permission( Namespace ns, PermissionType type )
 	{
-		this( ns.getLocalName(), type, ns.getNodeCount() <= 1 ? null : PermissionManager.INSTANCE.createNode( ns.getParent() ) );
+		this( ns.getLocalName(), type, ns.getNodeCount() <= 1 ? null : PermissionManager.instance().createNode( ns.getParent() ) );
 	}
 
 	public Permission( String localName )
@@ -63,7 +63,7 @@ public final class Permission implements Comparable<Permission>
 		this.parent = parent;
 
 		model = new PermissionModelValue( localName, type, this );
-		PermissionManager.INSTANCE.addPermission( this );
+		PermissionManager.instance().addPermission( this );
 	}
 
 	public void addChild( Permission node )
@@ -73,7 +73,7 @@ public final class Permission implements Comparable<Permission>
 
 	public void commit()
 	{
-		PermissionManager.INSTANCE.getBackend().nodeCommit( this );
+		PermissionManager.instance().getBackend().nodeCommit( this );
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public final class Permission implements Comparable<Permission>
 
 	public void debugPermissionStack( int deepth )
 	{
-		debugPermissionStack( ApplicationTerminal.INSTANCE, deepth );
+		debugPermissionStack( ApplicationTerminal.terminal(), deepth );
 	}
 
 	public Permission getChild( String name )

@@ -1,6 +1,10 @@
 package com.chiorichan;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,11 +12,12 @@ import java.util.logging.Logger;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
-import org.yaml.snakeyaml.Loader;
+import org.joda.time.Duration;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.event.EventBus;
-import com.chiorichan.event.EventException;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.EventPriority;
 import com.chiorichan.event.Listener;
@@ -31,20 +36,29 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Worker;
+import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.Versioning;
 
 /**
- * Provides a base Loader skeleton for you to extend or call directly using {@code AppLoader.init( Class<? extends AppLoader> loaderClass, String... args );}.
+ * Provides a base AppController skeleton for you to extend or call directly using {@code AppAppController.init( Class<? extends AppAppController> loaderClass, String... args );}.
  *
  * @author Chiori-chan
  */
 public abstract class AppLoader implements Listener
 {
+	static Watchdog watchdog = null;
 	private static OptionSet options;
+	private static boolean isRunning;
+	public static long startTime = System.currentTimeMillis();
 
 	public static OptionSet options()
 	{
 		return options;
+	}
+
+	public static boolean isWatchdogRunning()
+	{
+		return watchdog != null;
 	}
 
 	private final RunlevelEvent runlevel = new RunlevelEvent();
@@ -59,10 +73,14 @@ public abstract class AppLoader implements Listener
 		return runlevel.getRunLevel();
 	}
 
-	protected void runLevel( RunLevel level ) throws EventException
+	public static boolean isRunning()
+	{
+		return isRunning;
+	}
+
+	protected void runLevel( RunLevel level )
 	{
 		runlevel.setRunLevel( level );
-		EventBus.instance().callEventWithException( runlevel );
 	}
 
 	public static void main( String... args ) throws Exception
@@ -85,11 +103,11 @@ public abstract class AppLoader implements Listener
 
 			runLevel( RunLevel.INITIALIZED );
 
-			PluginManager.init();
+			AppManager.manager( PluginManager.class ).init();
 
 			runLevel( RunLevel.INITIALIZATION );
 
-			PluginManager.INSTANCE.loadPlugins();
+			PluginManager.instance().loadPlugins();
 
 			runLevel( RunLevel.STARTUP );
 			runLevel( RunLevel.POSTSTARTUP );
@@ -114,14 +132,49 @@ public abstract class AppLoader implements Listener
 		}
 	}
 
+	public static String uptime()
+	{
+		Duration duration = new Duration( System.currentTimeMillis() - startTime );
+		PeriodFormatter formatter = new PeriodFormatterBuilder().appendDays().appendSuffix( " Day(s) " ).appendHours().appendSuffix( " Hour(s) " ).appendMinutes().appendSuffix( " Minute(s) " ).appendSeconds().appendSuffix( " Second(s)" ).toFormatter();
+		return formatter.print( duration.toPeriod() );
+	}
+
 	private static void init( Class<? extends AppLoader> loaderClass, String... args ) throws StartupException
 	{
 		System.setProperty( "file.encoding", "utf-8" );
 		OptionSet options = null;
+		AppLoader instance = null;
+
+		if ( loaderClass == null )
+			loaderClass = SimpleLoader.class;
 
 		try
 		{
-			OptionParser parser = getOptionParser();
+			OptionParser parser = new OptionParser()
+			{
+				{
+					// TODO This needs refinement and an API
+					acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
+					acceptsAll( Arrays.asList( "c", "config", "b", "settings" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "server.yaml" ) ).describedAs( "Yml file" );
+					acceptsAll( Arrays.asList( "p", "plugins" ), "Plugin directory to use" ).withRequiredArg().ofType( String.class ).defaultsTo( "plugins" ).describedAs( "Plugin directory" );
+					acceptsAll( Arrays.asList( "query-disable" ), "Disable the internal TCP Server" );
+					acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
+					acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
+					acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
+					acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
+					acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
+				}
+			};
+
+			try
+			{
+				Method m = loaderClass.getMethod( "populateOptionParser", OptionParser.class );
+				m.invoke( null, parser );
+			}
+			catch ( NoSuchMethodException e )
+			{
+				// Ignore!
+			}
 
 			try
 			{
@@ -129,7 +182,7 @@ public abstract class AppLoader implements Listener
 			}
 			catch ( joptsimple.OptionException ex )
 			{
-				Logger.getLogger( Loader.class.getName() ).log( Level.SEVERE, ex.getLocalizedMessage() );
+				Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, ex.getLocalizedMessage() );
 			}
 
 			if ( options == null || options.has( "?" ) )
@@ -139,7 +192,7 @@ public abstract class AppLoader implements Listener
 				}
 				catch ( IOException ex )
 				{
-					Logger.getLogger( Loader.class.getName() ).log( Level.SEVERE, null, ex );
+					Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, null, ex );
 				}
 			else if ( options.has( "v" ) )
 				System.out.println( "Running " + Versioning.getProduct() + " version " + Versioning.getVersion() );
@@ -160,30 +213,24 @@ public abstract class AppLoader implements Listener
 
 			if ( isRunning )
 			{
-				if ( loaderClass == null )
-					loaderClass = SimpleLoader.class;
-				initClass( loaderClass ).start();
+				instance = ObjectFunc.initClass( loaderClass );
+				instance.start();
 			}
 		}
 		catch ( StartupAbortException e )
 		{
-			runLevel( RunLevel.DISPOSED );
+			instance.runLevel( RunLevel.SHUTDOWN );
 		}
 		catch ( Throwable t )
 		{
-			AppController.handleException( t );
-
-			if ( Loader.getConfig() != null && Loader.getConfig().getBoolean( "server.haltOnSevereError" ) )
-			{
-				System.out.println( "Press enter to exit..." );
-				System.in.read();
-			}
-
-			dispose();
+			instance.runLevel( RunLevel.CRASHED );
+			AppController.handleExceptions( t );
 		}
 
 		if ( isRunning && Log.get() != null )
 			Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
+		else
+			instance.runLevel( RunLevel.DISPOSED );
 	}
 
 	public RunLevel getLastRunLevel()
@@ -200,13 +247,13 @@ public abstract class AppLoader implements Listener
 	{
 		ReportingLevel.enableErrorLevelOnly( ReportingLevel.parse( AppController.config().getString( "server.errorReporting", "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
 
-		PluginManager.INSTANCE.clearPlugins();
+		PluginManager.instance().clearPlugins();
 		// ModuleBus.getCommandMap().clearCommands();
 
 		int pollCount = 0;
 
 		// Wait for at most 2.5 seconds for plugins to close their threads
-		while ( pollCount < 50 && TaskManager.INSTANCE.getActiveWorkers().size() > 0 )
+		while ( pollCount < 50 && TaskManager.instance().getActiveWorkers().size() > 0 )
 		{
 			try
 			{
@@ -219,7 +266,7 @@ public abstract class AppLoader implements Listener
 			pollCount++;
 		}
 
-		List<Worker> overdueWorkers = TaskManager.INSTANCE.getActiveWorkers();
+		List<Worker> overdueWorkers = TaskManager.instance().getActiveWorkers();
 		for ( Worker worker : overdueWorkers )
 		{
 			TaskRegistrar creator = worker.getOwner();
@@ -229,7 +276,7 @@ public abstract class AppLoader implements Listener
 			Log.get().log( Level.SEVERE, String.format( "Nag author: '%s' of '%s' about the following: %s", author, creator.getName(), "This plugin is not properly shutting down its async tasks when it is being reloaded.  This may cause conflicts with the newly loaded version of the plugin" ) );
 		}
 
-		PluginManager.INSTANCE.loadPlugins();
+		PluginManager.instance().loadPlugins();
 
 		runLevel( RunLevel.RELOAD );
 
@@ -243,7 +290,7 @@ public abstract class AppLoader implements Listener
 		}
 
 		Log.get().info( "Reinitalizing the Accounts Manager..." );
-		AccountManager.INSTANCE.reload();
+		AccountManager.instance().reload();
 
 		runLevel( RunLevel.RUNNING );
 	}

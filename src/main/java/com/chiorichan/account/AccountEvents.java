@@ -24,11 +24,9 @@ import com.chiorichan.tasks.TaskRegistrar;
  */
 public abstract class AccountEvents implements EventRegistrar, TaskRegistrar, ServiceProvider, ServiceManager, LogSource
 {
-	private final EventBus events = EventBus.INSTANCE;
-
 	void fireAccountLoad( AccountMeta meta )
 	{
-		events.callEvent( new AccountLoadEvent( meta ) );
+		EventBus.instance().callEvent( new AccountLoadEvent( meta ) );
 	}
 
 	/**
@@ -44,7 +42,7 @@ public abstract class AccountEvents implements EventRegistrar, TaskRegistrar, Se
 	{
 		AccountLookupEvent event = new AccountLookupEvent( acctId );
 
-		EventBus.INSTANCE.callEvent( event );
+		EventBus.instance().callEvent( event );
 
 		if ( !event.getDescriptiveReason().getReportingLevel().isSuccess() )
 		{
@@ -64,7 +62,7 @@ public abstract class AccountEvents implements EventRegistrar, TaskRegistrar, Se
 	{
 		AccountLookupEvent event = new AccountLookupEvent( acctId );
 
-		EventBus.INSTANCE.callEvent( event );
+		EventBus.instance().callEvent( event );
 
 		if ( !event.getDescriptiveReason().getReportingLevel().isSuccess() )
 			throw new AccountException( event.getDescriptiveReason(), acctId );

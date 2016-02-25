@@ -10,54 +10,51 @@ package com.chiorichan.logger.experimental;
 
 import java.util.logging.Level;
 
-import com.chiorichan.lang.EvalException;
-import com.chiorichan.logger.LogManager;
-
 /**
  */
 public class LogEvent implements ILogEvent
 {
 	final String id;
 	final LogRecord record;
-	
+
 	LogEvent( String id, LogRecord record )
 	{
 		this.id = id;
 		this.record = record;
 	}
-	
+
+	public void close()
+	{
+		LogManager.close( this );
+	}
+
 	@Override
-	public void header( String msg, Object... objs )
+	public void exceptions( Throwable... exceptions )
 	{
-		record.header( msg, objs );
+		record.exceptions( exceptions );
 	}
-	
-	@Override
-	public void log( Level level, String msg, Object... objs )
-	{
-		record.log( level, msg, objs );
-	}
-	
-	public void flushAndClose()
-	{
-		flush();
-		close();
-	}
-	
+
 	@Override
 	public void flush()
 	{
 		record.flush();
 	}
-	
-	public void close()
+
+	public void flushAndClose()
 	{
-		LogManager.close( this );
+		flush();
+		close();
 	}
-	
+
 	@Override
-	public void exceptions( EvalException... exceptions )
+	public void header( String msg, Object... objs )
 	{
-		record.exceptions( exceptions );
+		record.header( msg, objs );
+	}
+
+	@Override
+	public void log( Level level, String msg, Object... objs )
+	{
+		record.log( level, msg, objs );
 	}
 }

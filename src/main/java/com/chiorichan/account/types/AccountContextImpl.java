@@ -21,31 +21,31 @@ import com.chiorichan.account.AccountType;
  */
 final class AccountContextImpl extends AccountContext
 {
-	AccountContextImpl( AccountCreator creator, AccountType type, String acctId, String siteId, boolean keepLoaded )
-	{
-		super( creator, type, acctId, siteId, keepLoaded );
-	}
-	
-	AccountContextImpl( AccountCreator creator, AccountType type, String acctId, String siteId )
-	{
-		super( creator, type, acctId, siteId );
-	}
-	
 	AccountContextImpl( AccountCreator creator, AccountType type )
 	{
 		super( creator, type );
 	}
-	
+
+	AccountContextImpl( AccountCreator creator, AccountType type, String acctId, String siteId )
+	{
+		super( creator, type, acctId, siteId );
+	}
+
+	AccountContextImpl( AccountCreator creator, AccountType type, String acctId, String siteId, boolean keepLoaded )
+	{
+		super( creator, type, acctId, siteId, keepLoaded );
+	}
+
 	void setAcctId( String acctId )
 	{
 		this.acctId = acctId;
 	}
-	
-	void setSiteId( String siteId )
+
+	void setLocationId( String locId )
 	{
-		this.siteId = siteId;
+		this.locId = locId;
 	}
-	
+
 	void setValues( Map<String, Object> meta )
 	{
 		for ( Entry<String, Object> entry : meta.entrySet() )

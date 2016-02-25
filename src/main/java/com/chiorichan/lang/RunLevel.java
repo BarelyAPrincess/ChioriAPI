@@ -37,5 +37,13 @@ public enum RunLevel
 	/**
 	 * Indicates the application is preparing to shutdown
 	 */
-	DISPOSED;
+	DISPOSED,
+	/**
+	 * Indicates the application has crashed
+	 */
+	CRASHED,
+	/**
+	 * Indicates the application is shutting down but the final state could be either CRASHED or DISPOSED
+	 */
+	SHUTDOWN;
 }

@@ -115,12 +115,6 @@ public abstract class AccountPermissible extends Permissible implements Account
 		return account;
 	}
 
-	@Override
-	public String getCollectiveId()
-	{
-		return getCollective().getId();
-	}
-
 	/**
 	 * Attempts to authenticate using saved Account Credentials
 	 */
@@ -178,7 +172,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 				meta.context().creator().preLogin( meta, this, acctId, credObjs );
 				AccountPreLoginEvent event = new AccountPreLoginEvent( meta, this, acctId, credObjs );
 
-				EventBus.INSTANCE.callEvent( event );
+				EventBus.instance().callEvent( event );
 
 				if ( !event.getDescriptiveReason().getReportingLevel().isIgnorable() )
 				{
@@ -221,7 +215,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 
 					successfulLogin();
 					meta.context().creator().successLogin( meta );
-					EventBus.INSTANCE.callEvent( new AccountSuccessfulLoginEvent( meta, this, result ) );
+					EventBus.instance().callEvent( new AccountSuccessfulLoginEvent( meta, this, result ) );
 				}
 				else
 					result.setReason( creds.getDescriptiveReason() );
@@ -251,10 +245,10 @@ public abstract class AccountPermissible extends Permissible implements Account
 			failedLogin( result );
 			if ( meta != null )
 				meta.context().creator().failedLogin( meta, result );
-			EventBus.INSTANCE.callEvent( new AccountFailedLoginEvent( meta, result ) );
+			EventBus.instance().callEvent( new AccountFailedLoginEvent( meta, result ) );
 		}
 
-		if ( AccountManager.INSTANCE.isDebug() )
+		if ( AccountManager.instance().isDebug() )
 		{
 			if ( !result.isIgnorable() && result.hasCause() )
 				result.getCause().printStackTrace();
@@ -285,7 +279,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 
 		if ( account != null )
 		{
-			AccountManager.getLogger().info( EnumColor.GREEN + "Successful Logout: [id='" + account.getId() + "',collectiveId='" + account.getCollectiveId() + "',displayName='" + account.getDisplayName() + "',ipAddrs='" + account.getIpAddresses() + "']" );
+			AccountManager.getLogger().info( EnumColor.GREEN + "Successful Logout: [id='" + account.getId() + "',locId='" + ( account.getLocation() == null ? "null" : account.getLocation().getId() ) + "',displayName='" + account.getDisplayName() + "',ipAddrs='" + account.getIpAddresses() + "']" );
 			account = null;
 		}
 

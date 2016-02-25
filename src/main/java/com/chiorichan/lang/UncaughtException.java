@@ -1,50 +1,71 @@
 package com.chiorichan.lang;
 
-public class UncaughtException extends ApplicationException
+public class UncaughtException extends RuntimeException implements IException
 {
+	private ReportingLevel level;
+
 	public UncaughtException()
 	{
-		super( ReportingLevel.E_ERROR );
+		this( ReportingLevel.E_ERROR );
 	}
 
 	public UncaughtException( ReportingLevel level )
 	{
-		super( level );
+		this.level = level;
 	}
 
 	public UncaughtException( ReportingLevel level, String message )
 	{
-		super( level, message );
+		super( message );
+		this.level = level;
 	}
 
 	public UncaughtException( ReportingLevel level, String msg, Throwable cause )
 	{
-		super( level, msg, cause );
+		super( msg, cause );
+		this.level = level;
+		if ( cause instanceof UncaughtException )
+			throw new IllegalArgumentException( "The cause argument can't be of it's own type." );
 	}
 
 	public UncaughtException( ReportingLevel level, Throwable cause )
 	{
-		super( level, cause );
+		super( cause );
+		this.level = level;
+		if ( cause instanceof UncaughtException )
+			throw new IllegalArgumentException( "The cause argument can't be of it's own type." );
 	}
 
 	public UncaughtException( String message )
 	{
-		super( ReportingLevel.E_ERROR, message );
+		this( ReportingLevel.E_ERROR, message );
 	}
 
 	public UncaughtException( String msg, Throwable cause )
 	{
-		super( ReportingLevel.E_ERROR, msg, cause );
+		this( ReportingLevel.E_ERROR, msg, cause );
 	}
 
 	public UncaughtException( Throwable cause )
 	{
-		super( ReportingLevel.E_ERROR, cause );
+		this( ReportingLevel.E_ERROR, cause );
 	}
 
 	@Override
 	public boolean handle( ExceptionReport report, ExceptionContext context )
 	{
 		return false;
+	}
+
+	@Override
+	public boolean isIgnorable()
+	{
+		return level.isIgnorable();
+	}
+
+	@Override
+	public ReportingLevel reportingLevel()
+	{
+		return level;
 	}
 }

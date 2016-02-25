@@ -48,7 +48,7 @@ class Task implements ITask, Runnable
 	@Override
 	public void cancel()
 	{
-		TaskManager.INSTANCE.cancelTask( id );
+		TaskManager.instance().cancelTask( id );
 	}
 
 	/**

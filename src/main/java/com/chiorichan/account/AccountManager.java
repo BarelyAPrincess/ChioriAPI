@@ -20,8 +20,7 @@ import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.account.KickEvent;
 import com.chiorichan.logger.Log;
-import com.chiorichan.services.ProviderChild;
-import com.chiorichan.services.ServiceProvider;
+import com.chiorichan.services.AppManager;
 import com.chiorichan.util.SecureFunc;
 import com.chiorichan.util.StringFunc;
 import com.chiorichan.util.Versioning;
@@ -33,11 +32,14 @@ import com.google.common.collect.Sets;
  */
 public final class AccountManager extends AccountEvents
 {
-	private static boolean isInitialized = false;
-
 	public static Log getLogger()
 	{
-		return Log.get( INSTANCE );
+		return Log.get( instance() );
+	}
+
+	public static AccountManager instance()
+	{
+		return AppManager.manager( AccountManager.class ).instance();
 	}
 
 	final AccountList accounts = new AccountList();
@@ -244,16 +246,16 @@ public final class AccountManager extends AccountEvents
 		Validate.notNull( collective );
 		Set<AccountMeta> results = Sets.newHashSet();
 		for ( AccountMeta meta : accounts.toSet() )
-			if ( meta.getCollective() == collective )
+			if ( meta.getLocation() == collective )
 				results.add( meta );
 
 		return results;
 	}
 
-	public Set<AccountMeta> getAccountsByCollective( String collective )
+	public Set<AccountMeta> getAccountsByCollective( String locationId )
 	{
-		ServiceProvider provider = ServiceProvider.getProvider( AccountLocation.class );
-		return getAccountsByCollective( provider.getChildObject( collective ) );
+		LocationService service = AppController.getService( AccountLocation.class );
+		return getAccountsByCollective( service.getLocation( locationId ) );
 	}
 
 	public AccountMeta getAccountWithException( String acctId ) throws AccountException
@@ -278,19 +280,6 @@ public final class AccountManager extends AccountEvents
 			if ( meta.getEntity().isBanned() )
 				accts.add( meta );
 		return accts;
-	}
-
-	@Override
-	public Class<? extends ProviderChild> getChildClass()
-	{
-		return Account.class;
-	}
-
-	@SuppressWarnings( "unchecked" )
-	@Override
-	public Account getChildObject( String childId )
-	{
-		return getAccount( childId );
 	}
 
 	public Set<Account> getInitializedAccounts()

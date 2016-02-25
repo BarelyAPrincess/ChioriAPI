@@ -783,7 +783,7 @@ public class FileFunc
 
 	public static boolean extractZipResource( String path, File dest, Class<?> clz ) throws IOException
 	{
-		File temp = new File( AppController.config().cacheDirectory(), "temp.zip" );
+		File temp = new File( AppController.config().getCacheDirectory(), "temp.zip" );
 		putResource( clz, path, temp );
 
 		ZipFile zip = new ZipFile( temp );
@@ -877,6 +877,11 @@ public class FileFunc
 	public static byte[] inputStream2Bytes( InputStream is ) throws IOException
 	{
 		return inputStream2ByteArray( is ).toByteArray();
+	}
+
+	public static boolean isAbsolute( String dir )
+	{
+		return dir.startsWith( "/" ) || dir.startsWith( ":\\", 1 );
 	}
 
 	public static Map<String, File> mapExtensions( File[] files )
@@ -1017,7 +1022,7 @@ public class FileFunc
 	{
 		if ( file == null )
 			return null;
-		String serverRoot = AppController.config().applicationDirectory().getAbsolutePath();
+		String serverRoot = AppController.config().getRootDirectory().getAbsolutePath();
 		if ( file.getAbsolutePath().startsWith( serverRoot ) )
 			return file.getAbsolutePath().substring( serverRoot.length() + 1 );
 		else

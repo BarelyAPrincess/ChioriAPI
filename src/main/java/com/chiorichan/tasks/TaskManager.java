@@ -29,34 +29,23 @@ import org.apache.commons.lang3.Validate;
 import com.chiorichan.AppController;
 import com.chiorichan.ServiceManager;
 import com.chiorichan.logger.Log;
-import com.chiorichan.logger.LogSource;
+import com.chiorichan.services.AppManager;
 import com.google.common.collect.Maps;
 
 /**
  * Manages task scheduled in the main thread
  */
-public class TaskManager implements ServiceManager, LogSource
+public class TaskManager implements ServiceManager
 {
-	public static final TaskManager INSTANCE = new TaskManager();
-	private static boolean isInitialized = false;
-
 	private static final int RECENT_TICKS;
 	static
 	{
 		RECENT_TICKS = 20;
 	}
 
-	public static void init()
+	public static TaskManager instance()
 	{
-		if ( isInitialized )
-			throw new IllegalStateException( "The Schedule Manager has already been initialized." );
-
-		assert INSTANCE != null;
-
-		INSTANCE.init0();
-
-		isInitialized = true;
-
+		return AppManager.manager( TaskManager.class ).instance();
 	}
 
 	/**
@@ -450,7 +439,8 @@ public class TaskManager implements ServiceManager, LogSource
 		debugHead = debugHead.getNextHead( currentTick );
 	}
 
-	private void init0()
+	@Override
+	public void init()
 	{
 
 	}

@@ -12,14 +12,7 @@ package com.chiorichan.permission;
 public enum PermissionDefault
 {
 	ADMIN( "sys.admin" ), BANNED( "sys.banned" ), DEFAULT( "default" ), EVERYBODY( "" ), OP( "sys.op" ), WHITELISTED( "sys.whitelisted" ), QUERY( "sys.query" );
-	
-	private String nameSpace = "";
-	
-	PermissionDefault( String nameSpace )
-	{
-		this.nameSpace = nameSpace;
-	}
-	
+
 	/**
 	 * By calling each Permission node we forces it's creation if non-existent
 	 */
@@ -33,41 +26,48 @@ public enum PermissionDefault
 		WHITELISTED.getNode();
 		QUERY.getNode();
 	}
-	
+
 	public static boolean isDefault( Permission perm )
 	{
 		for ( PermissionDefault pd : PermissionDefault.values() )
 			if ( pd.getNameSpace().equalsIgnoreCase( perm.getNamespace() ) )
 				return true;
-		
+
 		return false;
 	}
-	
+
+	private String nameSpace = "";
+
+	PermissionDefault( String nameSpace )
+	{
+		this.nameSpace = nameSpace;
+	}
+
 	public String getLocalName()
 	{
-		return ( nameSpace.contains( "." ) ) ? nameSpace.substring( nameSpace.indexOf( "." ) + 1 ) : nameSpace;
+		return nameSpace.contains( "." ) ? nameSpace.substring( nameSpace.indexOf( "." ) + 1 ) : nameSpace;
 	}
-	
+
 	public String getNameSpace()
 	{
 		return nameSpace;
 	}
-	
+
 	public Permission getNode()
 	{
-		Permission result = PermissionManager.INSTANCE.getNode( nameSpace );
-		
+		Permission result = PermissionManager.instance().getNode( nameSpace );
+
 		if ( result == null )
 		{
 			if ( this == EVERYBODY )
 			{
-				result = PermissionManager.INSTANCE.createNode( getNameSpace(), PermissionType.BOOL );
+				result = PermissionManager.instance().createNode( getNameSpace(), PermissionType.BOOL );
 				result.getModel().setValue( true );
 				result.getModel().setValueDefault( true );
 			}
 			else
-				result = PermissionManager.INSTANCE.createNode( getNameSpace() );
-			
+				result = PermissionManager.instance().createNode( getNameSpace() );
+
 			switch ( this )
 			{
 				case DEFAULT:
@@ -92,13 +92,13 @@ public enum PermissionDefault
 					result.getModel().setDescription( "Indicates entities allowed to login thru QUERY server. (DO NOT EDIT!)" );
 					break;
 			}
-			
+
 			result.commit();
 		}
-		
+
 		return result;
 	}
-	
+
 	@Override
 	public String toString()
 	{

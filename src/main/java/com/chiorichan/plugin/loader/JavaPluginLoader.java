@@ -68,7 +68,7 @@ public final class JavaPluginLoader implements PluginLoader
 		Validate.notNull( plugin, "Plugin can not be null" );
 		Validate.notNull( listener, "Listener can not be null" );
 
-		boolean useTimings = EventBus.INSTANCE.useTimings();
+		boolean useTimings = EventBus.instance().useTimings();
 		Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> ret = new HashMap<Class<? extends AbstractEvent>, Set<RegisteredListener>>();
 		Set<Method> methods;
 		try
@@ -165,7 +165,7 @@ public final class JavaPluginLoader implements PluginLoader
 			String message = String.format( "Disabling %s", plugin.getDescription().getFullName() );
 			PluginManager.getLogger().info( message );
 
-			EventBus.INSTANCE.callEvent( new PluginDisableEvent( plugin ) );
+			EventBus.instance().callEvent( new PluginDisableEvent( plugin ) );
 
 			Plugin jPlugin = plugin;
 			ClassLoader cloader = jPlugin.getClassLoader();
@@ -230,7 +230,7 @@ public final class JavaPluginLoader implements PluginLoader
 
 			// Perhaps abort here, rather than continue going, but as it stands,
 			// an abort is not possible the way it's currently written
-			EventBus.INSTANCE.callEvent( new PluginEnableEvent( plugin ) );
+			EventBus.instance().callEvent( new PluginEnableEvent( plugin ) );
 		}
 	}
 

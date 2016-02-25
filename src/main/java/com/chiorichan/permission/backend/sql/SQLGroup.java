@@ -30,26 +30,26 @@ public class SQLGroup extends PermissibleGroup
 	{
 		super( id );
 	}
-	
+
 	@Override
 	public void reloadGroups()
 	{
 		SQLDatastore db = SQLBackend.getBackend().getSQL();
-		
+
 		clearGroups();
 		try
 		{
 			ResultSet rs = db.table( "permissions_groups" ).select().where( "parent" ).matches( getId() ).and().where( "type" ).matches( "1" ).execute().result();
 			// ResultSet rs = db.query( "SELECT * FROM `permissions_groups` WHERE `parent` = '" + getId() + "' AND `type` = '1';" );
-			
+
 			if ( rs != null && rs.first() )
 				do
 				{
-					PermissibleGroup grp = PermissionManager.INSTANCE.getGroup( rs.getString( "child" ) );
+					PermissibleGroup grp = PermissionManager.instance().getGroup( rs.getString( "child" ) );
 					addGroup( grp, References.format( rs.getString( "refs" ) ) );
 				}
 				while ( rs.next() );
-			
+
 			if ( rs != null )
 				rs.close();
 		}
@@ -58,43 +58,43 @@ public class SQLGroup extends PermissibleGroup
 			throw new RuntimeException( e );
 		}
 	}
-	
+
 	@Override
 	public void reloadPermissions()
 	{
 		SQLDatastore db = SQLBackend.getBackend().getSQL();
-		
+
 		clearPermissions();
 		clearTimedPermissions();
 		try
 		{
 			ResultSet rs = db.table( "permissions_entity" ).select().where( "owner" ).matches( getId() ).and().where( "type" ).matches( "1" ).execute().result();
 			// ResultSet rs = db.query( "SELECT * FROM `permissions_entity` WHERE `owner` = ? AND `type` = '1';", getId() );
-			
+
 			if ( rs != null && rs.first() )
 				do
 				{
 					PermissionNamespace ns = new PermissionNamespace( rs.getString( "permission" ) );
-					
+
 					if ( !ns.containsOnlyValidChars() )
 					{
 						PermissionManager.getLogger().warning( "We failed to add the permission %s to entity %s because it contained invalid characters, namespaces can only contain 0-9, a-z and _." );
 						continue;
 					}
-					
-					Collection<Permission> perms = ns.containsRegex() ? PermissionManager.INSTANCE.getNodes( ns ) : Arrays.asList( new Permission[] {ns.createPermission()} );
-					
+
+					Collection<Permission> perms = ns.containsRegex() ? PermissionManager.instance().getNodes( ns ) : Arrays.asList( new Permission[] {ns.createPermission()} );
+
 					for ( Permission perm : perms )
 					{
 						PermissionValue value = null;
 						if ( rs.getString( "value" ) != null )
 							value = perm.getModel().createValue( rs.getString( "value" ) );
-						
+
 						addPermission( new ChildPermission( this, perm, value, getWeight() ), References.format( rs.getString( "refs" ) ) );
 					}
 				}
 				while ( rs.next() );
-			
+
 			if ( rs != null )
 				rs.close();
 		}
@@ -103,7 +103,7 @@ public class SQLGroup extends PermissibleGroup
 			throw new RuntimeException( e );
 		}
 	}
-	
+
 	@Override
 	public void remove()
 	{
@@ -112,7 +112,7 @@ public class SQLGroup extends PermissibleGroup
 		{
 			// db.queryUpdate( String.format( "DELETE FROM `permissions_entity` WHERE `owner` = '%s' AND `type` = '1';", getId() ) );
 			// db.queryUpdate( String.format( "DELETE FROM `permissions_groups` WHERE `parent` = '%s' AND `type` = '1';", getId() ) );
-			
+
 			db.table( "permissions_entity" ).delete().where( "owner" ).matches( getId() ).and().where( "type" ).matches( "1" ).execute();
 			db.table( "permissions_groups" ).delete().where( "parent" ).matches( getId() ).and().where( "type" ).matches( "1" ).execute();
 		}
@@ -121,21 +121,21 @@ public class SQLGroup extends PermissibleGroup
 			throw new RuntimeException( e );
 		}
 	}
-	
+
 	@Override
 	public void save()
 	{
 		if ( isVirtual() )
 			return;
-		
+
 		if ( isDebug() )
 			PermissionManager.getLogger().info( EnumColor.YELLOW + "Group " + getId() + " being saved to backend" );
-		
+
 		try
 		{
 			SQLDatastore db = SQLBackend.getBackend().getSQL();
 			remove();
-			
+
 			Collection<ChildPermission> children = getChildPermissions( null );
 			for ( ChildPermission child : children )
 			{
@@ -144,7 +144,7 @@ public class SQLGroup extends PermissibleGroup
 				// child.getObject() ) );
 				db.table( "permissions_entity" ).insert().value( "owner", getId() ).value( "type", 1 ).value( "refs", child.getReferences().join() ).value( "permission", perm.getNamespace() ).value( "value", child.getObject() ).execute();
 			}
-			
+
 			Collection<Entry<PermissibleGroup, References>> groups = getGroupEntrys( null );
 			for ( Entry<PermissibleGroup, References> entry : groups )
 				db.table( "permissions_groups" ).insert().value( "child", entry.getKey().getId() ).value( "parent", getId() ).value( "type", 1 ).value( "refs", entry.getValue().join() ).execute();

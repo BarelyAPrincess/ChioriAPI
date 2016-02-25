@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.chiorichan.ServiceManager;
 import com.chiorichan.lang.ApplicationException;
+import com.chiorichan.logger.Log;
 import com.chiorichan.util.ObjectFunc;
 
 public class AppManager<T extends ServiceManager>
@@ -27,6 +28,11 @@ public class AppManager<T extends ServiceManager>
 	{
 		this.managerClass = managerClass;
 		managers.add( this );
+	}
+
+	public Log getLogger()
+	{
+		return Log.get( instance() );
 	}
 
 	public Class<T> getManagerClass()

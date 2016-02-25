@@ -48,6 +48,7 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		// return String.format( "Exception %s thrown in file '%s' at line %s: '%s'", getClass().getName(), getStackTrace()[0].getFileName(), getStackTrace()[0].getLineNumber(), super.getMessage() );
 	}
 
+	@Override
 	public boolean isIgnorable()
 	{
 		return level.isIgnorable();

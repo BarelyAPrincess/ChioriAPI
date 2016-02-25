@@ -21,6 +21,7 @@ import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppController;
 import com.chiorichan.ServiceManager;
+import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.AuthorNagException;
 import com.chiorichan.lang.DeprecatedDetail;
 import com.chiorichan.lang.ReportingLevel;
@@ -50,9 +51,14 @@ public class EventBus implements ServiceManager, LogSource
 
 	private Object lock = new Object();
 
-	private EventBus()
+	public EventBus()
 	{
 
+	}
+
+	public EventBus( boolean useTimings )
+	{
+		this.useTimings = useTimings;
 	}
 
 	/**
@@ -271,11 +277,10 @@ public class EventBus implements ServiceManager, LogSource
 		return null;
 	}
 
-	private void init( boolean useTimings )
+	@Override
+	public void init() throws ApplicationException
 	{
-		this.useTimings = useTimings;
 
-		AppManager.manager( EventBus.class ).init( useTimings );
 	}
 
 	public void registerEvent( Class<? extends AbstractEvent> event, Listener listener, EventPriority priority, EventExecutor executor, Object object )
