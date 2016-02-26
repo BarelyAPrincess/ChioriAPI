@@ -88,7 +88,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	private final List<Plugin> plugins = new ArrayList<Plugin>();
 
-	private PluginManager()
+	public PluginManager()
 	{
 
 	}

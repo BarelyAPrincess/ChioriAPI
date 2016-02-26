@@ -1,19 +1,18 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
  */
 package com.chiorichan;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,8 +25,6 @@ import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.event.EventBus;
-import com.chiorichan.event.EventHandler;
-import com.chiorichan.event.EventPriority;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
 import com.chiorichan.lang.ApplicationException;
@@ -36,7 +33,9 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.RunLevel;
 import com.chiorichan.lang.StartupAbortException;
 import com.chiorichan.lang.StartupException;
+import com.chiorichan.logger.DefaultLogFormatter;
 import com.chiorichan.logger.Log;
+import com.chiorichan.logger.LoggerOutputStream;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.permission.lang.PermissionBackendException;
 import com.chiorichan.plugin.PluginManager;
@@ -56,6 +55,7 @@ public abstract class AppLoader implements Listener
 	private static OptionSet options;
 	private static boolean isRunning;
 	public static long startTime = System.currentTimeMillis();
+	private AppController controller;
 
 	public static OptionSet options()
 	{
@@ -71,7 +71,7 @@ public abstract class AppLoader implements Listener
 
 	public AppLoader()
 	{
-
+		controller = new AppController( this );
 	}
 
 	public RunLevel runLevel()
@@ -84,9 +84,10 @@ public abstract class AppLoader implements Listener
 		return isRunning;
 	}
 
-	protected void runLevel( RunLevel level )
+	protected void runLevel( RunLevel level ) throws ApplicationException
 	{
 		runlevel.setRunLevel( level );
+		onRunlevelChange( level );
 	}
 
 	public static void main( String... args ) throws Exception
@@ -100,13 +101,12 @@ public abstract class AppLoader implements Listener
 		{
 			ReportingLevel.enableErrorLevelOnly( ReportingLevel.parse( AppController.config().getString( "server.errorReporting", "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
 
-			runLevel( RunLevel.INITIALIZED );
-
-			AppController.primaryThread.start();
-
+			AppManager.manager( TaskManager.class ).init();
 			EventBus.instance().registerEvents( this, this );
 
 			runLevel( RunLevel.INITIALIZED );
+
+			AppController.primaryThread.start();
 
 			AppManager.manager( PluginManager.class ).init();
 
@@ -116,24 +116,17 @@ public abstract class AppLoader implements Listener
 
 			runLevel( RunLevel.STARTUP );
 			runLevel( RunLevel.POSTSTARTUP );
-
-			Log.get().info( "Initalizing the Permission Subsystem..." );
-			AppManager.manager( PermissionManager.class ).init();
-
-			Log.get().info( "Initalizing the Account Subsystem..." );
-			AppManager.manager( AccountManager.class ).init();
-
 			runLevel( RunLevel.RUNNING );
 
 			// XXX There seems to be a problem registering sync'd tasks before this point
 		}
-		catch ( ApplicationException e )
+		catch ( ApplicationException | StartupException e )
 		{
 			throw e;
 		}
 		catch ( Throwable e )
 		{
-			throw new StartupException( "There was a problem initializing one of the modular systems", e );
+			throw new StartupException( "There was a problem initializing one or more of the managers", e );
 		}
 	}
 
@@ -144,104 +137,117 @@ public abstract class AppLoader implements Listener
 		return formatter.print( duration.toPeriod() );
 	}
 
-	protected static void init( Class<? extends AppLoader> loaderClass, String... args ) throws StartupException
+	protected static void init( Class<? extends AppLoader> loaderClass, String... args )
 	{
-		System.setProperty( "file.encoding", "utf-8" );
-		
-		AppLoader instance = null;
-		options = null;
-
-		if ( loaderClass == null )
-			loaderClass = SimpleLoader.class;
-
 		try
 		{
-			OptionParser parser = new OptionParser()
+			System.setProperty( "file.encoding", "utf-8" );
+
+			AppLoader instance = null;
+			options = null;
+
+			if ( loaderClass == null )
+				loaderClass = SimpleLoader.class;
+
+			try
 			{
+				OptionParser parser = new OptionParser()
 				{
-					// TODO This needs refinement and an API
-					acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
-					acceptsAll( Arrays.asList( "c", "config", "b", "settings" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "server.yaml" ) ).describedAs( "Yml file" );
-					acceptsAll( Arrays.asList( "p", "plugins" ), "Plugin directory to use" ).withRequiredArg().ofType( String.class ).defaultsTo( "plugins" ).describedAs( "Plugin directory" );
-					acceptsAll( Arrays.asList( "query-disable" ), "Disable the internal TCP Server" );
-					acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
-					acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
-					acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
-					acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
-					acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
-				}
-			};
+					{
+						// TODO This needs refinement and an API
+						acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
+						acceptsAll( Arrays.asList( "c", "config", "b", "settings" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "server.yaml" ) ).describedAs( "Yml file" );
+						acceptsAll( Arrays.asList( "p", "plugins" ), "Plugin directory to use" ).withRequiredArg().ofType( String.class ).defaultsTo( "plugins" ).describedAs( "Plugin directory" );
+						acceptsAll( Arrays.asList( "query-disable" ), "Disable the internal TCP Server" );
+						acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
+						acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
+						acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
+						acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
+						acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
+					}
+				};
 
-			try
-			{
-				Method m = loaderClass.getMethod( "populateOptionParser", OptionParser.class );
-				m.invoke( null, parser );
-			}
-			catch ( NoSuchMethodException e )
-			{
-				// Ignore!
-			}
-
-			try
-			{
-				options = parser.parse( args );
-			}
-			catch ( joptsimple.OptionException ex )
-			{
-				Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, ex.getLocalizedMessage() );
-			}
-
-			if ( options == null || options.has( "?" ) )
 				try
 				{
-					parser.printHelpOn( System.out );
+					Method m = loaderClass.getMethod( "populateOptionParser", OptionParser.class );
+					m.invoke( null, parser );
 				}
-				catch ( IOException ex )
+				catch ( NoSuchMethodException e )
 				{
-					Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, null, ex );
+					// Ignore!
 				}
-			else if ( options.has( "v" ) )
-				System.out.println( "Running " + Versioning.getProduct() + " version " + Versioning.getVersion() );
-			else if ( options.has( "watchdog" ) )
-			{
-				watchdog = new Watchdog();
 
-				if ( options.has( "child" ) )
+				try
 				{
-					isRunning = true;
-					watchdog.initChild();
+					options = parser.parse( args );
+				}
+				catch ( joptsimple.OptionException ex )
+				{
+					Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, ex.getLocalizedMessage() );
+				}
+
+				ConsoleHandler consoleHandler = new ConsoleHandler();
+				consoleHandler.setFormatter( new DefaultLogFormatter( !options.has( "nocolor" ) ) ); // Make a config option for nocolor
+				Log.addHandler( consoleHandler );
+
+				System.setOut( new PrintStream( new LoggerOutputStream( Log.get( "SysOut" ).getLogger(), Level.INFO ), true ) );
+				System.setErr( new PrintStream( new LoggerOutputStream( Log.get( "SysErr" ).getLogger(), Level.SEVERE ), true ) );
+
+				if ( options == null || options.has( "?" ) )
+					try
+					{
+						parser.printHelpOn( System.out );
+					}
+					catch ( IOException ex )
+					{
+						Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, null, ex );
+					}
+				else if ( options.has( "v" ) )
+					System.out.println( "Running " + Versioning.getProduct() + " version " + Versioning.getVersion() );
+				else if ( options.has( "watchdog" ) )
+				{
+					watchdog = new Watchdog();
+
+					if ( options.has( "child" ) )
+					{
+						isRunning = true;
+						watchdog.initChild();
+					}
+					else
+						watchdog.initDaemon( ( String ) options.valueOf( "watchdog" ), options );
 				}
 				else
-					watchdog.initDaemon( ( String ) options.valueOf( "watchdog" ), options );
-			}
-			else
-				isRunning = true;
+					isRunning = true;
 
-			if ( isRunning )
+				if ( isRunning )
+				{
+					AppManager.manager( EventBus.class ).init();
+
+					instance = ObjectFunc.initClass( loaderClass );
+					instance.start();
+				}
+			}
+			catch ( StartupAbortException e )
 			{
-				AppManager.manager( EventBus.class ).init();
-				
-				instance = ObjectFunc.initClass( loaderClass );
-				instance.start();
+				if ( instance != null )
+					instance.runLevel( RunLevel.SHUTDOWN );
 			}
-		}
-		catch ( StartupAbortException e )
-		{
-			if ( instance != null )
-				instance.runLevel( RunLevel.SHUTDOWN );
-		}
-		catch ( Throwable t )
-		{
-			// t.printStackTrace();
-			if ( instance != null )
-				instance.runLevel( RunLevel.CRASHED );
-			AppController.handleExceptions( t );
-		}
+			catch ( Throwable t )
+			{
+				if ( instance != null )
+					instance.runLevel( RunLevel.CRASHED );
+				AppController.handleExceptions( t );
+			}
 
-		if ( isRunning && Log.get() != null )
-			Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
-		else if ( instance != null )
-			instance.runLevel( RunLevel.DISPOSED );
+			if ( isRunning && Log.get() != null )
+				Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
+			else if ( instance != null )
+				instance.runLevel( RunLevel.DISPOSED );
+		}
+		catch ( ApplicationException e )
+		{
+			AppController.handleExceptions( e );
+		}
 	}
 
 	public RunLevel getLastRunLevel()
@@ -306,9 +312,5 @@ public abstract class AppLoader implements Listener
 		runLevel( RunLevel.RUNNING );
 	}
 
-	/**
-	 * Event listener for runlevel changes.
-	 */
-	@EventHandler( priority = EventPriority.NORMAL )
-	public abstract void onRunlevelChange( RunlevelEvent event ) throws ApplicationException;
+	public abstract void onRunlevelChange( RunLevel level ) throws ApplicationException;
 }

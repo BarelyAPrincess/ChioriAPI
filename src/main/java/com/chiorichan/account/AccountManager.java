@@ -19,6 +19,7 @@ import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.account.KickEvent;
+import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.util.SecureFunc;
@@ -32,6 +33,19 @@ import com.google.common.collect.Sets;
  */
 public final class AccountManager extends AccountEvents
 {
+	static
+	{
+		try
+		{
+			Log.get().info( "Initalizing the Account Manager..." );
+			AppManager.manager( AccountManager.class ).init();
+		}
+		catch ( ApplicationException e )
+		{
+			AppController.handleExceptions( e );
+		}
+	}
+	
 	public static Log getLogger()
 	{
 		return Log.get( instance() );
@@ -48,7 +62,7 @@ public final class AccountManager extends AccountEvents
 
 	int maxAccounts = -1;
 
-	private AccountManager()
+	public AccountManager()
 	{
 
 	}

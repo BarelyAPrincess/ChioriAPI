@@ -1,10 +1,7 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
  */
 package com.chiorichan;
 
@@ -33,17 +30,28 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 /**
- * Provides the console output of the server.
- * We also attach the Root Account here
+ * Provides the console output of the server. We also attach the Root Account here
  */
 public class ApplicationTerminal extends AccountPermissible implements AccountAttachment, LogSource, ServiceManager
 {
+	static
+	{
+		try
+		{
+			AppManager.manager( ApplicationTerminal.class ).init();
+		}
+		catch ( ApplicationException e )
+		{
+			AppController.handleExceptions( e );
+		}
+	}
+
 	public static ApplicationTerminal terminal()
 	{
 		return AppManager.manager( ApplicationTerminal.class ).instance();
 	}
 
-	private ApplicationTerminal()
+	public ApplicationTerminal()
 	{
 
 	}

@@ -118,7 +118,7 @@ public class TaskManager implements ServiceManager
 
 	private AsyncTaskDebugger debugTail = debugHead;
 
-	private TaskManager()
+	public TaskManager()
 	{
 
 	}

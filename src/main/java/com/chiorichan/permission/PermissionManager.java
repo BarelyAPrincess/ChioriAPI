@@ -1,10 +1,7 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
  */
 package com.chiorichan.permission;
 
@@ -28,6 +25,7 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.EventPriority;
 import com.chiorichan.event.EventRegistrar;
+import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.logger.Log;
 import com.chiorichan.permission.backend.file.FileBackend;
@@ -50,6 +48,19 @@ import com.google.common.collect.Sets;
 
 public class PermissionManager implements EventRegistrar, TaskRegistrar, ServiceManager, ServiceProvider
 {
+	static
+	{
+		try
+		{
+			Log.get().info( "Initalizing the Permission Manager..." );
+			AppManager.manager( PermissionManager.class ).init();
+		}
+		catch ( ApplicationException e )
+		{
+			AppController.handleExceptions( e );
+		}
+	}
+
 	static boolean allowOps = true;
 	static boolean debugMode = false;
 
@@ -133,7 +144,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 	private Map<String, Collection<String>> refInheritance = Maps.newConcurrentMap();
 
-	private PermissionManager()
+	public PermissionManager()
 	{
 
 	}
@@ -329,8 +340,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	}
 
 	/**
-	 * Finds entities assigned provided permission.
-	 * WARNING: Will not return a complete list if permissions.preloadEntities config is false.
+	 * Finds entities assigned provided permission. WARNING: Will not return a complete list if permissions.preloadEntities config is false.
 	 *
 	 * @param perm
 	 *             The permission to check for.
@@ -480,8 +490,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	}
 
 	/**
-	 * Attempts to find a Permission Node.
-	 * Will not create the node if non-existent.
+	 * Attempts to find a Permission Node. Will not create the node if non-existent.
 	 *
 	 * @param namespace
 	 *             The namespace to find, e.g., com.chiorichan.user
@@ -684,14 +693,12 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	}
 
 	/**
-	 * Attempts to move a permission from one namespace to another.
-	 * e.g., com.chiorichan.oldspace1.same.oldname -> com.chiorichan.newspace2.same.newname.
+	 * Attempts to move a permission from one namespace to another. e.g., com.chiorichan.oldspace1.same.oldname -> com.chiorichan.newspace2.same.newname.
 	 *
 	 * @param newNamespace
 	 *             The new namespace you wish to use.
 	 * @param appendLocalName
-	 *             Pass true if you wish the method to append the LocalName to the new namespace.
-	 *             If the local name of the new namespace is different then this permission will be renamed.
+	 *             Pass true if you wish the method to append the LocalName to the new namespace. If the local name of the new namespace is different then this permission will be renamed.
 	 * @return true if move/rename was successful.
 	 */
 	public boolean refactorNamespace( String newNamespace, boolean appendLocalName )
@@ -775,8 +782,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	}
 
 	/**
-	 * Set backend to specified backend.
-	 * This would also cause backend resetting.
+	 * Set backend to specified backend. This would also cause backend resetting.
 	 *
 	 * @param backendName
 	 *             name of backend to set to

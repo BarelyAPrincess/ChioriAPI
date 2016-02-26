@@ -1,15 +1,11 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
  */
 package com.chiorichan;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,8 +17,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.event.EventBus;
@@ -30,14 +24,13 @@ import com.chiorichan.event.EventRegistrar;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.services.ServiceRegisterEvent;
 import com.chiorichan.event.services.ServiceUnregisterEvent;
+import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.lang.ExceptionReport;
 import com.chiorichan.lang.IException;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.RunLevel;
-import com.chiorichan.logger.DefaultLogFormatter;
 import com.chiorichan.logger.Log;
-import com.chiorichan.logger.LoggerOutputStream;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.plugin.PluginManager;
 import com.chiorichan.services.ObjectContext;
@@ -52,7 +45,7 @@ import com.chiorichan.util.Versioning;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-public abstract class AppController implements Runnable, EventRegistrar, TaskRegistrar, Listener
+public final class AppController implements Runnable, EventRegistrar, TaskRegistrar, Listener
 {
 	public static final String BROADCAST_CHANNEL_ADMINISTRATIVE = "sys.admin";
 	public static final String BROADCAST_CHANNEL_USERS = "sys.user";
@@ -156,11 +149,11 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		{
 			List<IException> list = Arrays.asList( report.getNotIgnorableExceptions() );
 
-			Log.get().severe( "Encountered " + +list.size() + " exceptions:" );
+			Log.get().severe( "Encountered " + list.size() + " exception(s):" );
 			for ( IException e : list )
-				Log.get().severe( e.getMessage(), e instanceof Throwable ? ( Throwable ) e : null );
+				Log.get().severe( e.getClass() + ": " + e.getMessage(), e instanceof Throwable && Versioning.isDevelopment() ? ( Throwable ) e : null );
 
-			stopApplication( "WE ENCOUNTERED AN UNEXPECTED EXCEPTION (" + AppLoader.uptime() + "ms)!" );
+			stopApplication( "CRASHED" );
 
 			// TODO Pass that this was a crash
 		}
@@ -254,7 +247,6 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		isRunning = false;
 	}
 
-	public boolean useColors = true;
 	public final AppLoader loader;
 
 	protected AppController( AppLoader loader )
@@ -264,19 +256,9 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 
 		primaryThread = new Thread( this, "Server Thread" );
 		primaryThread.setPriority( Thread.MAX_PRIORITY );
-
-		if ( AppLoader.options().has( "nocolor" ) )
-			useColors = false;
-
-		ConsoleHandler consoleHandler = new ConsoleHandler();
-		consoleHandler.setFormatter( new DefaultLogFormatter() );
-		Log.addHandler( consoleHandler );
-
-		System.setOut( new PrintStream( new LoggerOutputStream( Log.get( "SysOut" ).getLogger(), Level.INFO ), true ) );
-		System.setErr( new PrintStream( new LoggerOutputStream( Log.get( "SysErr" ).getLogger(), Level.SEVERE ), true ) );
 	}
 
-	private void finalShutdown()
+	private void finalShutdown() throws ApplicationException
 	{
 		Object timing = new Object();
 		Timings.start( timing );
@@ -464,7 +446,14 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		}
 		finally
 		{
-			finalShutdown();
+			try
+			{
+				finalShutdown();
+			}
+			catch ( ApplicationException e )
+			{
+				handleExceptions( e );
+			}
 		}
 	}
 
