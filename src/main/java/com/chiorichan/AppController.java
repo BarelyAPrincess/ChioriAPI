@@ -1,8 +1,17 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Right Reserved.
+ */
 package com.chiorichan;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,8 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-
-import joptsimple.OptionSet;
 
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.event.EventBus;
@@ -73,8 +80,7 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 	}
 
 	/**
-	 * Queries for a provider. This may return if no provider has been
-	 * registered for a service. The highest priority provider is returned.
+	 * Queries for a provider. This may return if no provider has been registered for a service. The highest priority provider is returned.
 	 *
 	 * @param <T>
 	 *             The service interface
@@ -148,7 +154,12 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 
 		if ( report.hasNonIgnorableExceptions() )
 		{
-			ExceptionReport.printExceptions( report.getNotIgnorableExceptions() );
+			List<IException> list = Arrays.asList( report.getNotIgnorableExceptions() );
+
+			Log.get().severe( "Encountered " + +list.size() + " exceptions:" );
+			for ( IException e : list )
+				Log.get().severe( e.getMessage(), e instanceof Throwable ? ( Throwable ) e : null );
+
 			stopApplication( "WE ENCOUNTERED AN UNEXPECTED EXCEPTION (" + AppLoader.uptime() + "ms)!" );
 
 			// TODO Pass that this was a crash
@@ -243,19 +254,18 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		isRunning = false;
 	}
 
-	private OptionSet options;
 	public boolean useColors = true;
+	public final AppLoader loader;
 
-	public AppLoader loader;
-
-	protected AppController()
+	protected AppController( AppLoader loader )
 	{
+		this.loader = loader;
 		instance = this;
 
 		primaryThread = new Thread( this, "Server Thread" );
 		primaryThread.setPriority( Thread.MAX_PRIORITY );
 
-		if ( options.has( "nocolor" ) )
+		if ( AppLoader.options().has( "nocolor" ) )
 			useColors = false;
 
 		ConsoleHandler consoleHandler = new ConsoleHandler();
@@ -305,8 +315,7 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 	}
 
 	/**
-	 * Get a list of known services. A service is known if it has registered
-	 * providers for it.
+	 * Get a list of known services. A service is known if it has registered providers for it.
 	 *
 	 * @return a copy of the set of known services
 	 */
@@ -325,8 +334,7 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 	}
 
 	/**
-	 * Queries for a provider registration. This may return if no provider
-	 * has been registered for a service.
+	 * Queries for a provider registration. This may return if no provider has been registered for a service.
 	 *
 	 * @param <T>
 	 *             The service interface
@@ -350,8 +358,7 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 	}
 
 	/**
-	 * Get registrations of providers for a service. The returned list is
-	 * an unmodifiable copy.
+	 * Get registrations of providers for a service. The returned list is an unmodifiable copy.
 	 *
 	 * @param <T>
 	 *             The service interface
@@ -641,15 +648,5 @@ public abstract class AppController implements Runnable, EventRegistrar, TaskReg
 		}
 		for ( ServiceUnregisterEvent<?> event : unregisteredEvents )
 			EventBus.instance().callEvent( event );
-	}
-
-	public void setLoader( AppLoader loader )
-	{
-		this.loader = loader;
-	}
-
-	public void setParams( OptionSet options )
-	{
-		this.options = options;
 	}
 }

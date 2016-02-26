@@ -1,3 +1,11 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Right Reserved.
+ */
 package com.chiorichan;
 
 import java.io.File;
@@ -41,8 +49,6 @@ import com.chiorichan.util.Versioning;
 
 /**
  * Provides a base AppController skeleton for you to extend or call directly using {@code AppAppController.init( Class<? extends AppAppController> loaderClass, String... args );}.
- *
- * @author Chiori-chan
  */
 public abstract class AppLoader implements Listener
 {
@@ -98,7 +104,6 @@ public abstract class AppLoader implements Listener
 
 			AppController.primaryThread.start();
 
-			AppManager.manager( EventBus.class ).init();
 			EventBus.instance().registerEvents( this, this );
 
 			runLevel( RunLevel.INITIALIZED );
@@ -139,11 +144,12 @@ public abstract class AppLoader implements Listener
 		return formatter.print( duration.toPeriod() );
 	}
 
-	private static void init( Class<? extends AppLoader> loaderClass, String... args ) throws StartupException
+	protected static void init( Class<? extends AppLoader> loaderClass, String... args ) throws StartupException
 	{
 		System.setProperty( "file.encoding", "utf-8" );
-		OptionSet options = null;
+		
 		AppLoader instance = null;
+		options = null;
 
 		if ( loaderClass == null )
 			loaderClass = SimpleLoader.class;
@@ -213,23 +219,28 @@ public abstract class AppLoader implements Listener
 
 			if ( isRunning )
 			{
+				AppManager.manager( EventBus.class ).init();
+				
 				instance = ObjectFunc.initClass( loaderClass );
 				instance.start();
 			}
 		}
 		catch ( StartupAbortException e )
 		{
-			instance.runLevel( RunLevel.SHUTDOWN );
+			if ( instance != null )
+				instance.runLevel( RunLevel.SHUTDOWN );
 		}
 		catch ( Throwable t )
 		{
-			instance.runLevel( RunLevel.CRASHED );
+			// t.printStackTrace();
+			if ( instance != null )
+				instance.runLevel( RunLevel.CRASHED );
 			AppController.handleExceptions( t );
 		}
 
 		if ( isRunning && Log.get() != null )
 			Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
-		else
+		else if ( instance != null )
 			instance.runLevel( RunLevel.DISPOSED );
 	}
 
