@@ -115,8 +115,8 @@ public class Log implements LogAPI
 	/**
 	 * Gets an instance of Log for provided loggerId. If the logger does not exist one will be created.
 	 *
-	 * @param loggerId
-	 *             The loggerId we are looking for.
+	 * @param id
+	 *             The logger id
 	 * @return ConsoleLogger An empty loggerId will return the System Logger.
 	 */
 	public static Log get( String id )
@@ -147,12 +147,10 @@ public class Log implements LogAPI
 	private final String id;
 
 	/**
-	 * Attempts to find a logger based on the id provided.
-	 * If you would like to use your own Logger, be sure to create it
-	 * with the same id prior to using any of the builtin getLogger() methods
-	 * or you will need to use the replaceLogger() method.
+	 * Attempts to find a logger based on the id provided. If you would like to use your own Logger, be sure to create it with the same id prior to using any of the built-in getLogger() methods or you will need to use the replaceLogger() method.
 	 *
-	 * @param loggerId
+	 * @param id
+	 *             The logger id
 	 */
 	protected Log( String id )
 	{

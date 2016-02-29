@@ -1,7 +1,10 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Right Reserved.
  */
 package com.chiorichan.permission;
 
@@ -373,7 +376,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Return entity's object
 	 *
-	 * @param entityname
+	 * @param permissible
 	 *             get PermissibleEntity with given name
 	 * @return PermissibleEntity instance
 	 */
@@ -423,8 +426,8 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Return object for specified group
 	 *
-	 * @param groupname
-	 *             group's name
+	 * @param id
+	 *             the group id
 	 * @return PermissibleGroup object
 	 */
 	public PermissibleGroup getGroup( String id )
@@ -534,7 +537,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Finds registered permission nodes.
 	 *
-	 * @param namespace
+	 * @param ns
 	 *             The full name space we need to crawl for.
 	 * @return A list of permissions that matched the namespace. Will return more then one if namespace contained asterisk.
 	 */
@@ -747,8 +750,8 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Reset in-memory object of specified entity
 	 *
-	 * @param entityName
-	 *             entity's name
+	 * @param entity
+	 *             the entity
 	 */
 	public void resetEntity( Permissible entity )
 	{

@@ -5,7 +5,7 @@ defaultTasks 'clean', 'build'
 apply plugin: 'eclipse'
 apply plugin: 'java'
 apply plugin: 'license'
-apply plugin: 'com.github.johnrengelman.shadow'
+// apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'checkstyle'
 apply from: 'etc/publish.gradle'
 
@@ -21,7 +21,7 @@ buildscript {
 	}
 
 	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+		// classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
 		classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
 	}
 }
@@ -121,6 +121,9 @@ license
 	excludes ([
 		'**/*.md5',
 		'**/*.txt',
+		'**/*.bmp',
+		'**/*.png',
+		'**/*.jpg',
 		'**/config.yaml'
 	])
 	ext.year = Calendar.getInstance().get(Calendar.YEAR)
@@ -179,8 +182,8 @@ dependencies
 	compile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.3.5'
 }
 
-shadowJar
-{ include("**/*"); }
+// shadowJar
+// { include("**/*"); }
 
 jar
 {
@@ -204,7 +207,7 @@ task javadocArchive(type: Zip, dependsOn: 'javadoc'){
 	from javadoc.destinationDir
 }
 
-task writePropertiesFile {
+task writeApiPropertiesFile {
 	doFirst {
 		SimpleDateFormat sdf = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" )
 
@@ -220,15 +223,16 @@ task writePropertiesFile {
 		f3.parentFile.mkdirs()
 		OutputStream out2 = new FileOutputStream( f2 )
 		OutputStream out3 = new FileOutputStream( f3 )
-		props.store(out2, "Build Properties File")
-		props.store(out3, "Build Properties File")
+		props.store(out2, "Chiori API Build Properties File")
+		props.store(out3, "Chiori API Build Properties File")
 	}
 }
 
 task wrapper(type: Wrapper) { gradleVersion = '2.11' }
 
-jar.dependsOn writePropertiesFile
+jar.dependsOn writeApiPropertiesFile
 
 artifacts
-{ archives shadowJar, sourcesArchive, javadocArchive }
+{ archives sourcesArchive, javadocArchive }
+// shadowJar
 

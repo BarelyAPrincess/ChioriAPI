@@ -52,7 +52,7 @@ public class EventException extends ApplicationException
 	/**
 	 * Constructs a new EventException based on the given Exception
 	 *
-	 * @param throwable
+	 * @param cause
 	 *             Exception that triggered this Exception
 	 */
 	public EventException( Throwable cause )

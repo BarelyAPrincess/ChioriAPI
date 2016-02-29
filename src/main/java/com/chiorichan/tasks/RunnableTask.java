@@ -58,7 +58,7 @@ public abstract class RunnableTask implements Runnable
 	 *              if plugin is null
 	 * @throws IllegalStateException
 	 *              if this was already scheduled
-	 * @see ITaskManager#runTask(TaskRegistrar, Runnable)
+	 * @see TaskManager#runTask(TaskRegistrar, Runnable)
 	 */
 	public synchronized ITask runTask( TaskRegistrar creator ) throws IllegalArgumentException, IllegalStateException
 	{
@@ -79,7 +79,7 @@ public abstract class RunnableTask implements Runnable
 	 *              if plugin is null
 	 * @throws IllegalStateException
 	 *              if this was already scheduled
-	 * @see ITaskManager#runTaskAsynchronously(TaskRegistrar, Runnable)
+	 * @see TaskManager#runTaskAsynchronously(TaskRegistrar, Runnable)
 	 */
 	public synchronized ITask runTaskAsynchronously( TaskRegistrar creator ) throws IllegalArgumentException, IllegalStateException
 	{
@@ -99,7 +99,7 @@ public abstract class RunnableTask implements Runnable
 	 *              if plugin is null
 	 * @throws IllegalStateException
 	 *              if this was already scheduled
-	 * @see ITaskManager#runTaskLater(TaskRegistrar, Runnable, long)
+	 * @see TaskManager#runTaskLater(TaskRegistrar, long, Runnable)
 	 */
 	public synchronized ITask runTaskLater( TaskRegistrar creator, long delay ) throws IllegalArgumentException, IllegalStateException
 	{
@@ -122,7 +122,7 @@ public abstract class RunnableTask implements Runnable
 	 *              if plugin is null
 	 * @throws IllegalStateException
 	 *              if this was already scheduled
-	 * @see ITaskManager#runTaskLaterAsynchronously(TaskRegistrar, Runnable, long)
+	 * @see TaskManager#runTaskLaterAsynchronously(TaskRegistrar, long, Runnable)
 	 */
 	public synchronized ITask runTaskLaterAsynchronously( TaskRegistrar creator, long delay ) throws IllegalArgumentException, IllegalStateException
 	{
@@ -144,7 +144,7 @@ public abstract class RunnableTask implements Runnable
 	 *              if plugin is null
 	 * @throws IllegalStateException
 	 *              if this was already scheduled
-	 * @see ITaskManager#runTaskTimer(TaskRegistrar, Runnable, long, long)
+	 * @see TaskManager#runTaskTimer(TaskRegistrar, long, long, Runnable)
 	 */
 	public synchronized ITask runTaskTimer( TaskRegistrar creator, long delay, long period ) throws IllegalArgumentException, IllegalStateException
 	{
@@ -170,7 +170,7 @@ public abstract class RunnableTask implements Runnable
 	 *              if plugin is null
 	 * @throws IllegalStateException
 	 *              if this was already scheduled
-	 * @see ITaskManager#runTaskTimerAsynchronously(TaskRegistrar, Runnable, long, long)
+	 * @see TaskManager#runTaskTimerAsynchronously(TaskRegistrar, long, long, Runnable)
 	 */
 	public synchronized ITask runTaskTimerAsynchronously( TaskRegistrar creator, long delay, long period ) throws IllegalArgumentException, IllegalStateException
 	{

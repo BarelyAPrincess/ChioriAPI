@@ -435,7 +435,7 @@ public class StringFunc
 	/**
 	 * Scans a string array for entries that are not lower case.
 	 *
-	 * @param stringList
+	 * @param array
 	 *             The original array to check.
 	 * @return The corrected string array.
 	 */
@@ -457,7 +457,7 @@ public class StringFunc
 	/**
 	 * Scans a string array for entries that are not lower case.
 	 *
-	 * @param stringList
+	 * @param array
 	 *             The original array to check.
 	 * @return The corrected string array.
 	 */

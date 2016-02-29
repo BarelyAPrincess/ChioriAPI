@@ -38,7 +38,7 @@ public class ExceptionReport
 	}
 
 	/**
-	 * Registers an expected exception to be thrown by any subsystem of {@link ScriptingFactory}
+	 * Registers an expected exception to be thrown
 	 *
 	 * @param callback
 	 *             The Callback to call when such exception is thrown

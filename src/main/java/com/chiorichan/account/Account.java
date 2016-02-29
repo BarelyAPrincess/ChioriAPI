@@ -8,7 +8,6 @@
  */
 package com.chiorichan.account;
 
-import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.messaging.MessageChannel;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
@@ -27,7 +26,7 @@ public interface Account extends MessageSender, MessageChannel, ProviderChild
 	 * Returns the exact instance of AccountMeta
 	 *
 	 * @return {@link AccountInstance} instance of this Account
-	 * @throws AccountException
+	 * @throws com.chiorichan.account.lang.AccountException
 	 */
 	AccountInstance instance();
 
@@ -44,7 +43,7 @@ public interface Account extends MessageSender, MessageChannel, ProviderChild
 	 *
 	 * @return The associated {@link AccountLocation}
 	 */
-	public AccountLocation getLocation();
+	AccountLocation getLocation();
 
 	/**
 	 * Compiles a human readable display name, e.g., John Smith

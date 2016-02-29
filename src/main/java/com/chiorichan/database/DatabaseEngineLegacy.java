@@ -807,8 +807,8 @@ public class DatabaseEngineLegacy
 			options.put( "debug", "false" );
 
 		String limit = Integer.parseInt( options.get( "limit" ) ) > 0 ? " LIMIT " + Integer.parseInt( options.get( "offset" ) ) + ", " + Integer.parseInt( options.get( "limit" ) ) : "";
-		String orderby = options.get( "orderby" ) == "" ? "" : " ORDER BY " + options.get( "orderby" );
-		String groupby = options.get( "groupby" ) == "" ? "" : " GROUP BY " + options.get( "groupby" );
+		String orderby = "".equals( options.get( "orderby" ) ) ? "" : " ORDER BY " + options.get( "orderby" );
+		String groupby = "".equals( options.get( "groupby" ) ) ? "" : " GROUP BY " + options.get( "groupby" );
 
 		where = whr.isEmpty() ? "" : " WHERE " + whr;
 
@@ -927,8 +927,7 @@ public class DatabaseEngineLegacy
 	}
 
 	/**
-	 * Checks Query String for Attempted SQL Injection by Checking for Certain Commands After the First 6 Characters.
-	 * Warning: This Check Will Return True (or Positive) if You Check A Query That Inserts an Image.
+	 * Checks Query String for Attempted SQL Injection by Checking for Certain Commands After the First 6 Characters. Warning: This Check Will Return True (or Positive) if You Check A Query That Inserts an Image.
 	 */
 	public boolean sqlInjectionDetection( String query )
 	{

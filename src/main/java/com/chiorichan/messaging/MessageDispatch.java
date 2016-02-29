@@ -69,8 +69,6 @@ public class MessageDispatch
 	/**
 	 * Attempts to send specified object to every initialized Account
 	 *
-	 * @param excludedAcct
-	 *             Ignore this account when sending
 	 * @param objs
 	 *             The objects to send
 	 */

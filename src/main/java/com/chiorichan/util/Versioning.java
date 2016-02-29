@@ -91,7 +91,7 @@ public class Versioning
 	/**
 	 * Get the Java Binary
 	 *
-	 * @return
+	 * @return the Java Binary location
 	 */
 	public static String getJavaBinary()
 	{
@@ -221,7 +221,7 @@ public class Versioning
 	 * Indicates if the provided PID is still running, this method is setup to work with both Windows and Linux, might need tuning for other OS's
 	 *
 	 * @param pid
-	 * @return
+	 * @return is the provided PID running
 	 */
 	public static boolean isPIDRunning( int pid ) throws IOException
 	{

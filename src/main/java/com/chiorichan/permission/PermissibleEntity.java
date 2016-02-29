@@ -126,8 +126,10 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Adds timed permission with specified references and a lifetime to live
 	 *
-	 * @param permission
+	 * @param perm
 	 *             The Permission Node
+	 * @param val
+	 *             The custom permission value
 	 * @param refs
 	 *             The References
 	 * @param lifeTime
@@ -266,8 +268,7 @@ public abstract class PermissibleEntity implements ProviderChild
 	protected ChildPermission getChildPermissionRecursive( Permission perm, References refs )
 	{
 		/**
-		 * Used as a constant tracker for already checked groups, prevents infinite looping.
-		 * e.g., User -> Group1 -> Group2 -> Group3 -> Group1
+		 * Used as a constant tracker for already checked groups, prevents infinite looping. e.g., User -> Group1 -> Group2 -> Group3 -> Group1
 		 */
 		return getChildPermissionRecursive( new HashSet<PermissibleGroup>(), perm, refs );
 	}
@@ -354,8 +355,7 @@ public abstract class PermissibleEntity implements ProviderChild
 	}
 
 	/**
-	 * Return id of permission entity (Entity or Group)
-	 * User should be equal to User's id on the server
+	 * Return id of permission entity (Entity or Group) User should be equal to User's id on the server
 	 *
 	 * @return id
 	 */
@@ -482,9 +482,10 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Returns remaining lifetime of specified permission in ref
 	 *
-	 * @param permission
+	 * @param perm
 	 *             Name of permission
-	 * @param ref
+	 * @param refs
+	 *             The permission references
 	 * @return remaining lifetime in seconds of timed permission. 0 if permission is transient
 	 */
 	public int getTimedPermissionLifetime( Permission perm, References refs )
@@ -503,7 +504,7 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Return entity timed (temporary) permission
 	 *
-	 * @param ref
+	 * @param refs
 	 *             The Reference to check
 	 * @return Collection of timed permissions
 	 */
@@ -672,10 +673,12 @@ public abstract class PermissibleEntity implements ProviderChild
 	}
 
 	/**
-	 * Removes specified timed permission for ref
+	 * Removes specified timed permission for references
 	 *
-	 * @param permission
-	 * @param ref
+	 * @param group
+	 *             The PermissibleGroup
+	 * @param refs
+	 *             The references
 	 */
 	public void removeTimedGroup( PermissibleGroup group, References refs )
 	{

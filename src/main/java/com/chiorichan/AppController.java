@@ -1,7 +1,10 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Right Reserved.
  */
 package com.chiorichan;
 
@@ -159,7 +162,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 		}
 	}
 
-	public final static boolean isPrimaryThread()
+	public static boolean isPrimaryThread()
 	{
 		return Thread.currentThread().equals( primaryThread );
 	}
@@ -207,7 +210,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 			// Insert the provider into the collection, much more efficient big O than sort
 			int position = Collections.binarySearch( registered, registeredProvider );
 			if ( position < 0 )
-				registered.add( - ( position + 1 ), ( RegisteredServiceProvider<?, ServiceProvider> ) registeredProvider );
+				registered.add( -( position + 1 ), ( RegisteredServiceProvider<?, ServiceProvider> ) registeredProvider );
 			else
 				registered.add( position, ( RegisteredServiceProvider<?, ServiceProvider> ) registeredProvider );
 

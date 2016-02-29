@@ -24,20 +24,12 @@ import com.google.common.collect.Maps;
 public class EventHandlers extends AbstractList<RegisteredListener>
 {
 	private static final List<EventHandlers> handlers = Lists.newArrayList();
-	
-	private final EnumMap<EventPriority, List<RegisteredListener>> listeners = Maps.newEnumMap( EventPriority.class );
-	
-	public EventHandlers()
-	{
-		for ( EventPriority o : EventPriority.values() )
-			listeners.put( o, new ArrayList<RegisteredListener>() );
-	}
-	
+
 	/**
 	 * Get a specific creator's registered listeners associated with this handler list
-	 * 
-	 * @param creator
-	 *            the creator to get the listeners of
+	 *
+	 * @param source
+	 *            the source to get the listeners of
 	 * @return the list of registered listeners
 	 */
 	public static ArrayList<RegisteredListener> getRegisteredListeners( Object source )
@@ -56,7 +48,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 		}
 		return listeners;
 	}
-	
+
 	/**
 	 * Unregister all listeners from all handler lists.
 	 */
@@ -72,10 +64,10 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 				}
 		}
 	}
-	
+
 	/**
 	 * Unregister a specific creator's listeners from all handler lists.
-	 * 
+	 *
 	 * @param creator
 	 *            creator to unregister
 	 */
@@ -87,10 +79,10 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 				handler.unregister( creator );
 		}
 	}
-	
+
 	/**
 	 * Unregister a specific listener from all handler lists.
-	 * 
+	 *
 	 * @param listener
 	 *            listener to unregister
 	 */
@@ -102,13 +94,21 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 				handler.unregister( listener );
 		}
 	}
-	
+
+	private final EnumMap<EventPriority, List<RegisteredListener>> listeners = Maps.newEnumMap( EventPriority.class );
+
+	public EventHandlers()
+	{
+		for ( EventPriority o : EventPriority.values() )
+			listeners.put( o, new ArrayList<RegisteredListener>() );
+	}
+
 	@Override
 	public RegisteredListener get( int index )
 	{
 		return getRegisteredListeners().get( index );
 	}
-	
+
 	public List<RegisteredListener> getRegisteredListeners()
 	{
 		List<RegisteredListener> registeredListeners = Lists.newArrayList();
@@ -116,10 +116,10 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 			registeredListeners.addAll( listOfListeners );
 		return registeredListeners;
 	}
-	
+
 	/**
 	 * Register a new listener in this handler list
-	 * 
+	 *
 	 * @param listener
 	 *            listener to register
 	 */
@@ -129,10 +129,10 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 			throw new IllegalStateException( "This listener is already registered to priority " + listener.getPriority().toString() );
 		listeners.get( listener.getPriority() ).add( listener );
 	}
-	
+
 	/**
 	 * Register a collection of new listeners in this handler list
-	 * 
+	 *
 	 * @param listeners
 	 *            listeners to register
 	 */
@@ -141,16 +141,16 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 		for ( RegisteredListener listener : listeners )
 			register( listener );
 	}
-	
+
 	@Override
 	public int size()
 	{
 		return getRegisteredListeners().size();
 	}
-	
+
 	/**
 	 * Remove a specific listener from this handler
-	 * 
+	 *
 	 * @param listener
 	 *            listener to remove
 	 */
@@ -161,11 +161,11 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 				if ( i.next().getListener().equals( listener ) )
 					i.remove();
 	}
-	
+
 	/**
 	 * Remove a specific creator's listeners from this handler
-	 * 
-	 * @param creator
+	 *
+	 * @param source
 	 *            creator to remove
 	 */
 	public synchronized void unregister( Object source )
@@ -175,10 +175,10 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 				if ( i.next().getContext().getSource().equals( source ) )
 					i.remove();
 	}
-	
+
 	/**
 	 * Remove a listener from a specific order slot
-	 * 
+	 *
 	 * @param listener
 	 *            listener to remove
 	 */

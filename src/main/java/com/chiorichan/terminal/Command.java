@@ -61,9 +61,9 @@ public abstract class Command
 	/**
 	 * Executes the command, returning its success
 	 *
-	 * @param handler
+	 * @param sender
 	 *            Source object which is executing this command
-	 * @param commandLabel
+	 * @param command
 	 *            The alias of the command used
 	 * @param args
 	 *            All arguments passed to the command, split via ' '
@@ -201,7 +201,7 @@ public abstract class Command
 	 *
 	 * @param target
 	 *            InteractiveConsoleHandler to test
-	 * @return {@link true} if they can use it, otherwise false
+	 * @return {@value true} if they can use it, otherwise false
 	 */
 	public boolean testPermission( AccountAttachment target )
 	{

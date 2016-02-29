@@ -139,8 +139,7 @@ public class TaskManager implements ServiceManager
 	}
 
 	/**
-	 * Calls a method on the main thread and returns a Future object This task will be executed by the main server
-	 * thread.
+	 * Calls a method on the main thread and returns a Future object This task will be executed by the main server thread.
 	 * <p>
 	 * Note: The Future.get() methods must NOT be called from the main thread. Note2: There is at least an average of 10ms latency until the isDone() method returns true.
 	 *
@@ -204,7 +203,7 @@ public class TaskManager implements ServiceManager
 	 */
 	public void cancelTask( final int taskId )
 	{
-		if ( taskId <= 0 )
+		if ( taskId <= 0 || !runners.containsKey( taskId ) )
 			return;
 		cancelTask( runners.get( taskId ) );
 	}
@@ -224,6 +223,7 @@ public class TaskManager implements ServiceManager
 
 	public void cancelTask( Task task )
 	{
+		Validate.notNull( task );
 		int taskId = task.getTaskId();
 		if ( task != null )
 			task.cancel0();
@@ -542,8 +542,7 @@ public class TaskManager implements ServiceManager
 	}
 
 	/**
-	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety
-	 * of asynchronous tasks.</b> <br>
+	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety of asynchronous tasks.</b> <br>
 	 * <br>
 	 * Returns a task that will run asynchronously.
 	 *
@@ -583,17 +582,16 @@ public class TaskManager implements ServiceManager
 	}
 
 	/**
-	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety
-	 * of asynchronous tasks.</b> <br>
+	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety of asynchronous tasks.</b> <br>
 	 * <br>
 	 * Returns a task that will run asynchronously after the specified number of server ticks.
 	 *
 	 * @param creator
 	 *             the reference to the creator scheduling task
-	 * @param task
-	 *             the task to be run
 	 * @param delay
 	 *             the ticks to wait before running the task
+	 * @param runnable
+	 *             the task to be run
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException
 	 *              if creator is null
@@ -614,7 +612,7 @@ public class TaskManager implements ServiceManager
 	 *             the ticks to wait before running the task
 	 * @param period
 	 *             the ticks to wait between runs
-	 * @param task
+	 * @param runnable
 	 *             the task to be run
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException
@@ -642,11 +640,9 @@ public class TaskManager implements ServiceManager
 	}
 
 	/**
-	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety
-	 * of asynchronous tasks.</b> <br>
+	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety of asynchronous tasks.</b> <br>
 	 * <br>
-	 * Returns a task that will repeatedly run asynchronously until cancelled, starting after the specified number of
-	 * server ticks.
+	 * Returns a task that will repeatedly run asynchronously until cancelled, starting after the specified number of server ticks.
 	 *
 	 * @param creator
 	 *             the reference to the creator scheduling task
@@ -654,7 +650,7 @@ public class TaskManager implements ServiceManager
 	 *             the ticks to wait before running the task for the first time
 	 * @param period
 	 *             the ticks to wait between runs
-	 * @param task
+	 * @param runnable
 	 *             the task to be run
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException
@@ -717,8 +713,7 @@ public class TaskManager implements ServiceManager
 	}
 
 	/**
-	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety
-	 * of asynchronous tasks.</b> <br>
+	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety of asynchronous tasks.</b> <br>
 	 * <br>
 	 * Schedules a once off task to occur after a delay. This task will be executed by a thread managed by the scheduler.
 	 *
@@ -736,11 +731,9 @@ public class TaskManager implements ServiceManager
 	}
 
 	/**
-	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety
-	 * of asynchronous tasks.</b> <br>
+	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety of asynchronous tasks.</b> <br>
 	 * <br>
-	 * Schedules a once off task to occur as soon as possible. This task will be executed by a thread managed by the
-	 * scheduler.
+	 * Schedules a once off task to occur as soon as possible. This task will be executed by a thread managed by the scheduler.
 	 *
 	 * @param creator
 	 *             TaskCreator that owns the task
@@ -754,19 +747,18 @@ public class TaskManager implements ServiceManager
 	}
 
 	/**
-	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety
-	 * of asynchronous tasks.</b> <br>
+	 * <b>Asynchronous tasks should never access any API in Main. Great care should be taken to assure the thread-safety of asynchronous tasks.</b> <br>
 	 * <br>
 	 * Schedules a repeating task. This task will be executed by a thread managed by the scheduler.
 	 *
 	 * @param creator
 	 *             TaskCreator that owns the task
-	 * @param task
-	 *             Task to be executed
 	 * @param delay
 	 *             Delay in server ticks before executing first repeat
 	 * @param period
 	 *             Period in server ticks of the task
+	 * @param runnable
+	 *             Task to be executed
 	 * @return Task id number (-1 if scheduling failed), calling {@link #cancelTask(int)} will cancel it
 	 */
 	public int scheduleAsyncRepeatingTask( final TaskRegistrar creator, long delay, long period, final Runnable runnable )
@@ -809,12 +801,12 @@ public class TaskManager implements ServiceManager
 	 *
 	 * @param creator
 	 *             TaskCreator that owns the task
-	 * @param task
-	 *             Task to be executed
 	 * @param delay
 	 *             Delay in server ticks before executing first repeat
 	 * @param period
 	 *             Period in server ticks of the task
+	 * @param runnable
+	 *             Task to be executed
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public int scheduleSyncRepeatingTask( final TaskRegistrar creator, long delay, long period, final Runnable runnable )

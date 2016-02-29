@@ -24,77 +24,75 @@ public class AccountPreLoginEvent extends AccountEvent implements Conditional, C
 	private AccountDescriptiveReason reason = AccountDescriptiveReason.DEFAULT;
 	private final AccountPermissible via;
 	private final Object[] creds;
-	
+
 	public AccountPreLoginEvent( AccountMeta meta, AccountPermissible accountPermissible, String acctId, Object[] creds )
 	{
 		super( meta, accountPermissible );
 		via = accountPermissible;
 		this.creds = creds;
 	}
-	
+
 	@Override
 	public boolean conditional( RegisteredListener context ) throws EventException
 	{
 		// If the result returned is an error then we skip the remaining EventListeners
 		return reason.getReportingLevel().isSuccess();
 	}
-	
+
 	/**
-	 * Disallows the User from logging in, with the given reason
-	 * 
-	 * @param result
-	 *            New result for disallowing the User
-	 * @param message
-	 *            Kick message to display to the user
+	 * Notifies the user that log has failed with the given reason
+	 *
+	 * @param reason
+	 *            fail message to display to the user
 	 */
 	public void fail( final AccountDescriptiveReason reason )
 	{
 		this.reason = reason;
 	}
-	
+
 	public AccountPermissible getAttachment()
 	{
 		return via;
 	}
-	
+
 	public Object[] getCredentials()
 	{
 		return creds;
 	}
-	
+
 	/**
 	 * Gets the current result of the login, as an enum
-	 * 
+	 *
 	 * @return Current AccountResult of the login
 	 */
 	public AccountDescriptiveReason getDescriptiveReason()
 	{
 		return reason;
 	}
-	
+
 	@Override
 	public boolean isCancelled()
 	{
 		return reason == AccountDescriptiveReason.CANCELLED_BY_EVENT;
 	}
-	
+
 	@Override
 	public void setCancelled( boolean cancel )
 	{
 		reason = AccountDescriptiveReason.CANCELLED_BY_EVENT;
 	}
-	
+
 	/**
-	 * Sets the new result of the login, as an enum
-	 * 
-	 * @param result
-	 *            New result to set
+	 * Sets the new result of the login
+	 *
+	 * @param reason
+	 *            reason to set
 	 */
 	public void setDescriptiveReason( final AccountDescriptiveReason reason )
 	{
 		this.reason = reason;
 	}
-	
+
 	/**
 	 * Allows the User to log in
 	 */

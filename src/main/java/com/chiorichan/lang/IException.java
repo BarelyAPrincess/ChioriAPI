@@ -10,7 +10,7 @@ package com.chiorichan.lang;
 
 public interface IException
 {
-	public static void check( IException t )
+	static void check( IException t )
 	{
 		if ( ! ( t instanceof Throwable ) )
 			throw new IllegalArgumentException( "IException must be implemented by java.lang.Throwable only, this is a serious programming bug!" );
