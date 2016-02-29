@@ -2,7 +2,7 @@ sudo: false
 language: java
 jdk: oraclejdk8
 install:
-- gradle clean writePropertiesFile shadowJar javadocArchive sourcesArchive
+- gradle clean writeApiPropertiesFile javadocArchive sourcesArchive
 script:
 - gradle build
 after_success:
