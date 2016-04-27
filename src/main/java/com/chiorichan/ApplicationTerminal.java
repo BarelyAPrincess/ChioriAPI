@@ -8,6 +8,8 @@
  */
 package com.chiorichan;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Scanner;
 
@@ -28,7 +30,10 @@ import com.chiorichan.logger.LogSource;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.services.AppManager;
+import com.chiorichan.services.ServiceManager;
+import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.util.Versioning;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -244,6 +249,35 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	public void setVariable( String key, String value )
 	{
 		// TODO New Empty Method
+	}
+
+	public void showBanner()
+	{
+		try
+		{
+			InputStream is = null;
+			try
+			{
+				is = getClass().getClassLoader().getResourceAsStream( "com/chiorichan/banner.txt" );
+
+				String[] banner = new String( FileFunc.inputStream2Bytes( is ) ).split( "\\n" );
+
+				for ( String l : banner )
+					Log.get().info( EnumColor.GOLD + l );
+
+				Log.get().info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + "Starting " + Versioning.getProduct() + " Version " + Versioning.getVersion() );
+				Log.get().info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + Versioning.getCopyright() );
+			}
+			finally
+			{
+				if ( is != null )
+					is.close();
+			}
+		}
+		catch ( IOException e )
+		{
+
+		}
 	}
 
 	@Override

@@ -19,10 +19,10 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 
-import com.chiorichan.AppController;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissionManager;
+import com.chiorichan.services.AppManager;
 import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.SecureFunc;
 import com.google.common.base.Joiner;
@@ -134,7 +134,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	public PermissibleEntity getEntity()
 	{
 		if ( permissibleEntity == null || permissibleEntity.get() == null )
-			permissibleEntity = new WeakReference<PermissibleEntity>( ( ( PermissionManager ) AppController.getService( PermissibleEntity.class ) ).getEntity( getId() ) );
+			permissibleEntity = new WeakReference<PermissibleEntity>( ( ( PermissionManager ) AppManager.getService( PermissibleEntity.class ) ).getEntity( getId() ) );
 
 		return permissibleEntity.get();
 	}
@@ -172,7 +172,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	@Override
 	public AccountLocation getLocation()
 	{
-		LocationService service = AppController.getService( AccountLocation.class );
+		LocationService service = AppManager.getService( AccountLocation.class );
 		if ( service == null )
 			return null;
 		return service.getLocation( locId );

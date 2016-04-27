@@ -104,7 +104,7 @@ public class UtilityCommands extends PermissionBaseCommand
 		if ( args.get( "value" ) != null )
 		{
 			AppController.config().set( nodeName, parseValue( args.get( "value" ) ) );
-			AppController.config().saveConfig();
+			AppController.config().save();
 		}
 
 		Object node = AppController.config().get( nodeName );

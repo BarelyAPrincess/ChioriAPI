@@ -45,7 +45,7 @@ public final class AccountManager extends AccountEvents
 			AppController.handleExceptions( e );
 		}
 	}
-	
+
 	public static Log getLogger()
 	{
 		return Log.get( instance() );
@@ -255,7 +255,7 @@ public final class AccountManager extends AccountEvents
 		return accounts.toSet();
 	}
 
-	public Set<AccountMeta> getAccountsByCollective( AccountLocation collective )
+	public Set<AccountMeta> getAccountsByLocation( AccountLocation collective )
 	{
 		Validate.notNull( collective );
 		Set<AccountMeta> results = Sets.newHashSet();
@@ -266,10 +266,10 @@ public final class AccountManager extends AccountEvents
 		return results;
 	}
 
-	public Set<AccountMeta> getAccountsByCollective( String locationId )
+	public Set<AccountMeta> getAccountsByLocation( String locationId )
 	{
-		LocationService service = AppController.getService( AccountLocation.class );
-		return getAccountsByCollective( service.getLocation( locationId ) );
+		LocationService service = AppManager.getService( AccountLocation.class );
+		return getAccountsByLocation( service.getLocation( locationId ) );
 	}
 
 	public AccountMeta getAccountWithException( String acctId ) throws AccountException

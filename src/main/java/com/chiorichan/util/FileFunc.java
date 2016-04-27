@@ -44,7 +44,10 @@ import org.apache.commons.lang3.Validate;
 import com.chiorichan.AppController;
 import com.chiorichan.AppLoader;
 import com.chiorichan.lang.EnumColor;
+import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.libraries.Libraries;
+import com.chiorichan.logger.Log;
 import com.chiorichan.plugin.PluginManager;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -57,27 +60,6 @@ import com.google.common.io.ByteStreams;
  */
 public class FileFunc
 {
-	public enum DirectoryInfo
-	{
-		CREATE_FAILED, DELETE_FAILED, DIRECTORY_HEALTHY, PERMISSION_FAILED;
-
-		public String getDescription( File file )
-		{
-			switch ( this )
-			{
-				case CREATE_FAILED:
-					return String.format( "The directory '%s' does not exist, we tried to create the directory but failed for an unknown reason.", file.getAbsolutePath() );
-				case DELETE_FAILED:
-					return String.format( "There was a problem trying to delete the directory '%s'.", file.getAbsolutePath() );
-				case DIRECTORY_HEALTHY:
-					return String.format( "The directory '%s' does exist and is accessible.", file.getAbsolutePath() );
-				case PERMISSION_FAILED:
-					return String.format( "We have no permission to either create, delete or access the directory '%s'.", file.getAbsolutePath() );
-			}
-			return null;
-		}
-	}
-
 	static class LibraryPath
 	{
 		private List<String> libPath;
@@ -519,35 +501,6 @@ public class FileFunc
 		return true;
 	}
 
-	public static DirectoryInfo directoryHealthCheck( File file )
-	{
-		Validate.notNull( file );
-
-		if ( file.isFile() )
-			if ( !file.delete() )
-				return DirectoryInfo.DELETE_FAILED;
-
-		if ( file.getParentFile() != null && file.getParentFile().exists() && !file.getParentFile().canWrite() )
-			return DirectoryInfo.PERMISSION_FAILED;
-
-		if ( !file.exists() )
-			if ( !file.mkdirs() )
-				return DirectoryInfo.CREATE_FAILED;
-
-		if ( !file.canWrite() )
-			return DirectoryInfo.PERMISSION_FAILED;
-
-		return DirectoryInfo.DIRECTORY_HEALTHY;
-	}
-
-	public static void directoryHealthCheckWithException( File file ) throws IOException
-	{
-		DirectoryInfo info = directoryHealthCheck( file );
-
-		if ( info != DirectoryInfo.DIRECTORY_HEALTHY )
-			throw new IOException( info.getDescription( file ) );
-	}
-
 	public static void extractLibraries( File jarFile, File baseDir )
 	{
 		try
@@ -783,7 +736,10 @@ public class FileFunc
 
 	public static boolean extractZipResource( String path, File dest, Class<?> clz ) throws IOException
 	{
-		File temp = new File( AppController.config().getCacheDirectory(), "temp.zip" );
+		File cache = AppController.config().getDirectoryCache();
+		if ( !cache.exists() )
+			cache.mkdirs();
+		File temp = new File( cache, "temp.zip" );
 		putResource( clz, path, temp );
 
 		ZipFile zip = new ZipFile( temp );
@@ -822,19 +778,6 @@ public class FileFunc
 	private static String fileExtension( String fileName )
 	{
 		return StringFunc.regexCapture( fileName, ".*\\.(.*)$" );
-	}
-
-	public static File fileHealthCheck( File file ) throws IOException
-	{
-		Validate.notNull( file );
-
-		if ( file.exists() && file.isDirectory() )
-			file = new File( file, "default" );
-
-		if ( !file.exists() )
-			file.createNewFile();
-
-		return file;
 	}
 
 	public static void gzFile( File source ) throws IOException
@@ -921,29 +864,6 @@ public class FileFunc
 		return output.replaceAll( "\\.", PATH_SEPERATOR );
 	}
 
-	public static void patchDirectory( File dir )
-	{
-		patchDirectory( dir, true, true );
-	}
-
-	public static void patchDirectory( File dir, boolean writable, boolean readable )
-	{
-		if ( !dir.isDirectory() )
-			dir.delete();
-
-		if ( !dir.exists() )
-		{
-			dir.mkdirs();
-			dir.mkdir();
-		}
-
-		if ( !dir.canWrite() )
-			dir.setWritable( writable );
-
-		if ( !dir.canRead() )
-			dir.setWritable( readable );
-	}
-
 	public static void putResource( Class<?> clz, String resource, File file ) throws IOException
 	{
 		try
@@ -1022,7 +942,7 @@ public class FileFunc
 	{
 		if ( file == null )
 			return null;
-		String serverRoot = AppController.config().getRootDirectory().getAbsolutePath();
+		String serverRoot = AppController.config().getDirectory().getAbsolutePath();
 		if ( file.getAbsolutePath().startsWith( serverRoot ) )
 			return file.getAbsolutePath().substring( serverRoot.length() + 1 );
 		else
@@ -1042,6 +962,34 @@ public class FileFunc
 			return null;
 
 		return new String( inputStream2Bytes( is ), "UTF-8" );
+	}
+
+	public static boolean setDirectoryAccess( File file )
+	{
+		if ( file.isDirectory() && file.canRead() && file.canWrite() )
+			Log.get().fine( "This application has read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
+		else
+			try
+			{
+				if ( file.exists() && file.isFile() )
+					Validate.isTrue( file.delete() );
+				Validate.isTrue( file.mkdirs() );
+				Validate.isTrue( file.setWritable( true ) );
+				Validate.isTrue( file.setReadable( true ) );
+
+				Log.get().fine( "Setting read and write access for directory \"" + FileFunc.relPath( file ) + "\" was successful!" );
+			}
+			catch ( IllegalArgumentException e )
+			{
+				return false;
+			}
+		return true;
+	}
+
+	public static void setDirectoryAccessWithException( File file )
+	{
+		if ( !setDirectoryAccess( file ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "Experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
 	}
 
 	/**

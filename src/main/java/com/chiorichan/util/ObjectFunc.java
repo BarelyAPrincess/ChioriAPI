@@ -280,8 +280,18 @@ public class ObjectFunc<T>
 	{
 		try
 		{
-			Constructor<T> constructor = clz.getConstructor();
-			return constructor.newInstance();
+			List<Class<?>> argClasses = new ArrayList<Class<?>>()
+			{
+				{
+					for ( Object o : args )
+						add( o.getClass() );
+				}
+			};
+
+			// Constructor<T> constructor = clz.getConstructor();
+			Constructor<T> constructor = clz.getDeclaredConstructor( argClasses.toArray( new Class[0] ) );
+			constructor.setAccessible( true );
+			return constructor.newInstance( args );
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e )
 		{

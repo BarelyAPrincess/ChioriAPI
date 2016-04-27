@@ -8,8 +8,6 @@
  */
 package com.chiorichan.lang;
 
-
-
 public abstract class ApplicationException extends Exception implements IException
 {
 	protected final ReportingLevel level;
@@ -29,24 +27,26 @@ public abstract class ApplicationException extends Exception implements IExcepti
 	{
 		super( message, cause );
 		this.level = level;
-		if ( cause instanceof ApplicationException )
-			throw new IllegalArgumentException( "The cause argument can't be of it's own type." );
+
+		if ( cause.getClass().isAssignableFrom( getClass() ) )
+			throw new IllegalArgumentException( "The cause argument can't be same class, cause was " + cause.getClass() + " and this is " + getClass() + "." );
 	}
 
 	public ApplicationException( ReportingLevel level, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace )
 	{
 		super( message, cause, enableSuppression, writableStackTrace );
 		this.level = level;
-		if ( cause instanceof ApplicationException )
-			throw new IllegalArgumentException( "The cause argument can't be of it's own type." );
+		if ( cause.getClass().isAssignableFrom( getClass() ) )
+			throw new IllegalArgumentException( "The cause argument can't be same class, cause was " + cause.getClass() + " and this is " + getClass() + "." );
 	}
 
 	public ApplicationException( ReportingLevel level, Throwable cause )
 	{
 		super( cause );
 		this.level = level;
-		if ( cause instanceof ApplicationException )
-			throw new IllegalArgumentException( "The cause argument can't be of it's own type." );
+
+		if ( cause.getClass().isAssignableFrom( getClass() ) )
+			throw new IllegalArgumentException( "The cause argument can't be same class, cause was " + cause.getClass() + " and this is " + getClass() + "." );
 	}
 
 	@Override

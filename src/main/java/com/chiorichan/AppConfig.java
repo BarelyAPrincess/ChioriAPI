@@ -1,10 +1,7 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
  */
 package com.chiorichan;
 
@@ -13,10 +10,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.configuration.Configuration;
@@ -29,24 +28,79 @@ import com.chiorichan.datastore.sql.bases.H2SQLDatastore;
 import com.chiorichan.datastore.sql.bases.MySQLDatastore;
 import com.chiorichan.datastore.sql.bases.SQLDatastore;
 import com.chiorichan.datastore.sql.bases.SQLiteDatastore;
+import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.lang.StartupException;
+import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.logger.Log;
 import com.chiorichan.tasks.TaskManager;
+import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Ticks;
 import com.chiorichan.util.FileFunc;
+import com.chiorichan.util.Versioning;
 
-public class AppConfig implements Configuration
+public class AppConfig implements Configuration, TaskRegistrar
 {
-	private static String clientId;
-	private static File cacheDirectory;
-	private static File tmpDirectory;
-	private static File logDirectory;
 	private static File lockFile;
 
+	static
+	{
+		try
+		{
+			lockFile = new File( getApplicationJar() + ".lck" );
+
+			// TODO check that the enclosed lock PID number is currently running
+			if ( lockFile.exists() )
+			{
+				int pid = Integer.parseInt( FileUtils.readFileToString( lockFile ).trim() );
+
+				try
+				{
+					if ( Versioning.isPIDRunning( pid ) )
+						throw new StartupException( "We have detected the server jar is already running. Please terminate process ID " + pid + " or disregard this notice and try again." );
+				}
+				catch ( IOException e )
+				{
+					throw new StartupException( "We have detected the server jar is already running. We were unable to verify if the PID " + pid + " is still running." );
+				}
+			}
+
+			FileUtils.writeStringToFile( lockFile, Versioning.getProcessID() );
+			lockFile.deleteOnExit();
+		}
+		catch ( IOException e )
+		{
+			throw new StartupException( "We had a problem locking the running server jar", e );
+		}
+
+		lockFile.deleteOnExit();
+	}
+
+	/**
+	 * @return The server jar file
+	 */
+	public static File getApplicationJar()
+	{
+		try
+		{
+			return new File( URLDecoder.decode( AppLoader.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8" ) );
+		}
+		catch ( UnsupportedEncodingException e )
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private String clientId;
 	private SQLDatastore fwDatabase = null;
-
 	private File loadedLocation = null;
-
 	private YamlConfiguration yaml = new YamlConfiguration();
+	private Map<String, File> directories = new HashMap<>();
+
+	protected AppConfig()
+	{
+
+	}
 
 	@Override
 	public void addDefault( String path, Object value )
@@ -84,7 +138,14 @@ public class AppConfig implements Configuration
 
 	public void clearCache( long keepHistory )
 	{
-		clearCache( getTempFileDirectory(), keepHistory );
+		try
+		{
+			clearCache( getDirectoryCache(), keepHistory );
+		}
+		catch ( IllegalStateException e )
+		{
+			// Ignore!
+		}
 	}
 
 	@Override
@@ -105,7 +166,7 @@ public class AppConfig implements Configuration
 		return yaml.createSection( path, map );
 	}
 
-	protected File file()
+	public File file()
 	{
 		return loadedLocation;
 	}
@@ -120,22 +181,6 @@ public class AppConfig implements Configuration
 	public Object get( String path, Object def )
 	{
 		return yaml.get( path, def );
-	}
-
-	/**
-	 * @return The server jar file
-	 */
-	public File getApplicationJar()
-	{
-		try
-		{
-			return new File( URLDecoder.decode( AppLoader.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8" ) );
-		}
-		catch ( UnsupportedEncodingException e )
-		{
-			e.printStackTrace();
-			return null;
-		}
 	}
 
 	@Override
@@ -172,13 +217,6 @@ public class AppConfig implements Configuration
 	public List<Byte> getByteList( String path )
 	{
 		return yaml.getByteList( path );
-	}
-
-	public File getCacheDirectory()
-	{
-		if ( cacheDirectory == null )
-			cacheDirectory = getDirectory( "cache", "temp" );
-		return cacheDirectory;
 	}
 
 	public String getClientId()
@@ -240,10 +278,77 @@ public class AppConfig implements Configuration
 		return yaml.getDefaultSection();
 	}
 
+	public File getDirectory()
+	{
+		return getApplicationJar().getParentFile();
+	}
+
 	public File getDirectory( String configKey, String defPath )
 	{
-		String dir = AppLoader.options().has( configKey ) ? ( String ) AppLoader.options().valueOf( "plugins" ) : AppController.config().getString( "directories." + configKey, "plugins" );
-		return FileFunc.isAbsolute( dir ) ? new File( dir ) : new File( getRootDirectory(), dir );
+		return getDirectory( configKey, defPath, false, false );
+	}
+
+	public File getDirectory( String configKey, String defPath, boolean forceReload )
+	{
+		return getDirectory( configKey, defPath, forceReload, true );
+	}
+
+	public File getDirectory( String configKey, String defPath, boolean forceReload, boolean directoryCheck )
+	{
+		if ( !directories.containsKey( configKey ) || forceReload )
+		{
+			String dir;
+			if ( AppLoader.options().has( configKey + "-dir" ) )
+				dir = ( String ) AppLoader.options().valueOf( configKey + "-dir" );
+			else if ( isString( "directories." + configKey ) )
+				dir = getString( "directories." + configKey, defPath );
+			else
+			{
+				set( "directories." + configKey, defPath );
+				dir = defPath;
+			}
+
+			File file = FileFunc.isAbsolute( dir ) ? new File( dir ) : new File( getDirectory(), dir );
+
+			if ( directoryCheck )
+				if ( !FileFunc.setDirectoryAccess( file ) )
+					throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
+
+			directories.put( configKey, file );
+		}
+
+		return directories.get( configKey );
+	}
+
+	public File getDirectoryCache()
+	{
+		return getDirectory( "cache", "cache" );
+	}
+
+	public File getDirectoryCache( String subdir )
+	{
+		File file = new File( getDirectoryCache(), subdir );
+		if ( !FileFunc.setDirectoryAccess( file ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
+		return file;
+	}
+
+	public File getDirectoryLogs()
+	{
+		return getDirectory( "logs", "logs" );
+	}
+
+	/**
+	 * @return The plugins directory
+	 */
+	public File getDirectoryPlugins()
+	{
+		return getDirectory( "plugins", "plugins" );
+	}
+
+	public File getDirectoryUpdates()
+	{
+		return getDirectory( "updates", "plugins/updates" );
 	}
 
 	@Override
@@ -312,14 +417,6 @@ public class AppConfig implements Configuration
 		return yaml.getList( path, def );
 	}
 
-	public File getLogsFileDirectory()
-	{
-		if ( logDirectory == null )
-			throw new IllegalStateException( "Logs directory appears to be null, was getLogsFileDirectory() called before the server finished inialization?" );
-
-		return logDirectory;
-	}
-
 	@Override
 	public long getLong( String path )
 	{
@@ -362,11 +459,6 @@ public class AppConfig implements Configuration
 		return yaml.getRoot();
 	}
 
-	public File getRootDirectory()
-	{
-		return getApplicationJar().getParentFile();
-	}
-
 	@Override
 	public List<Short> getShortList( String path )
 	{
@@ -395,25 +487,6 @@ public class AppConfig implements Configuration
 	public List<String> getStringList( String path, List<String> def )
 	{
 		return yaml.getStringList( path, def );
-	}
-
-	public File getTempFileDirectory()
-	{
-		if ( tmpDirectory == null )
-			throw new IllegalStateException( "Temp directory appears to be null, was getTempFileDirectory() called before the server finished inialization?" );
-
-		FileFunc.patchDirectory( tmpDirectory );
-
-		return tmpDirectory;
-	}
-
-	public File getTempFileDirectory( String subdir )
-	{
-		File file = new File( getTempFileDirectory(), subdir );
-
-		FileFunc.patchDirectory( file );
-
-		return file;
 	}
 
 	@Override
@@ -492,6 +565,12 @@ public class AppConfig implements Configuration
 	}
 
 	@Override
+	public boolean isEnabled()
+	{
+		return true;
+	}
+
+	@Override
 	public boolean isInt( String path )
 	{
 		return yaml.isInt( path );
@@ -531,14 +610,15 @@ public class AppConfig implements Configuration
 	 */
 	protected void loadConfig( File location, String resourcePath )
 	{
-		yaml = YamlConfiguration.loadConfiguration( location );
-		loadedLocation = location;
-	}
+		if ( location == null )
+			throw new StartupException( "The configuration file location is null, did you define the --config argument?" );
 
-	public File logsDirectory()
-	{
-		// TODO Auto-generated method stub
-		return null;
+		yaml = YamlConfiguration.loadConfiguration( location );
+		yaml.options().copyDefaults( true );
+		yaml.setDefaults( YamlConfiguration.loadConfiguration( getClass().getClassLoader().getResourceAsStream( resourcePath ) ) );
+
+		loadedLocation = location;
+		directories.clear();
 	}
 
 	@Override
@@ -547,7 +627,7 @@ public class AppConfig implements Configuration
 		return yaml.options();
 	}
 
-	public void reloadConfig()
+	public void reload()
 	{
 		try
 		{
@@ -559,12 +639,12 @@ public class AppConfig implements Configuration
 		}
 	}
 
-	public void saveConfig()
+	public void save()
 	{
 		// TODO Targeted key path saves
 		// TODO Save only changed values, so manual edits are not overridden
 
-		TaskManager.instance().runTaskWithTimeout( AppController.instance, Ticks.MINUTE, new Runnable()
+		TaskManager.instance().runTaskWithTimeout( this, Ticks.MINUTE, new Runnable()
 		{
 			@Override
 			public void run()

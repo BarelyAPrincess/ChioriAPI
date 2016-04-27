@@ -103,7 +103,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 
 	public void initDaemon( String childArgs, OptionSet options )
 	{
-		if ( !AppController.config().getApplicationJar().getName().endsWith( ".jar" ) )
+		if ( !AppConfig.getApplicationJar().getName().endsWith( ".jar" ) )
 			throw new IllegalStateException( "Watchdog process can only run from compiled jar files" );
 
 		log( "Starting " + Versioning.getProduct() + " with Watchdog protection" );
@@ -121,7 +121,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 			commands.addAll( Arrays.asList( childArgs.trim().split( " " ) ) );
 
 		commands.add( "-jar" );
-		commands.add( AppController.config().getApplicationJar().getAbsolutePath() );
+		commands.add( AppConfig.getApplicationJar().getAbsolutePath() );
 
 		for ( Entry<OptionSpec<?>, List<?>> e : options.asMap().entrySet() )
 		{

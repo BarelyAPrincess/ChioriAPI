@@ -129,7 +129,7 @@ public class SQLGroup extends PermissibleGroup
 			return;
 
 		if ( isDebug() )
-			PermissionManager.getLogger().info( EnumColor.YELLOW + "Group " + getId() + " being saved to backend" );
+			PermissionManager.getLogger().info( EnumColor.YELLOW + "Group " + getId() + " saved to backend" );
 
 		try
 		{

@@ -371,7 +371,7 @@ public class PluginInformation
 		}
 		catch ( IllegalArgumentException | NullPointerException e )
 		{
-			return RunLevel.INITIALIZED;
+			return RunLevel.STARTUP;
 		}
 	}
 

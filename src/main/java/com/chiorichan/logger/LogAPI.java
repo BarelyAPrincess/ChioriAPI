@@ -12,6 +12,8 @@ import java.util.logging.Level;
 
 public interface LogAPI
 {
+	void dev( Object... var1 );
+
 	void debug( Object... var1 );
 
 	void fine( String var1 );

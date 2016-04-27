@@ -11,7 +11,6 @@ package com.chiorichan.datastore;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.chiorichan.ServiceManager;
 import com.chiorichan.lang.ExceptionCallback;
 import com.chiorichan.lang.ExceptionContext;
 import com.chiorichan.lang.ExceptionReport;
@@ -19,6 +18,7 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.logger.Log;
 import com.chiorichan.logger.LogSource;
 import com.chiorichan.services.AppManager;
+import com.chiorichan.services.ServiceManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.google.common.collect.Lists;
 

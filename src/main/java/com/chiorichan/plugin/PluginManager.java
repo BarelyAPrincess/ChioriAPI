@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppController;
-import com.chiorichan.ServiceManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.EventHandlers;
@@ -48,6 +47,7 @@ import com.chiorichan.plugin.loader.Plugin;
 import com.chiorichan.plugin.loader.PluginClassLoader;
 import com.chiorichan.plugin.loader.PluginLoader;
 import com.chiorichan.services.AppManager;
+import com.chiorichan.services.ServiceManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.util.FileFunc;
@@ -55,24 +55,9 @@ import com.google.common.collect.Maps;
 
 public class PluginManager implements Listener, ServiceManager, EventRegistrar, TaskRegistrar
 {
-	private static File updateDirectory = null;
-
 	public static Log getLogger()
 	{
 		return AppManager.manager( PluginManager.class ).getLogger();
-	}
-
-	/**
-	 * @return The plugins directory
-	 */
-	public static File getPluginsDirectory()
-	{
-		return AppController.config().getDirectory( "plugins", "plugins" );
-	}
-
-	public static File getUpdateDirectory()
-	{
-		return AppController.config().getDirectory( "update", "plugins/update" );
 	}
 
 	public static PluginManager instance()
@@ -100,10 +85,10 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	private void checkUpdate( File file )
 	{
-		if ( updateDirectory == null || !updateDirectory.isDirectory() )
+		if ( AppController.config().getDirectoryUpdates() == null || !AppController.config().getDirectoryUpdates().isDirectory() )
 			return;
 
-		File updateFile = new File( updateDirectory, file.getName() );
+		File updateFile = new File( AppController.config().getDirectoryUpdates(), file.getName() );
 		if ( updateFile.isFile() && FileFunc.copy( updateFile, file ) )
 			updateFile.delete();
 	}
@@ -373,7 +358,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		return result;
 	}
 
-	private void loadPlugin( Plugin plugin )
+	protected void loadPlugin( Plugin plugin )
 	{
 		try
 		{
@@ -390,8 +375,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		registerInterface( JavaPluginLoader.class );
 		// registerInterface( GroovyPluginLoader.class );
 
-		File pluginFolder = getPluginsDirectory();
-
+		File pluginFolder = AppController.config().getDirectoryPlugins();
 		if ( pluginFolder.exists() )
 		{
 			Plugin[] plugins = loadPlugins( pluginFolder );
@@ -425,9 +409,6 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 		List<Plugin> result = new ArrayList<Plugin>();
 		Set<Pattern> filters = fileAssociations.keySet();
-
-		if ( updateDirectory == null )
-			updateDirectory = getUpdateDirectory();
 
 		Map<String, File> plugins = new HashMap<String, File>();
 		Map<String, Collection<MavenReference>> libraries = Maps.newHashMap();
@@ -650,7 +631,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 		for ( Plugin plugin : plugins )
 			if ( !plugin.isEnabled() && plugin.getDescription().getLoad() == level )
-				loadPlugin( plugin );
+				enablePlugin( plugin );
 	}
 
 	/**

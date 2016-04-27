@@ -19,10 +19,10 @@ import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppController;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.lang.StartupException;
+import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.plugin.PluginManager;
 import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.FileFunc.DirectoryInfo;
 import com.chiorichan.util.NetworkFunc;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -45,12 +45,11 @@ public class Libraries implements LibrarySource
 		LIBRARY_DIR = new File( AppController.config().getString( "advanced.libraries.libPath", "libraries" ) );
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 
-		DirectoryInfo result = FileFunc.directoryHealthCheck( LIBRARY_DIR );
-		if ( result != DirectoryInfo.DIRECTORY_HEALTHY )
-			throw new StartupException( result.getDescription( LIBRARY_DIR ) );
-		result = FileFunc.directoryHealthCheck( INCLUDES_DIR );
-		if ( result != DirectoryInfo.DIRECTORY_HEALTHY )
-			throw new StartupException( result.getDescription( INCLUDES_DIR ) );
+		if ( !FileFunc.setDirectoryAccess( LIBRARY_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( LIBRARY_DIR ) + "\"!" );
+
+		if ( !FileFunc.setDirectoryAccess( INCLUDES_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( INCLUDES_DIR ) + "\"!" );
 
 		addLoaded( "org.fusesource.jansi:jansi:1.11" );
 		addLoaded( "net.sf.jopt-simple:jopt-simple:4.7" );

@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -27,6 +29,7 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.chiorichan.account.AccountManager;
+import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
@@ -36,6 +39,7 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.RunLevel;
 import com.chiorichan.lang.StartupAbortException;
 import com.chiorichan.lang.StartupException;
+import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.logger.DefaultLogFormatter;
 import com.chiorichan.logger.Log;
 import com.chiorichan.logger.LoggerOutputStream;
@@ -58,7 +62,15 @@ public abstract class AppLoader implements Listener
 	private static OptionSet options;
 	private static boolean isRunning;
 	public static long startTime = System.currentTimeMillis();
+	private static List<AppLoader> instances = new ArrayList<>();
 	private AppController controller;
+
+	public static List<AppLoader> instances()
+	{
+		if ( instances.size() == 0 )
+			throw new StartupException( "There are no initalized application instances!" );
+		return Collections.unmodifiableList( instances );
+	}
 
 	public static OptionSet options()
 	{
@@ -82,6 +94,11 @@ public abstract class AppLoader implements Listener
 		return runlevel.getRunLevel();
 	}
 
+	public AppController controller()
+	{
+		return controller;
+	}
+
 	public static boolean isRunning()
 	{
 		return isRunning;
@@ -102,15 +119,32 @@ public abstract class AppLoader implements Listener
 	{
 		try
 		{
+			ConfigurationSection logs = AppController.config().getConfigurationSection( "logs.loggers", true );
+
+			if ( logs != null )
+				for ( String key : logs.getKeys( false ) )
+				{
+					ConfigurationSection logger = logs.getConfigurationSection( key );
+
+					switch ( logger.getString( "type", "file" ) )
+					{
+						case "file":
+							if ( logger.getBoolean( "enabled", true ) )
+								Log.addFileHandler( key, logger.getBoolean( "color", false ), logger.getInt( "archiveLimit", 3 ), Level.parse( logger.getString( "level", "INFO" ).toUpperCase() ) );
+							break;
+						default:
+							Log.get().warning( "We had no logger for type '" + logger.getString( "type" ) + "'" );
+					}
+				}
+
 			ReportingLevel.enableErrorLevelOnly( ReportingLevel.parse( AppController.config().getString( "server.errorReporting", "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
 
-			AppManager.manager( TaskManager.class ).init();
+			// AppManager.manager( TaskManager.class ).init();
 			EventBus.instance().registerEvents( this, this );
 
 			runLevel( RunLevel.INITIALIZED );
 
 			AppController.primaryThread.start();
-
 			AppManager.manager( PluginManager.class ).init();
 
 			runLevel( RunLevel.INITIALIZATION );
@@ -159,8 +193,11 @@ public abstract class AppLoader implements Listener
 					{
 						// TODO This needs refinement and an API
 						acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
-						acceptsAll( Arrays.asList( "c", "config", "b", "settings" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "server.yaml" ) ).describedAs( "Yml file" );
-						acceptsAll( Arrays.asList( "p", "plugins" ), "Plugin directory to use" ).withRequiredArg().ofType( String.class ).defaultsTo( "plugins" ).describedAs( "Plugin directory" );
+						acceptsAll( Arrays.asList( "config" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "server.yaml" ) ).describedAs( "Yml file" );
+						acceptsAll( Arrays.asList( "plugins-dir" ), "Specify plugin directory" ).withRequiredArg().ofType( String.class );
+						acceptsAll( Arrays.asList( "updates-dir" ), "Specify updates directory" ).withRequiredArg().ofType( String.class );
+						acceptsAll( Arrays.asList( "cache-dir" ), "Specify cache directory" ).withRequiredArg().ofType( String.class );
+						acceptsAll( Arrays.asList( "logs-dir" ), "Specify logs directory" ).withRequiredArg().ofType( String.class );
 						acceptsAll( Arrays.asList( "query-disable" ), "Disable the internal TCP Server" );
 						acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
 						acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
@@ -177,7 +214,8 @@ public abstract class AppLoader implements Listener
 				}
 				catch ( NoSuchMethodException e )
 				{
-					// Ignore!
+					if ( Versioning.isDevelopment() )
+						Log.get( AppController.class.getName() ).dev( "The class \"" + loaderClass.getName() + "\" has no populateOptionParser() method!" );
 				}
 
 				try
@@ -186,15 +224,15 @@ public abstract class AppLoader implements Listener
 				}
 				catch ( joptsimple.OptionException ex )
 				{
-					Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, ex.getLocalizedMessage() );
+					Log.get( AppController.class.getName() ).log( Level.SEVERE, ex.getLocalizedMessage() );
 				}
 
 				ConsoleHandler consoleHandler = new ConsoleHandler();
-				consoleHandler.setFormatter( new DefaultLogFormatter( !options.has( "nocolor" ) ) ); // Make a config option for nocolor
+				consoleHandler.setFormatter( new DefaultLogFormatter( !options.has( "nocolor" ) ) );
 				Log.addHandler( consoleHandler );
 
-				System.setOut( new PrintStream( new LoggerOutputStream( Log.get( "SysOut" ).getLogger(), Level.INFO ), true ) );
-				System.setErr( new PrintStream( new LoggerOutputStream( Log.get( "SysErr" ).getLogger(), Level.SEVERE ), true ) );
+				System.setOut( new PrintStream( new LoggerOutputStream( Log.get( "SysOut" ), Level.INFO ), true ) );
+				System.setErr( new PrintStream( new LoggerOutputStream( Log.get( "SysErr" ), Level.SEVERE ), true ) );
 
 				if ( options == null || options.has( "?" ) )
 					try
@@ -224,9 +262,12 @@ public abstract class AppLoader implements Listener
 
 				if ( isRunning )
 				{
+					AppManager.manager( TaskManager.class ).init();
 					AppManager.manager( EventBus.class ).init();
 
 					instance = ObjectFunc.initClass( loaderClass );
+					instances.add( instance );
+
 					instance.start();
 				}
 			}
@@ -247,7 +288,7 @@ public abstract class AppLoader implements Listener
 			else if ( instance != null )
 				instance.runLevel( RunLevel.DISPOSED );
 		}
-		catch ( ApplicationException e )
+		catch ( UncaughtException | ApplicationException e )
 		{
 			AppController.handleExceptions( e );
 		}

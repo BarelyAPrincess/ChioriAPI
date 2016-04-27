@@ -27,9 +27,9 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppController;
-import com.chiorichan.ServiceManager;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
+import com.chiorichan.services.ServiceManager;
 import com.google.common.collect.Maps;
 
 /**

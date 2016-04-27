@@ -267,7 +267,7 @@ public abstract class BuiltinCommand extends Command
 				sender.sendMessage( EnumColor.AQUA + "Forcing Save..." );
 				AccountManager.instance().save();
 				PermissionManager.instance().saveData();
-				AppController.config().saveConfig();
+				AppController.config().save();
 				sender.sendMessage( EnumColor.AQUA + "Complete." );
 				return true;
 			}

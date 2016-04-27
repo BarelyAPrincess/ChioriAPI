@@ -9,7 +9,10 @@
 package com.chiorichan.logger;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -29,6 +32,7 @@ public class Log implements LogAPI
 {
 	private static final Set<Log> loggers = new HashSet<>();
 	private static final Logger rootLogger = Logger.getLogger( "" );
+	private static final PrintStream altOutputStream = new PrintStream( new FileOutputStream( FileDescriptor.out ) );
 
 	static
 	{
@@ -40,12 +44,12 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			File log = new File( AppController.config().logsDirectory(), filename + ".log" );
+			File log = new File( AppController.config().getDirectoryLogs(), filename + ".log" );
 
 			if ( log.exists() )
 			{
 				if ( archiveLimit > 0 )
-					FileFunc.gzFile( log, new File( AppController.config().logsDirectory(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
+					FileFunc.gzFile( log, new File( AppController.config().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
 				log.delete();
 			}
 
@@ -70,7 +74,7 @@ public class Log implements LogAPI
 
 	private static void cleanupLogs( final String suffix, int limit )
 	{
-		File[] files = AppController.config().logsDirectory().listFiles( new FilenameFilter()
+		File[] files = AppController.config().getDirectoryLogs().listFiles( new FilenameFilter()
 		{
 			@Override
 			public boolean accept( File dir, String name )
@@ -145,6 +149,7 @@ public class Log implements LogAPI
 
 	private final Logger logger;
 	private final String id;
+	private boolean hasErrored = false;
 
 	/**
 	 * Attempts to find a logger based on the id provided. If you would like to use your own Logger, be sure to create it with the same id prior to using any of the built-in getLogger() methods or you will need to use the replaceLogger() method.
@@ -174,25 +179,36 @@ public class Log implements LogAPI
 
 		for ( Object var2 : var1 )
 			if ( var2 != null )
-				info( EnumColor.NEGATIVE + "" + EnumColor.YELLOW + " >>>>   " + var2.toString() + "   <<<< " );
+				info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + ">>>>   " + var2.toString() + "   <<<< " );
+	}
+
+	@Override
+	public void dev( Object... var1 )
+	{
+		if ( !Versioning.isDevelopment() || var1.length < 1 )
+			return;
+
+		for ( Object var2 : var1 )
+			if ( var2 != null )
+				info( EnumColor.NEGATIVE + "" + EnumColor.WHITE + "[DEV NOTICE] " + var2.toString() );
 	}
 
 	@Override
 	public void fine( String var1 )
 	{
-		logger.log( Level.FINE, var1 );
+		log( Level.FINE, var1 );
 	}
 
 	@Override
 	public void finer( String var1 )
 	{
-		logger.log( Level.FINER, var1 );
+		log( Level.FINER, var1 );
 	}
 
 	@Override
 	public void finest( String var1 )
 	{
-		logger.log( Level.FINEST, var1 );
+		log( Level.FINEST, var1 );
 	}
 
 	@Override
@@ -204,6 +220,11 @@ public class Log implements LogAPI
 	public Logger getLogger()
 	{
 		return logger;
+	}
+
+	public boolean hasErrored()
+	{
+		return hasErrored;
 	}
 
 	@Override
@@ -221,19 +242,66 @@ public class Log implements LogAPI
 	@Override
 	public void log( Level l, String msg )
 	{
-		logger.log( l, msg );
+		try
+		{
+			if ( hasErrored )
+				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
+			else
+				logger.log( l, msg );
+		}
+		catch ( Throwable t )
+		{
+			markError( t );
+			if ( Versioning.isDevelopment() )
+				throw t;
+		}
 	}
 
 	@Override
-	public void log( Level level, String msg, Object... params )
+	public void log( Level l, String msg, Object... params )
 	{
-		logger.log( level, msg, params );
+		try
+		{
+			if ( hasErrored )
+				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
+			else
+				logger.log( l, msg, params );
+		}
+		catch ( Throwable t )
+		{
+			markError( t );
+			if ( Versioning.isDevelopment() )
+				throw t;
+		}
 	}
 
 	@Override
 	public void log( Level l, String msg, Throwable t )
 	{
-		logger.log( l, msg, t );
+		try
+		{
+			if ( hasErrored )
+				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
+			else
+				logger.log( l, msg, t );
+		}
+		catch ( Throwable tt )
+		{
+			markError( tt );
+			if ( Versioning.isDevelopment() )
+				throw tt;
+		}
+	}
+
+	private void markError( Throwable t )
+	{
+		hasErrored = true;
+
+		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "The child logger \"" + getId() + "\" has thrown an unrecoverable exception!" );
+		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Please report the following stacktrace to the application developer." );
+		if ( Versioning.isDevelopment() )
+			altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "ATTENTION DEVELOPER: Calling the method \"Log.get( [log name] ).unmarkError()\" will reset the errored state." );
+		t.printStackTrace( altOutputStream );
 	}
 
 	public String[] multilineColorRepeater( String var1 )
@@ -301,6 +369,11 @@ public class Log implements LogAPI
 	public void severe( Throwable t )
 	{
 		log( Level.SEVERE, EnumColor.RED + t.getMessage(), t );
+	}
+
+	public void unmarkError()
+	{
+		hasErrored = false;
 	}
 
 	@Override

@@ -8,7 +8,6 @@
  */
 package com.chiorichan.account;
 
-import com.chiorichan.ServiceManager;
 import com.chiorichan.account.event.AccountLoadEvent;
 import com.chiorichan.account.event.AccountLookupEvent;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
@@ -16,6 +15,7 @@ import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventRegistrar;
 import com.chiorichan.logger.LogSource;
+import com.chiorichan.services.ServiceManager;
 import com.chiorichan.services.ServiceProvider;
 import com.chiorichan.tasks.TaskRegistrar;
 

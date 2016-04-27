@@ -13,7 +13,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import com.chiorichan.AppController;
 import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountPermissible;
@@ -25,6 +24,7 @@ import com.chiorichan.account.lang.AccountResult;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
+import com.chiorichan.services.AppManager;
 import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.Versioning;
 
@@ -88,7 +88,7 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 	@Override
 	public AccountLocation getLocation()
 	{
-		return ( ( LocationService ) AppController.getService( AccountLocation.class ) ).getDefaultLocation();
+		return ( ( LocationService ) AppManager.getService( AccountLocation.class ) ).getDefaultLocation();
 	}
 
 	@Override

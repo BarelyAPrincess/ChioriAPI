@@ -14,7 +14,7 @@ package com.chiorichan.lang;
 public class StartupAbortException extends StartupException
 {
 	private static final long serialVersionUID = -4937198089020390887L;
-	
+
 	public StartupAbortException()
 	{
 		super( "STARTUP ABORTED!" );

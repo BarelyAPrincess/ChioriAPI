@@ -29,6 +29,7 @@ import com.chiorichan.account.lang.AccountResult;
 import com.chiorichan.configuration.file.YamlConfiguration;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.util.FileFunc;
@@ -53,7 +54,8 @@ public class FileTypeCreator extends AccountTypeCreator
 		String fileBase = AppController.config().getString( "accounts.fileType.filebase", "accounts" );
 		accountsDirectory = new File( fileBase );
 
-		FileFunc.directoryHealthCheck( accountsDirectory );
+		if ( !FileFunc.setDirectoryAccess( accountsDirectory ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( accountsDirectory ) + "\"!" );
 
 		accountFields = AppController.config().getStringList( "accounts.fileType.fields", new ArrayList<String>() );
 

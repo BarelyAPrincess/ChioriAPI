@@ -19,11 +19,14 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -241,6 +244,20 @@ public class NetworkFunc
 		}
 		catch ( IOException e )
 		{
+			Log.get().severe( "Reading URL \"" + url + "\" failed because: " + e.getMessage() );
+			return null;
+		}
+	}
+
+	public static byte[] readUrl( String url, boolean trustAll )
+	{
+		try
+		{
+			return readUrlWithException( url, trustAll );
+		}
+		catch ( IOException e )
+		{
+			Log.get().severe( "Reading URL \"" + url + "\" failed because: " + e.getMessage() );
 			return null;
 		}
 	}
@@ -249,20 +266,26 @@ public class NetworkFunc
 	{
 		try
 		{
-			return readUrlWithException( url, user, pass );
+			return readUrlWithException( url, user, pass, false );
 		}
 		catch ( IOException e )
 		{
+			Log.get().severe( "Reading URL \"" + url + "\" failed because: " + e.getMessage() );
 			return null;
 		}
 	}
 
 	public static byte[] readUrlWithException( String url ) throws IOException
 	{
-		return readUrlWithException( url, null, null );
+		return readUrlWithException( url, null, null, false );
 	}
 
-	public static byte[] readUrlWithException( String surl, String user, String pass ) throws IOException
+	public static byte[] readUrlWithException( String url, boolean trustAll ) throws IOException
+	{
+		return readUrlWithException( url, null, null, trustAll );
+	}
+
+	public static byte[] readUrlWithException( String surl, String user, String pass, boolean trustAll ) throws IOException
 	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -275,6 +298,18 @@ public class NetworkFunc
 			String basicAuth = "Basic " + new String( Base64.getEncoder().encode( userpass.getBytes() ) );
 			uc.setRequestProperty( "Authorization", basicAuth );
 		}
+
+		if ( uc instanceof HttpsURLConnection && trustAll )
+			try
+			{
+				SSLContext ctx = SSLContext.getInstance( "SSL" );
+				ctx.init( null, TrustManagerFactory.getTrustManagers(), null );
+				( ( HttpsURLConnection ) uc ).setSSLSocketFactory( ctx.getSocketFactory() );
+			}
+			catch ( KeyManagementException | NoSuchAlgorithmException e )
+			{
+				Log.get().severe( "Failed to set the SSL Factory, so all certificates are accepted.", e );
+			}
 
 		InputStream is = uc.getInputStream();
 
@@ -290,7 +325,7 @@ public class NetworkFunc
 	}
 
 	/**
-	 * TODO The server was lagging with this! WHY???
+	 * TODO This was lagging the server! WHY???
 	 * Maybe we should change our metrics system
 	 */
 	public static boolean sendTracking( String category, String action, String label )

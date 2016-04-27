@@ -20,7 +20,6 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppController;
-import com.chiorichan.ServiceManager;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.AuthorNagException;
 import com.chiorichan.lang.DeprecatedDetail;
@@ -31,6 +30,7 @@ import com.chiorichan.plugin.PluginBase;
 import com.chiorichan.plugin.PluginManager;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ObjectContext;
+import com.chiorichan.services.ServiceManager;
 import com.google.common.collect.Maps;
 
 public class EventBus implements ServiceManager, LogSource
@@ -53,7 +53,7 @@ public class EventBus implements ServiceManager, LogSource
 
 	public EventBus()
 	{
-		this( false );
+		this( AppController.config().getBoolean( "plugins.useTimings" ) );
 	}
 
 	public EventBus( boolean useTimings )

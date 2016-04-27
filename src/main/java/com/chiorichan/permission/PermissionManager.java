@@ -19,7 +19,6 @@ import java.util.TimerTask;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
-import com.chiorichan.ServiceManager;
 import com.chiorichan.account.AccountInstance;
 import com.chiorichan.account.AccountType;
 import com.chiorichan.account.event.AccountPreLoginEvent;
@@ -40,6 +39,7 @@ import com.chiorichan.permission.event.PermissibleSystemEvent;
 import com.chiorichan.permission.lang.PermissionBackendException;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ObjectContext;
+import com.chiorichan.services.ServiceManager;
 import com.chiorichan.services.ServicePriority;
 import com.chiorichan.services.ServiceProvider;
 import com.chiorichan.tasks.TaskManager;
@@ -609,9 +609,9 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 		hasWhitelist = config.getBoolean( "settings.whitelist" );
 
-		AppController.registerService( Permission.class, this, new ObjectContext( this ), ServicePriority.Lowest );
-		AppController.registerService( PermissibleGroup.class, this, new ObjectContext( this ), ServicePriority.Lowest );
-		AppController.registerService( PermissibleEntity.class, this, new ObjectContext( this ), ServicePriority.Lowest );
+		AppManager.registerService( Permission.class, this, new ObjectContext( this ), ServicePriority.Lowest );
+		AppManager.registerService( PermissibleGroup.class, this, new ObjectContext( this ), ServicePriority.Lowest );
+		AppManager.registerService( PermissibleEntity.class, this, new ObjectContext( this ), ServicePriority.Lowest );
 
 		initBackend();
 	}

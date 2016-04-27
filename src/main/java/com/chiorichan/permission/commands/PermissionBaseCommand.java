@@ -31,6 +31,7 @@ import com.chiorichan.permission.PermissibleGroup;
 import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.permission.References;
+import com.chiorichan.services.AppManager;
 import com.chiorichan.terminal.TerminalEntity;
 import com.chiorichan.terminal.commands.AdvancedCommand;
 import com.chiorichan.terminal.commands.advanced.AutoCompleteChoicesException;
@@ -152,10 +153,10 @@ public abstract class PermissionBaseCommand implements CommandListener
 			if ( r.toLowerCase().startsWith( ref.toLowerCase() ) )
 				refs.add( r );
 
-		LocationService service = AppController.getService( LocationService.class );
+		LocationService service = AppManager.getService( LocationService.class );
 		if ( service != null )
 			for ( AccountLocation location : service.getLocations() )
-				if ( location.getId().toLowerCase().startsWith( ref.toLowerCase() ) )
+				if ( location != null && location.getId().toLowerCase().startsWith( ref.toLowerCase() ) )
 					refs.add( location.getId() );
 
 		if ( refs.size() > 1 )
@@ -221,7 +222,7 @@ public abstract class PermissionBaseCommand implements CommandListener
 			AccountMeta meta = AccountManager.instance().getAccount( acctId );
 
 			if ( meta == null )
-				ref = References.format( ( ( LocationService ) AppController.getService( LocationService.class ) ).getDefaultLocation().getId() );
+				ref = References.format( ( ( LocationService ) AppManager.getService( LocationService.class ) ).getDefaultLocation().getId() );
 			else
 				ref = References.format( meta.getLocation().getId() );
 		}

@@ -6,7 +6,7 @@
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
-package com.chiorichan;
+package com.chiorichan.services;
 
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.logger.LogSource;
