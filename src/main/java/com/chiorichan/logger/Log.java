@@ -83,7 +83,7 @@ public class Log implements LogAPI
 			}
 		} );
 
-		if ( files.length < 1 )
+		if ( files == null || files.length < 1 )
 			return;
 
 		// Delete all logs, no archiving!

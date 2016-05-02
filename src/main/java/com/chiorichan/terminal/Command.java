@@ -201,7 +201,7 @@ public abstract class Command
 	 *
 	 * @param target
 	 *            InteractiveConsoleHandler to test
-	 * @return {@value true} if they can use it, otherwise false
+	 * @return true if they can use it, otherwise false
 	 */
 	public boolean testPermission( AccountAttachment target )
 	{

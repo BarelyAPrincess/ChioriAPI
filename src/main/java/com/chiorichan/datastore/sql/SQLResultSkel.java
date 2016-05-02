@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provides a SQL Result/Execute skeleton for {@link com.chiorichan.datastore.SQLBase} and {@link com.chiorichan.datastore.SQLExecute}
+ * Provides a SQL Result/Execute skeleton for {@link com.chiorichan.datastore.sql.SQLBase} and {@link com.chiorichan.datastore.sql.SQLExecute}
  */
 public interface SQLResultSkel
 {

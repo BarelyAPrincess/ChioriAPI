@@ -75,7 +75,7 @@ public abstract class AccountAuthenticator
 	 *            The Account Meta
 	 * @param perm
 	 *            An instance of the {@link com.chiorichan.account.AccountAttachment}
-	 * @return
+	 * @return The authorized account credentials
 	 */
 	public abstract AccountCredentials authorize( AccountMeta acct, AccountPermissible perm ) throws AccountException;
 

@@ -32,7 +32,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 /**
- * Used on classes that can support Account Logins, e.g., {@link com.chiorichan.session.Session}
+ * Used on classes that can support Account Logins
  */
 public abstract class AccountPermissible extends Permissible implements Account
 {

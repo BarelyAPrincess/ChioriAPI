@@ -335,7 +335,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public File getDirectoryLogs()
 	{
-		return getDirectory( "logs", "logs" );
+		return getDirectory( "logs", "logs", false, true );
 	}
 
 	/**

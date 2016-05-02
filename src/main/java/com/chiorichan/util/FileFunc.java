@@ -981,6 +981,7 @@ public class FileFunc
 			}
 			catch ( IllegalArgumentException e )
 			{
+				Log.get().severe( "Exception encountered while handling access to path '" + FileFunc.relPath( file ) + "' with message '" + e.getMessage() + "'" );
 				return false;
 			}
 		return true;

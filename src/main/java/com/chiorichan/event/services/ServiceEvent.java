@@ -13,7 +13,7 @@ import com.chiorichan.services.RegisteredServiceProvider;
 import com.chiorichan.services.ServiceProvider;
 
 /**
- * An event relating to a registered service. This is called in a {@link com.chiorichan.services.ServicesManager}
+ * An event relating to a registered service. This is called in a {@link com.chiorichan.services.AppManager}
  */
 public abstract class ServiceEvent<T> extends ApplicationEvent
 {

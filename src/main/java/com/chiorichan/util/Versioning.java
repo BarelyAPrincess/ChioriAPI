@@ -20,6 +20,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import com.chiorichan.AppController;
 import com.chiorichan.AppLoader;
+import com.chiorichan.logger.Log;
 
 /**
  * Provides easy access to the server metadata plus operating system and jvm information
@@ -310,6 +311,12 @@ public class Versioning
 		try
 		{
 			is = AppLoader.class.getClassLoader().getResourceAsStream( "build.properties" );
+			if ( is == null )
+			{
+				Log.get().severe( "This application is missing the `build.properties` file, we will now default to the API build properties file." );
+				is = AppLoader.class.getClassLoader().getResourceAsStream( "api.properties" );
+			}
+
 			metadata.load( is );
 		}
 		catch ( IOException e )

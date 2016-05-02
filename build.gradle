@@ -20,10 +20,8 @@ buildscript {
 		mavenCentral()
 	}
 
-	dependencies {
-		// classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-		classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
-	}
+	dependencies { // classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+		classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0' }
 }
 
 def gitDescribe() {
@@ -48,7 +46,7 @@ def getVersionNumber()
 	try
 	{
 		Properties props = new Properties()
-		props.load( new FileInputStream( new File( "./src/main/resources/build.properties" ) ) )
+		props.load( new FileInputStream( new File( "./src/main/resources/api.properties" ) ) )
 
 		return props.getProperty( "project.versionMajor" ) + "." + props.getProperty( "project.versionMinor" ) + "." + props.getProperty( "project.versionRevision" )
 	}
@@ -212,13 +210,13 @@ task writeApiPropertiesFile {
 		SimpleDateFormat sdf = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" )
 
 		Properties props = new Properties()
-		props.load( new FileInputStream( file( "src/main/resources/build.properties" ) ) )
+		props.load( new FileInputStream( file( "src/main/resources/api.properties" ) ) )
 		props.setProperty("project.builtOn", sdf.format( new Date() ))
 		props.setProperty("project.build", buildNumber)
 		props.setProperty("project.version", version)
 
-		File f2 = file("build/dist/build.properties")
-		File f3 = file("build/resources/main/build.properties")
+		File f2 = file("build/dist/api.properties")
+		File f3 = file("build/resources/main/api.properties")
 		f2.parentFile.mkdirs()
 		f3.parentFile.mkdirs()
 		OutputStream out2 = new FileOutputStream( f2 )

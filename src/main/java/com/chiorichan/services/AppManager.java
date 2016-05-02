@@ -183,7 +183,7 @@ public class AppManager<T extends ServiceManager>
 	/**
 	 * Queries for a provider registration. This may return if no provider has been registered for a service.
 	 *
-	 * @param <T>
+	 * @param <C>
 	 *             The service interface
 	 * @param service
 	 *             The service interface
@@ -207,7 +207,7 @@ public class AppManager<T extends ServiceManager>
 	/**
 	 * Get registrations of providers for a service. The returned list is an unmodifiable copy.
 	 *
-	 * @param <T>
+	 * @param <C>
 	 *             The service interface
 	 * @param service
 	 *             The service interface
@@ -279,7 +279,7 @@ public class AppManager<T extends ServiceManager>
 	/**
 	 * Returns whether a provider has been registered for a service.
 	 *
-	 * @param <T>
+	 * @param <C>
 	 *             service
 	 * @param service
 	 *             service to check
