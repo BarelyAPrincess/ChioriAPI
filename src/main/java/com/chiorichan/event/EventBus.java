@@ -19,6 +19,7 @@ import java.util.logging.Level;
 
 import org.apache.commons.lang3.Validate;
 
+import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.AuthorNagException;
@@ -53,7 +54,7 @@ public class EventBus implements ServiceManager, LogSource
 
 	public EventBus()
 	{
-		this( AppController.config().getBoolean( "plugins.useTimings" ) );
+		this( AppConfig.get().getBoolean( "plugins.useTimings" ) );
 	}
 
 	public EventBus( boolean useTimings )

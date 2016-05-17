@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.lang.EnumColor;
 import com.google.common.base.Strings;
 
@@ -24,9 +24,9 @@ public class DefaultLogFormatter extends Formatter
 	public static int debugModeHowDeep = 1;
 	private SimpleDateFormat dateFormat;
 	private SimpleDateFormat timeFormat;
+	private boolean useColor;
 
 	private boolean formatConfigLoaded = false;
-	private final boolean useColor;
 
 	public DefaultLogFormatter()
 	{
@@ -35,22 +35,22 @@ public class DefaultLogFormatter extends Formatter
 
 	public DefaultLogFormatter( boolean useColor )
 	{
+		this.useColor = useColor;
 		dateFormat = new SimpleDateFormat( "MM-dd" );
 		timeFormat = new SimpleDateFormat( "HH:mm:ss.SSS" );
-		this.useColor = useColor;
 	}
 
 	@Override
 	public String format( LogRecord record )
 	{
-		if ( AppController.config() != null && !formatConfigLoaded )
+		if ( AppConfig.get().isConfigLoaded() && !formatConfigLoaded )
 		{
-			dateFormat = new SimpleDateFormat( AppController.config().getString( "console.dateFormat", "MM-dd" ) );
-			timeFormat = new SimpleDateFormat( AppController.config().getString( "console.timeFormat", "HH:mm:ss.SSS" ) );
+			dateFormat = new SimpleDateFormat( AppConfig.get().getString( "console.dateFormat", "MM-dd" ) );
+			timeFormat = new SimpleDateFormat( AppConfig.get().getString( "console.timeFormat", "HH:mm:ss.SSS" ) );
 			formatConfigLoaded = true;
 		}
 
-		String style = AppController.config() == null ? "&r&7%dt %tm [%lv&7]&f" : AppController.config().getString( "console.style", "&r&7[&d%ct&7] %dt %tm [%lv&7]&f" );
+		String style = AppConfig.get().isConfigLoaded() ? AppConfig.get().getString( "console.style", "&r&7[&d%ct&7] %dt %tm [%lv&7]&f" ) : "&r&7%dt %tm [%lv&7]&f";
 
 		Throwable ex = record.getThrown();
 
@@ -93,7 +93,7 @@ public class DefaultLogFormatter extends Formatter
 
 		style += " " + formatMessage( record );
 
-		if ( !formatMessage( record ).endsWith( "\r" ) )
+		if ( !style.endsWith( "\r" ) )
 			style += "\n";
 
 		if ( ex != null )
@@ -107,5 +107,10 @@ public class DefaultLogFormatter extends Formatter
 			return EnumColor.removeAltColors( style );
 		else
 			return EnumColor.transAltColors( style );
+	}
+
+	public boolean useColor()
+	{
+		return useColor;
 	}
 }

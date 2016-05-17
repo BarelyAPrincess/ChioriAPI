@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -28,20 +31,12 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.logger.Log;
-import com.chiorichan.plugin.PluginManager;
 import com.google.common.base.Joiner;
 
 /**
@@ -52,23 +47,25 @@ public class NetworkFunc
 	public static final String REGEX_IPV4 = "^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$";
 	public static final String REGEX_IPV6 = "^((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$";
 
-	public static boolean downloadFile( String url, File dest ) throws ClientProtocolException, IOException
+	public static boolean downloadFile( String url, File dest ) throws IOException
 	{
-		HttpClient httpclient = HttpClients.createDefault();
-		HttpGet httpget = new HttpGet( url );
-
-		HttpResponse response = httpclient.execute( httpget );
-		HttpEntity entity = response.getEntity();
-
-		if ( response.getStatusLine().getStatusCode() != 200 )
+		ReadableByteChannel rbc = null;
+		FileOutputStream fos = null;
+		try
 		{
-			PluginManager.getLogger().severe( "Could not download the file `" + url + "`, webserver returned `" + response.getStatusLine().getStatusCode() + " - " + response.getStatusLine().getReasonPhrase() + "`" );
-			return false;
+			URL conn = new URL( url );
+			rbc = Channels.newChannel( conn.openStream() );
+			fos = new FileOutputStream( dest );
+
+			fos.getChannel().transferFrom( rbc, 0, Long.MAX_VALUE );
 		}
-
-		InputStream instream = entity.getContent();
-
-		FileUtils.copyInputStreamToFile( instream, dest );
+		finally
+		{
+			if ( rbc != null )
+				rbc.close();
+			if ( fos != null )
+				fos.close();
+		}
 
 		return true;
 	}
@@ -104,7 +101,7 @@ public class NetworkFunc
 
 	public static String getUserAgent()
 	{
-		return Versioning.getProductSimple() + "/" + Versioning.getVersion() + "/" + Versioning.getJavaVersion();
+		return Application.getProductSimple() + "/" + Application.getVersion() + "/" + Application.getJavaVersion();
 	}
 
 	public static boolean isValidIPv4( String ip )
@@ -244,7 +241,7 @@ public class NetworkFunc
 		}
 		catch ( IOException e )
 		{
-			Log.get().severe( "Reading URL \"" + url + "\" failed because: " + e.getMessage() );
+			Log.get().severe( "Reading URL \"" + url + "\" failed!" );
 			return null;
 		}
 	}
@@ -257,7 +254,7 @@ public class NetworkFunc
 		}
 		catch ( IOException e )
 		{
-			Log.get().severe( "Reading URL \"" + url + "\" failed because: " + e.getMessage() );
+			Log.get().severe( "Reading URL \"" + url + "\" failed!" );
 			return null;
 		}
 	}
@@ -270,7 +267,7 @@ public class NetworkFunc
 		}
 		catch ( IOException e )
 		{
-			Log.get().severe( "Reading URL \"" + url + "\" failed because: " + e.getMessage() );
+			Log.get().severe( "Reading URL \"" + url + "\" failed!" );
 			return null;
 		}
 	}
@@ -338,7 +335,7 @@ public class NetworkFunc
 			HttpURLConnection con = ( HttpURLConnection ) urlObj.openConnection();
 			con.setRequestMethod( "POST" );
 
-			String urlParameters = "v=1&tid=UA-60405654-1&cid=" + AppController.config().getClientId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
+			String urlParameters = "v=1&tid=UA-60405654-1&cid=" + AppConfig.get().getClientId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
 
 			con.setDoOutput( true );
 			DataOutputStream wr = new DataOutputStream( con.getOutputStream() );

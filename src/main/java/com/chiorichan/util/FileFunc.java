@@ -8,11 +8,13 @@
  */
 package com.chiorichan.util;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -39,8 +42,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.Validate;
 
+import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
 import com.chiorichan.AppLoader;
 import com.chiorichan.lang.EnumColor;
@@ -51,7 +54,6 @@ import com.chiorichan.logger.Log;
 import com.chiorichan.plugin.PluginManager;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 
@@ -556,7 +558,7 @@ public class FileFunc
 
 	public static boolean extractNatives( File libFile, File baseDir ) throws IOException
 	{
-		List<String> nativesExtracted = Lists.newArrayList();
+		List<String> nativesExtracted = new ArrayList<>();
 		boolean foundArchMatchingNative = false;
 
 		baseDir = new File( baseDir, "natives" );
@@ -603,7 +605,14 @@ public class FileFunc
 						PluginManager.getLogger().info( EnumColor.GOLD + "Extracting native library '" + entry.getName() + "' to '" + lib.getAbsolutePath() + "'." );
 						InputStream is = jar.getInputStream( entry );
 						FileOutputStream out = new FileOutputStream( lib );
-						ByteStreams.copy( is, out );
+						byte[] buf = new byte[0x1000];
+						while ( true )
+						{
+							int r = is.read( buf );
+							if ( r == -1 )
+								break;
+							out.write( buf, 0, r );
+						}
 						is.close();
 						out.close();
 					}
@@ -648,7 +657,7 @@ public class FileFunc
 		if ( !MapCaster.containsKeys( natives, Arrays.asList( OSInfo.NATIVE_SEARCH_PATHS ) ) )
 			PluginManager.getLogger().warning( String.format( "%sWe were unable to locate any natives libraries that match architectures '%s' within plugin '%s'.", EnumColor.DARK_GRAY, Joiner.on( ", '" ).join( OSInfo.NATIVE_SEARCH_PATHS ), libFile.getAbsolutePath() ) );
 
-		List<String> nativesExtracted = Lists.newArrayList();
+		List<String> nativesExtracted = new ArrayList<>();
 		baseDir = new File( baseDir, "natives" );
 		// FileFunc.directoryHealthCheck( baseDir );
 
@@ -736,7 +745,7 @@ public class FileFunc
 
 	public static boolean extractZipResource( String path, File dest, Class<?> clz ) throws IOException
 	{
-		File cache = AppController.config().getDirectoryCache();
+		File cache = AppConfig.get().getDirectoryCache();
 		if ( !cache.exists() )
 			cache.mkdirs();
 		File temp = new File( cache, "temp.zip" );
@@ -887,6 +896,36 @@ public class FileFunc
 		putResource( AppLoader.class, resource, file );
 	}
 
+	public static String readFileToString( File file ) throws IOException
+	{
+		InputStream in = null;
+		try
+		{
+			in = new FileInputStream( file );
+
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ( ( nRead = in.read( data, 0, data.length ) ) != -1 )
+				buffer.write( data, 0, nRead );
+
+			return new String( buffer.toByteArray(), Charset.defaultCharset() );
+		}
+		finally
+		{
+			try
+			{
+				if ( in != null )
+					in.close();
+			}
+			catch ( IOException ioe )
+			{
+			}
+		}
+	}
+
 	public static List<File> recursiveFiles( final File dir )
 	{
 		return recursiveFiles( dir, 9999 );
@@ -894,7 +933,7 @@ public class FileFunc
 
 	private static List<File> recursiveFiles( final File start, final File current, final int depth, final int maxDepth, final String regexPattern )
 	{
-		final List<File> files = Lists.newArrayList();
+		final List<File> files = new ArrayList<>();
 
 		current.list( new FilenameFilter()
 		{
@@ -942,7 +981,7 @@ public class FileFunc
 	{
 		if ( file == null )
 			return null;
-		String serverRoot = AppController.config().getDirectory().getAbsolutePath();
+		String serverRoot = AppConfig.get().getDirectory().getAbsolutePath();
 		if ( file.getAbsolutePath().startsWith( serverRoot ) )
 			return file.getAbsolutePath().substring( serverRoot.length() + 1 );
 		else
@@ -966,16 +1005,16 @@ public class FileFunc
 
 	public static boolean setDirectoryAccess( File file )
 	{
-		if ( file.isDirectory() && file.canRead() && file.canWrite() )
+		if ( file.exists() && file.isDirectory() && file.canRead() && file.canWrite() )
 			Log.get().fine( "This application has read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
 		else
 			try
 			{
 				if ( file.exists() && file.isFile() )
-					Validate.isTrue( file.delete() );
-				Validate.isTrue( file.mkdirs() );
-				Validate.isTrue( file.setWritable( true ) );
-				Validate.isTrue( file.setReadable( true ) );
+					ObjectFunc.isTrue( file.delete(), "failed to delete directory!" );
+				ObjectFunc.isTrue( file.mkdirs(), "failed to create directory!" );
+				ObjectFunc.isTrue( file.setWritable( true ), "failed to set directory writable!" );
+				ObjectFunc.isTrue( file.setReadable( true ), "failed to set directory readable!" );
 
 				Log.get().fine( "Setting read and write access for directory \"" + FileFunc.relPath( file ) + "\" was successful!" );
 			}
@@ -991,6 +1030,26 @@ public class FileFunc
 	{
 		if ( !setDirectoryAccess( file ) )
 			throw new UncaughtException( ReportingLevel.E_ERROR, "Experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
+	}
+
+	public static void writeStringToFile( File file, String data ) throws IOException
+	{
+		writeStringToFile( file, data, false );
+	}
+
+	public static void writeStringToFile( File file, String data, boolean append ) throws IOException
+	{
+		BufferedWriter out = null;
+		try
+		{
+			out = new BufferedWriter( new FileWriter( file, append ) );
+			out.write( data );
+		}
+		finally
+		{
+			if ( out != null )
+				out.close();
+		}
 	}
 
 	/**

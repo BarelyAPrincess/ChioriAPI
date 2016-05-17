@@ -167,7 +167,7 @@ public class AppManager<T extends ServiceManager>
 
 	public Log getLogger()
 	{
-		return Log.get( instance() );
+		return instance == null ? Log.get( getName() ) : Log.get( instance() );
 	}
 
 	public Class<T> getManagerClass()

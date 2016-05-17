@@ -38,7 +38,7 @@ public class MavenReference
 		String[] parts = maven.split( ":" );
 
 		if ( parts.length > 3 || parts.length < 3 )
-			throw new IllegalArgumentException( "Invalid length maven string, it must equal three parts when devided with delimiter ':', i.e., group:name:version." );
+			throw new IllegalArgumentException( "Invalid array count, must equal exactly three parts with delimiter ':', i.e., group:name:version. " + maven );
 
 		group = parts[0];
 		name = parts[1];

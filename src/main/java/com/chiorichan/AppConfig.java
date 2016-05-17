@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.configuration.Configuration;
@@ -35,36 +34,48 @@ import com.chiorichan.logger.Log;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Ticks;
+import com.chiorichan.util.Application;
 import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.util.ObjectFunc;
 
 public class AppConfig implements Configuration, TaskRegistrar
 {
+	private static final AppConfig instance = new AppConfig();
 	private static File lockFile;
+	protected static File appDirectory = null;
 
 	static
 	{
 		try
 		{
-			lockFile = new File( getApplicationJar() + ".lck" );
+			File run = new File( "/var/run" );
+			if ( Application.isUnixLikeOS() && run.exists() && run.canWrite() )
+				lockFile = new File( "/var/run/chiori.pid" );
+			else
+				lockFile = new File( "chiori.pid" );
 
 			// TODO check that the enclosed lock PID number is currently running
 			if ( lockFile.exists() )
 			{
-				int pid = Integer.parseInt( FileUtils.readFileToString( lockFile ).trim() );
+				String pidraw = FileFunc.readFileToString( lockFile );
 
-				try
+				if ( pidraw != null && pidraw.length() > 0 )
 				{
-					if ( Versioning.isPIDRunning( pid ) )
-						throw new StartupException( "We have detected the server jar is already running. Please terminate process ID " + pid + " or disregard this notice and try again." );
-				}
-				catch ( IOException e )
-				{
-					throw new StartupException( "We have detected the server jar is already running. We were unable to verify if the PID " + pid + " is still running." );
+					int pid = Integer.parseInt( pidraw );
+
+					try
+					{
+						if ( pid != Integer.parseInt( Application.getProcessID() ) && Application.isPIDRunning( pid ) )
+							throw new StartupException( "We have detected the server jar is already running. Please terminate process ID " + pid + " or disregard this notice and try again." );
+					}
+					catch ( IOException e )
+					{
+						throw new StartupException( "We have detected the server jar is already running. We were unable to verify if the PID " + pid + " is still running." );
+					}
 				}
 			}
 
-			FileUtils.writeStringToFile( lockFile, Versioning.getProcessID() );
+			FileFunc.writeStringToFile( lockFile, Application.getProcessID() );
 			lockFile.deleteOnExit();
 		}
 		catch ( IOException e )
@@ -75,6 +86,13 @@ public class AppConfig implements Configuration, TaskRegistrar
 		lockFile.deleteOnExit();
 	}
 
+	public static AppConfig get()
+	{
+		if ( !instance.isConfigLoaded() && instance.configFile != null && ObjectFunc.noLoopDetected( AppConfig.class, "loadConfig" ) )
+			instance.loadConfig();
+		return instance;
+	}
+
 	/**
 	 * @return The server jar file
 	 */
@@ -82,7 +100,10 @@ public class AppConfig implements Configuration, TaskRegistrar
 	{
 		try
 		{
-			return new File( URLDecoder.decode( AppLoader.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8" ) );
+			File file = new File( URLDecoder.decode( AppLoader.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8" ) );
+			if ( file.isDirectory() || !file.getAbsolutePath().endsWith( ".jar" ) )
+				return null;
+			return file;
 		}
 		catch ( UnsupportedEncodingException e )
 		{
@@ -93,8 +114,8 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	private String clientId;
 	private SQLDatastore fwDatabase = null;
-	private File loadedLocation = null;
-	private YamlConfiguration yaml = new YamlConfiguration();
+	protected File configFile = null;
+	private YamlConfiguration yaml = null;
 	private Map<String, File> directories = new HashMap<>();
 
 	protected AppConfig()
@@ -105,18 +126,21 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public void addDefault( String path, Object value )
 	{
+		yamlCheck();
 		yaml.addDefault( path, value );
 	}
 
 	@Override
 	public void addDefaults( Configuration defaults )
 	{
+		yamlCheck();
 		yaml.addDefaults( defaults );
 	}
 
 	@Override
 	public void addDefaults( Map<String, Object> defaults )
 	{
+		yamlCheck();
 		yaml.addDefaults( defaults );
 	}
 
@@ -151,71 +175,84 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public boolean contains( String path )
 	{
+		yamlCheck();
 		return yaml.contains( path );
 	}
 
 	@Override
 	public ConfigurationSection createSection( String path )
 	{
+		yamlCheck();
 		return yaml.createSection( path );
 	}
 
 	@Override
 	public ConfigurationSection createSection( String path, Map<?, ?> map )
 	{
+		yamlCheck();
 		return yaml.createSection( path, map );
 	}
 
 	public File file()
 	{
-		return loadedLocation;
+		if ( configFile == null )
+			configFile = new File( instance.getDirectory().getAbsolutePath(), "config.yaml" );
+		return configFile;
 	}
 
 	@Override
 	public Object get( String path )
 	{
+		yamlCheck();
 		return yaml.get( path );
 	}
 
 	@Override
 	public Object get( String path, Object def )
 	{
+		yamlCheck();
 		return yaml.get( path, def );
 	}
 
 	@Override
 	public <T> List<T> getAsList( String path )
 	{
+		yamlCheck();
 		return yaml.getAsList( path );
 	}
 
 	@Override
 	public <T> List<T> getAsList( String path, List<T> def )
 	{
+		yamlCheck();
 		return yaml.getAsList( path, def );
 	}
 
 	@Override
 	public boolean getBoolean( String path )
 	{
+		yamlCheck();
 		return yaml.getBoolean( path );
 	}
 
 	@Override
 	public boolean getBoolean( String path, boolean def )
 	{
+		yamlCheck();
 		return yaml.getBoolean( path, def );
 	}
 
 	@Override
 	public List<Boolean> getBooleanList( String path )
 	{
+		yamlCheck();
 		return yaml.getBooleanList( path );
 	}
 
 	@Override
 	public List<Byte> getByteList( String path )
 	{
+		yamlCheck();
 		return yaml.getByteList( path );
 	}
 
@@ -227,30 +264,35 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public Color getColor( String path )
 	{
+		yamlCheck();
 		return yaml.getColor( path );
 	}
 
 	@Override
 	public Color getColor( String path, Color def )
 	{
+		yamlCheck();
 		return yaml.getColor( path, def );
 	}
 
 	@Override
 	public ConfigurationSection getConfigurationSection( String path )
 	{
+		yamlCheck();
 		return yaml.getConfigurationSection( path );
 	}
 
 	@Override
 	public ConfigurationSection getConfigurationSection( String path, boolean create )
 	{
+		yamlCheck();
 		return yaml.getConfigurationSection( path, create );
 	}
 
 	@Override
 	public String getCurrentPath()
 	{
+		yamlCheck();
 		return yaml.getCurrentPath();
 	}
 
@@ -269,18 +311,24 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public Configuration getDefaults()
 	{
+		yamlCheck();
 		return yaml.getDefaults();
 	}
 
 	@Override
 	public ConfigurationSection getDefaultSection()
 	{
+		yamlCheck();
 		return yaml.getDefaultSection();
 	}
 
 	public File getDirectory()
 	{
-		return getApplicationJar().getParentFile();
+		if ( appDirectory != null ) // Was application directory set
+			return appDirectory;
+		if ( getApplicationJar() != null ) // Are we running from java jar file
+			return getApplicationJar().getParentFile();
+		return new File( "" ); // Return current working directory
 	}
 
 	public File getDirectory( String configKey, String defPath )
@@ -296,26 +344,39 @@ public class AppConfig implements Configuration, TaskRegistrar
 	public File getDirectory( String configKey, String defPath, boolean forceReload, boolean directoryCheck )
 	{
 		if ( !directories.containsKey( configKey ) || forceReload )
-		{
-			String dir;
-			if ( AppLoader.options().has( configKey + "-dir" ) )
-				dir = ( String ) AppLoader.options().valueOf( configKey + "-dir" );
-			else if ( isString( "directories." + configKey ) )
-				dir = getString( "directories." + configKey, defPath );
-			else
+			try
 			{
-				set( "directories." + configKey, defPath );
-				dir = defPath;
+				String dir;
+				if ( AppLoader.options().has( configKey + "-dir" ) )
+					dir = ( String ) AppLoader.options().valueOf( configKey + "-dir" );
+				else if ( isString( "directories." + configKey ) )
+					dir = getString( "directories." + configKey, defPath );
+				else
+				{
+					set( "directories." + configKey, defPath );
+					dir = defPath;
+				}
+
+				File file = FileFunc.isAbsolute( dir ) ? new File( dir ) : new File( getDirectory().getAbsolutePath(), dir );
+
+				if ( directoryCheck )
+					if ( !FileFunc.setDirectoryAccess( file ) )
+						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
+
+				directories.put( configKey, file );
 			}
+			catch ( NoClassDefFoundError e )
+			{
+				File file = FileFunc.isAbsolute( defPath ) ? new File( defPath ) : new File( getDirectory(), defPath );
 
-			File file = FileFunc.isAbsolute( dir ) ? new File( dir ) : new File( getDirectory(), dir );
+				if ( directoryCheck )
+					if ( !FileFunc.setDirectoryAccess( file ) )
+						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
 
-			if ( directoryCheck )
-				if ( !FileFunc.setDirectoryAccess( file ) )
-					throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
+				return file;
 
-			directories.put( configKey, file );
-		}
+				// XXX Don't save so we can try again later
+			}
 
 		return directories.get( configKey );
 	}
@@ -354,150 +415,175 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public double getDouble( String path )
 	{
+		yamlCheck();
 		return yaml.getDouble( path );
 	}
 
 	@Override
 	public double getDouble( String path, double def )
 	{
+		yamlCheck();
 		return yaml.getDouble( path, def );
 	}
 
 	@Override
 	public List<Double> getDoubleList( String path )
 	{
+		yamlCheck();
 		return yaml.getDoubleList( path );
 	}
 
 	@Override
 	public List<Float> getFloatList( String path )
 	{
+		yamlCheck();
 		return yaml.getFloatList( path );
 	}
 
 	@Override
 	public int getInt( String path )
 	{
+		yamlCheck();
 		return yaml.getInt( path );
 	}
 
 	@Override
 	public int getInt( String path, int def )
 	{
+		yamlCheck();
 		return yaml.getInt( path, def );
 	}
 
 	@Override
 	public List<Integer> getIntegerList( String path )
 	{
+		yamlCheck();
 		return yaml.getIntegerList( path );
 	}
 
 	@Override
 	public Set<String> getKeys()
 	{
+		yamlCheck();
 		return yaml.getKeys();
 	}
 
 	@Override
 	public Set<String> getKeys( boolean deep )
 	{
+		yamlCheck();
 		return yaml.getKeys( deep );
 	}
 
 	@Override
 	public <T> List<T> getList( String path )
 	{
+		yamlCheck();
 		return yaml.getList( path );
 	}
 
 	@Override
 	public <T> List<T> getList( String path, List<T> def )
 	{
+		yamlCheck();
 		return yaml.getList( path, def );
 	}
 
 	@Override
 	public long getLong( String path )
 	{
+		yamlCheck();
 		return yaml.getLong( path );
 	}
 
 	@Override
 	public long getLong( String path, long def )
 	{
+		yamlCheck();
 		return yaml.getLong( path, def );
 	}
 
 	@Override
 	public List<Long> getLongList( String path )
 	{
+		yamlCheck();
 		return yaml.getLongList( path );
 	}
 
 	@Override
 	public List<Map<?, ?>> getMapList( String path )
 	{
+		yamlCheck();
 		return yaml.getMapList( path );
 	}
 
 	@Override
 	public String getName()
 	{
+		yamlCheck();
 		return yaml.getName();
 	}
 
 	@Override
 	public ConfigurationSection getParent()
 	{
+		yamlCheck();
 		return yaml.getParent();
 	}
 
 	@Override
 	public Configuration getRoot()
 	{
+		yamlCheck();
 		return yaml.getRoot();
 	}
 
 	@Override
 	public List<Short> getShortList( String path )
 	{
+		yamlCheck();
 		return yaml.getShortList( path );
 	}
 
 	@Override
 	public String getString( String path )
 	{
+		yamlCheck();
 		return yaml.getString( path );
 	}
 
 	@Override
 	public String getString( String path, String def )
 	{
+		yamlCheck();
 		return yaml.getString( path, def );
 	}
 
 	@Override
 	public List<String> getStringList( String path )
 	{
+		yamlCheck();
 		return yaml.getStringList( path );
 	}
 
 	@Override
 	public List<String> getStringList( String path, List<String> def )
 	{
+		yamlCheck();
 		return yaml.getStringList( path, def );
 	}
 
 	@Override
 	public Map<String, Object> getValues( boolean deep )
 	{
+		yamlCheck();
 		return yaml.getValues( deep );
 	}
 
 	@Override
 	public boolean has( String path )
 	{
+		yamlCheck();
 		return yaml.has( path );
 	}
 
@@ -538,29 +624,33 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public boolean isBoolean( String path )
 	{
+		yamlCheck();
 		return yaml.isBoolean( path );
 	}
 
 	@Override
 	public boolean isColor( String path )
 	{
+		yamlCheck();
 		return yaml.isColor( path );
 	}
 
 	public boolean isConfigLoaded()
 	{
-		return loadedLocation != null;
+		return yaml != null;
 	}
 
 	@Override
 	public boolean isConfigurationSection( String path )
 	{
+		yamlCheck();
 		return yaml.isConfigurationSection( path );
 	}
 
 	@Override
 	public boolean isDouble( String path )
 	{
+		yamlCheck();
 		return yaml.isDouble( path );
 	}
 
@@ -573,30 +663,35 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public boolean isInt( String path )
 	{
+		yamlCheck();
 		return yaml.isInt( path );
 	}
 
 	@Override
 	public boolean isList( String path )
 	{
+		yamlCheck();
 		return yaml.isList( path );
 	}
 
 	@Override
 	public boolean isLong( String path )
 	{
+		yamlCheck();
 		return yaml.isLong( path );
 	}
 
 	@Override
 	public boolean isSet( String path )
 	{
+		yamlCheck();
 		return yaml.isSet( path );
 	}
 
 	@Override
 	public boolean isString( String path )
 	{
+		yamlCheck();
 		return yaml.isString( path );
 	}
 
@@ -608,27 +703,34 @@ public class AppConfig implements Configuration, TaskRegistrar
 	 * @param resourcePath
 	 *             The packaged jar file resource path
 	 */
-	protected void loadConfig( File location, String resourcePath )
+	protected void loadConfig()
 	{
-		if ( location == null )
-			throw new StartupException( "The configuration file location is null, did you define the --config argument?" );
+		try
+		{
+			yaml = YamlConfiguration.loadConfiguration( file() );
+			yaml.options().copyDefaults( true );
+			yaml.setDefaults( YamlConfiguration.loadConfiguration( getClass().getClassLoader().getResourceAsStream( "com/chiorichan/config.yaml" ) ) );
+			directories.clear();
 
-		yaml = YamlConfiguration.loadConfiguration( location );
-		yaml.options().copyDefaults( true );
-		yaml.setDefaults( YamlConfiguration.loadConfiguration( getClass().getClassLoader().getResourceAsStream( resourcePath ) ) );
+			Log.get().info( String.format( "Loaded application configuration from %s", FileFunc.relPath( configFile ) ) );
+		}
+		catch ( NoClassDefFoundError e )
+		{
 
-		loadedLocation = location;
-		directories.clear();
+		}
 	}
 
 	@Override
 	public ConfigurationOptions options()
 	{
-		return yaml.options();
+		return yaml == null ? null : yaml.options();
 	}
 
 	public void reload()
 	{
+		if ( yaml == null )
+			return;
+
 		try
 		{
 			yaml.load( file() );
@@ -641,6 +743,9 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public void save()
 	{
+		if ( yaml == null )
+			return;
+
 		// TODO Targeted key path saves
 		// TODO Save only changed values, so manual edits are not overridden
 
@@ -665,12 +770,14 @@ public class AppConfig implements Configuration, TaskRegistrar
 	@Override
 	public void set( String path, Object value )
 	{
+		yamlCheck();
 		yaml.set( path, value );
 	}
 
 	@Override
 	public void setDefaults( Configuration defaults )
 	{
+		yamlCheck();
 		yaml.setDefaults( defaults );
 	}
 
@@ -681,11 +788,18 @@ public class AppConfig implements Configuration, TaskRegistrar
 	 */
 	public boolean warnOnOverload()
 	{
+		yamlCheck();
 		return yaml.getBoolean( "settings.warn-on-overload" );
 	}
 
 	public YamlConfiguration yaml()
 	{
 		return yaml;
+	}
+
+	public void yamlCheck()
+	{
+		if ( yaml == null )
+			throw new IllegalStateException( "The YAML configuration is not loaded." );
 	}
 }

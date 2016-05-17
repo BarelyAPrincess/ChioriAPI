@@ -33,7 +33,7 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ServiceManager;
 import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.util.Application;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -265,8 +265,8 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 				for ( String l : banner )
 					Log.get().info( EnumColor.GOLD + l );
 
-				Log.get().info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + "Starting " + Versioning.getProduct() + " Version " + Versioning.getVersion() );
-				Log.get().info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + Versioning.getCopyright() );
+				Log.get().info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + "Starting " + Application.getProduct() + " Version " + Application.getVersion() );
+				Log.get().info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + Application.getCopyright() );
 			}
 			finally
 			{

@@ -18,6 +18,7 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Hex;
 
 import com.chiorichan.lang.StartupException;
+import com.chiorichan.lang.UncaughtException;
 import com.google.common.base.Joiner;
 
 public class ObjectFunc<T>
@@ -276,7 +277,7 @@ public class ObjectFunc<T>
 		return hex2Readable( e2 );
 	}
 
-	public static <T> T initClass( Class<T> clz, Object... args ) throws StartupException
+	public static <T> T initClass( Class<T> clz, Object... args ) throws UncaughtException
 	{
 		try
 		{
@@ -293,7 +294,14 @@ public class ObjectFunc<T>
 			constructor.setAccessible( true );
 			return constructor.newInstance( args );
 		}
-		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e )
+		catch ( InvocationTargetException e )
+		{
+			if ( e.getTargetException() instanceof UncaughtException )
+				throw ( UncaughtException ) e.getTargetException();
+			else
+				throw new StartupException( String.format( "Failed to initalize a new instance of %s, because it has thrown an exception.", clz.getSimpleName() ), e.getTargetException() );
+		}
+		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e )
 		{
 			String argClasses = Joiner.on( ", " ).join( new ArrayList<String>()
 			{
@@ -314,6 +322,57 @@ public class ObjectFunc<T>
 			return true;
 
 		return false;
+	}
+
+	public static void isTrue( final boolean expression )
+	{
+		if ( expression == false )
+			throw new IllegalArgumentException( "The validated expression is false" );
+	}
+
+	public static void isTrue( final boolean expression, final String msg )
+	{
+		if ( expression == false )
+			throw new IllegalArgumentException( msg );
+	}
+
+	public static boolean noLoopDetected( Class<?> cls, String method )
+	{
+		return noLoopDetected( cls.getCanonicalName(), method );
+	}
+
+	/**
+	 * Detects if the specified class and method has been called in a previous stack trace event.
+	 *
+	 * @param cls
+	 *             The class to check.
+	 * @param method
+	 *             The method to check, null to ignore.
+	 * @return
+	 *         True if no loop was detected.
+	 */
+	public static boolean noLoopDetected( String cls, String method )
+	{
+		for ( StackTraceElement ste : Thread.currentThread().getStackTrace() )
+			if ( ste.getClassName().equals( cls ) && ( method == null || ste.getMethodName().equals( method ) ) )
+				return false;
+		return true;
+	}
+
+	public static <T extends CharSequence> T notEmpty( final T chars, final String message, final Object... values )
+	{
+		if ( chars == null )
+			throw new NullPointerException( String.format( message, values ) );
+		if ( chars.length() == 0 )
+			throw new IllegalArgumentException( String.format( message, values ) );
+		return chars;
+	}
+
+	public static <T> T notNull( final T object, final String message, final Object... values )
+	{
+		if ( object == null )
+			throw new NullPointerException( String.format( message, values ) );
+		return object;
 	}
 
 	public static int safeLongToInt( long l )

@@ -328,10 +328,18 @@ public abstract class Plugin extends PluginBase
 		{
 			isEnabled = enabled;
 
-			if ( isEnabled )
-				onEnable();
-			else
-				onDisable();
+			try
+			{
+				if ( enabled )
+					onEnable();
+				else
+					onDisable();
+			}
+			catch ( Throwable e )
+			{
+				isEnabled = false;
+				throw e;
+			}
 		}
 	}
 

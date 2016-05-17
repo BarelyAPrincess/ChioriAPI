@@ -603,7 +603,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	@Override
 	public void init() throws PermissionBackendException
 	{
-		AppConfig config = AppController.config();
+		AppConfig config = AppConfig.get();
 		debugMode = config.getBoolean( "permissions.debug", debugMode );
 		allowOps = config.getBoolean( "permissions.allowOps", allowOps );
 
@@ -622,12 +622,12 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 		PermissionBackend.registerBackendAlias( "file", FileBackend.class );
 		PermissionBackend.registerBackendAlias( "memory", MemoryBackend.class );
 
-		String backendName = AppController.config().getString( "permissions.backend" );
+		String backendName = AppConfig.get().getString( "permissions.backend" );
 
 		if ( backendName == null || backendName.isEmpty() )
 		{
 			backendName = PermissionBackend.defaultBackend; // Default backend
-			AppController.config().set( "permissions.backend", backendName );
+			AppConfig.get().set( "permissions.backend", backendName );
 		}
 
 		setBackend( backendName );
@@ -732,7 +732,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 		backend.loadEntities();
 		backend.loadGroups();
 
-		hasWhitelist = AppController.config().getBoolean( "settings.whitelist" );
+		hasWhitelist = AppConfig.get().getBoolean( "settings.whitelist" );
 	}
 
 	/**
@@ -838,6 +838,6 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	public void setWhitelist( boolean value )
 	{
 		hasWhitelist = value;
-		AppController.config().set( "settings.whitelist", value );
+		AppConfig.get().set( "settings.whitelist", value );
 	}
 }

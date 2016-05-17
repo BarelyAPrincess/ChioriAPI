@@ -18,38 +18,48 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
 import com.chiorichan.lang.EnumColor;
+import com.chiorichan.util.Application;
 import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.Versioning;
 
 public class Log implements LogAPI
 {
 	private static final Set<Log> loggers = new HashSet<>();
 	private static final Logger rootLogger = Logger.getLogger( "" );
+	private static final ConsoleHandler consoleHandler = new ConsoleHandler();
 	private static final PrintStream altOutputStream = new PrintStream( new FileOutputStream( FileDescriptor.out ) );
 
 	static
 	{
 		for ( Handler h : rootLogger.getHandlers() )
 			rootLogger.removeHandler( h );
+
+		consoleHandler.setFormatter( new SimpleLogFormatter() );
+		Log.addHandler( consoleHandler );
+
+		System.setOut( new PrintStream( new LoggerOutputStream( Log.get( "SysOut" ), Level.INFO ), true ) );
+		System.setErr( new PrintStream( new LoggerOutputStream( Log.get( "SysErr" ), Level.SEVERE ), true ) );
 	}
 
 	public static void addFileHandler( String filename, boolean useColor, int archiveLimit, Level level )
 	{
 		try
 		{
-			File log = new File( AppController.config().getDirectoryLogs(), filename + ".log" );
+			File log = new File( AppConfig.get().getDirectoryLogs(), filename + ".log" );
 
 			if ( log.exists() )
 			{
 				if ( archiveLimit > 0 )
-					FileFunc.gzFile( log, new File( AppController.config().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
+					FileFunc.gzFile( log, new File( AppConfig.get().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
 				log.delete();
 			}
 
@@ -74,7 +84,7 @@ public class Log implements LogAPI
 
 	private static void cleanupLogs( final String suffix, int limit )
 	{
-		File[] files = AppController.config().getDirectoryLogs().listFiles( new FilenameFilter()
+		File[] files = AppConfig.get().getDirectoryLogs().listFiles( new FilenameFilter()
 		{
 			@Override
 			public boolean accept( File dir, String name )
@@ -147,8 +157,24 @@ public class Log implements LogAPI
 		rootLogger.removeHandler( h );
 	}
 
+	public static void setConsoleFormatter( Formatter formatter )
+	{
+		consoleHandler.setFormatter( formatter );
+	}
+
+	/**
+	 * Checks if the currently set Log Formatter, supports colored logs.
+	 *
+	 * @return true if it does
+	 */
+	public static boolean useColor()
+	{
+		return consoleHandler.getFormatter() instanceof DefaultLogFormatter && ( ( DefaultLogFormatter ) consoleHandler.getFormatter() ).useColor();
+	}
+
 	private final Logger logger;
 	private final String id;
+
 	private boolean hasErrored = false;
 
 	/**
@@ -174,23 +200,23 @@ public class Log implements LogAPI
 	@Override
 	public void debug( Object... var1 )
 	{
-		if ( !Versioning.isDevelopment() || var1.length < 1 )
+		if ( !Application.isDevelopment() || var1.length < 1 )
 			return;
 
 		for ( Object var2 : var1 )
 			if ( var2 != null )
-				info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + ">>>>   " + var2.toString() + "   <<<< " );
+				highlight( ">>>>   " + var2.toString() + "   <<<< " );
 	}
 
 	@Override
 	public void dev( Object... var1 )
 	{
-		if ( !Versioning.isDevelopment() || var1.length < 1 )
+		if ( !Application.isDevelopment() || var1.length < 1 )
 			return;
 
 		for ( Object var2 : var1 )
 			if ( var2 != null )
-				info( EnumColor.NEGATIVE + "" + EnumColor.WHITE + "[DEV NOTICE] " + var2.toString() );
+				highlight( "[DEV NOTICE] " + var2.toString() );
 	}
 
 	@Override
@@ -230,13 +256,20 @@ public class Log implements LogAPI
 	@Override
 	public void highlight( String msg )
 	{
-		log( Level.INFO, EnumColor.GOLD + "" + EnumColor.NEGATIVE + msg );
+		try
+		{
+			log( Level.INFO, EnumColor.GOLD + "" + EnumColor.NEGATIVE + msg );
+		}
+		catch ( NoClassDefFoundError e )
+		{
+			log( Level.INFO, msg );
+		}
 	}
 
 	@Override
 	public void info( String s )
 	{
-		log( Level.INFO, EnumColor.WHITE + s );
+		log( Level.INFO, s );
 	}
 
 	@Override
@@ -247,12 +280,12 @@ public class Log implements LogAPI
 			if ( hasErrored )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
-				logger.log( l, msg );
+				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg );
 		}
 		catch ( Throwable t )
 		{
 			markError( t );
-			if ( Versioning.isDevelopment() )
+			if ( Application.isDevelopment() )
 				throw t;
 		}
 	}
@@ -265,12 +298,12 @@ public class Log implements LogAPI
 			if ( hasErrored )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
-				logger.log( l, msg, params );
+				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, params );
 		}
 		catch ( Throwable t )
 		{
 			markError( t );
-			if ( Versioning.isDevelopment() )
+			if ( Application.isDevelopment() )
 				throw t;
 		}
 	}
@@ -283,12 +316,12 @@ public class Log implements LogAPI
 			if ( hasErrored )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
-				logger.log( l, msg, t );
+				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, t );
 		}
 		catch ( Throwable tt )
 		{
 			markError( tt );
-			if ( Versioning.isDevelopment() )
+			if ( Application.isDevelopment() )
 				throw tt;
 		}
 	}
@@ -299,7 +332,7 @@ public class Log implements LogAPI
 
 		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "The child logger \"" + getId() + "\" has thrown an unrecoverable exception!" );
 		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Please report the following stacktrace to the application developer." );
-		if ( Versioning.isDevelopment() )
+		if ( Application.isDevelopment() )
 			altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "ATTENTION DEVELOPER: Calling the method \"Log.get( [log name] ).unmarkError()\" will reset the errored state." );
 		t.printStackTrace( altOutputStream );
 	}
@@ -311,10 +344,17 @@ public class Log implements LogAPI
 
 	public String[] multilineColorRepeater( String[] var1 )
 	{
-		String color = EnumColor.getLastColors( var1[0] );
+		try
+		{
+			String color = EnumColor.getLastColors( var1[0] );
 
-		for ( int l = 0; l < var1.length; l++ )
-			var1[l] = color + var1[l];
+			for ( int l = 0; l < var1.length; l++ )
+				var1[l] = color + var1[l];
+		}
+		catch ( NoClassDefFoundError e )
+		{
+
+		}
 
 		return var1;
 	}
@@ -350,25 +390,25 @@ public class Log implements LogAPI
 	@Override
 	public void severe( String s )
 	{
-		log( Level.SEVERE, EnumColor.RED + s );
+		log( Level.SEVERE, s );
 	}
 
 	@Override
 	public void severe( String s, Object... objs )
 	{
-		log( Level.SEVERE, EnumColor.RED + s, objs );
+		log( Level.SEVERE, s, objs );
 	}
 
 	@Override
 	public void severe( String s, Throwable t )
 	{
-		log( Level.SEVERE, EnumColor.RED + s, t );
+		log( Level.SEVERE, s, t );
 	}
 
 	@Override
 	public void severe( Throwable t )
 	{
-		log( Level.SEVERE, EnumColor.RED + t.getMessage(), t );
+		log( Level.SEVERE, "Encountered An Exception:", t );
 	}
 
 	public void unmarkError()
@@ -379,18 +419,18 @@ public class Log implements LogAPI
 	@Override
 	public void warning( String s )
 	{
-		log( Level.WARNING, EnumColor.GOLD + s );
+		log( Level.WARNING, s );
 	}
 
 	@Override
 	public void warning( String s, Object... objs )
 	{
-		log( Level.WARNING, EnumColor.GOLD + s, objs );
+		log( Level.WARNING, s, objs );
 	}
 
 	@Override
 	public void warning( String s, Throwable throwable )
 	{
-		log( Level.WARNING, EnumColor.GOLD + s, throwable );
+		log( Level.WARNING, s, throwable );
 	}
 }

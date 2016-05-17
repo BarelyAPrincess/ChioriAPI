@@ -17,7 +17,7 @@ import java.util.Map;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountContext;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.AccountPermissible;
@@ -51,13 +51,12 @@ public class FileTypeCreator extends AccountTypeCreator
 
 	public FileTypeCreator()
 	{
-		String fileBase = AppController.config().getString( "accounts.fileType.filebase", "accounts" );
-		accountsDirectory = new File( fileBase );
+		accountsDirectory = AppConfig.get().getDirectory( "accounts", "accounts" );
 
 		if ( !FileFunc.setDirectoryAccess( accountsDirectory ) )
 			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( accountsDirectory ) + "\"!" );
 
-		accountFields = AppController.config().getStringList( "accounts.fileType.fields", new ArrayList<String>() );
+		accountFields = AppConfig.get().getStringList( "accounts.fileType.fields", new ArrayList<String>() );
 
 		accountFields.add( "username" );
 

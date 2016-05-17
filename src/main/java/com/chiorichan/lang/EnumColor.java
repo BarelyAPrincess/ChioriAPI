@@ -9,15 +9,15 @@
 package com.chiorichan.lang;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.Validate;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.Ansi.Attribute;
 
-import com.google.common.collect.Maps;
+import com.chiorichan.util.ObjectFunc;
 
 /**
  * All supported color values for chat
@@ -112,26 +112,22 @@ public enum EnumColor
 	 * Resets all previous chat colors or formats.
 	 */
 	RESET( 'r', 0x15 ),
-	
+
 	FAINT( 'z', 0x16 ),
-	
+
 	NEGATIVE( 'x', 0x17 );
-	
+
 	/**
 	 * The special character which prefixes all chat color codes. Use this if you need to dynamically convert color
 	 * codes from your custom format.
 	 */
 	public static final char COLOR_CHAR = '\u00A7';
 	private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile( "(?i)" + String.valueOf( COLOR_CHAR ) + "[0-9A-FK-OR]" );
-	
-	private final int intCode;
-	private final char code;
-	private final boolean isFormat;
-	private final String toString;
-	private static final Map<Integer, EnumColor> BY_ID = Maps.newHashMap();
-	private static final Map<Character, EnumColor> BY_CHAR = Maps.newHashMap();
+
+	private static final Map<Integer, EnumColor> BY_ID = new HashMap<>();
+	private static final Map<Character, EnumColor> BY_CHAR = new HashMap<>();
 	private static Map<EnumColor, String> replacements = new EnumMap<EnumColor, String>( EnumColor.class );
-	
+
 	static
 	{
 		replacements.put( EnumColor.BLACK, Ansi.ansi().fg( Ansi.Color.BLACK ).boldOff().toString() );
@@ -159,180 +155,7 @@ public enum EnumColor
 		replacements.put( EnumColor.NEGATIVE, Ansi.ansi().a( Attribute.NEGATIVE_ON ).toString() );
 		replacements.put( EnumColor.RESET, Ansi.ansi().a( Attribute.RESET ).fg( Ansi.Color.DEFAULT ).toString() );
 	}
-	
-	private EnumColor( char code, int intCode )
-	{
-		this( code, intCode, false );
-	}
-	
-	private EnumColor( char code, int intCode, boolean isFormat )
-	{
-		this.code = code;
-		this.intCode = intCode;
-		this.isFormat = isFormat;
-		this.toString = new String( new char[] {COLOR_CHAR, code} );
-	}
-	
-	/**
-	 * Gets the char value associated with this color
-	 * 
-	 * @return A char value of this color code
-	 */
-	public char getChar()
-	{
-		return code;
-	}
-	
-	@Override
-	public String toString()
-	{
-		return toString;
-	}
-	
-	/**
-	 * Checks if this code is a format code as opposed to a color code.
-	 */
-	public boolean isFormat()
-	{
-		return isFormat;
-	}
-	
-	/**
-	 * Checks if this code is a color code as opposed to a format code.
-	 */
-	public boolean isColor()
-	{
-		return !isFormat && this != RESET;
-	}
-	
-	/**
-	 * Gets the color represented by the specified color code
-	 * 
-	 * @param code
-	 *            Code to check
-	 * @return Associative ConsoleColor with the given code, or null if it doesn't exist
-	 */
-	public static EnumColor getByChar( char code )
-	{
-		return BY_CHAR.get( code );
-	}
-	
-	/**
-	 * Gets the color represented by the specified color code
-	 * 
-	 * @param code
-	 *            Code to check
-	 * @return Associative ConsoleColor with the given code, or null if it doesn't exist
-	 */
-	public static EnumColor getByChar( String code )
-	{
-		Validate.notNull( code, "Code cannot be null" );
-		Validate.isTrue( code.length() > 0, "Code must have at least one char" );
-		
-		return BY_CHAR.get( code.charAt( 0 ) );
-	}
-	
-	/**
-	 * Strips the given message of all color codes
-	 * 
-	 * @param input
-	 *            String to strip of color
-	 * @return A copy of the input string, without any coloring
-	 */
-	public static String stripColor( final String input )
-	{
-		if ( input == null )
-		{
-			return null;
-		}
-		
-		return STRIP_COLOR_PATTERN.matcher( input ).replaceAll( "" );
-	}
-	
-	/**
-	 * Translates a string using an alternate color code character into a string that uses the internal
-	 * ConsoleColor.COLOR_CODE color code character. The alternate color code character will only be replaced if it is
-	 * immediately followed by 0-9, A-F, a-f, K-O, k-o, R or r.
-	 * 
-	 * @param altColorChar
-	 *            The alternate color code character to replace. Ex: &
-	 * @param textToTranslate
-	 *            Text containing the alternate color code character.
-	 * @return Text containing the ChatColor.COLOR_CODE color code character.
-	 */
-	public static String translateAlternateColorCodes( char altColorChar, String textToTranslate )
-	{
-		char[] b = textToTranslate.toCharArray();
-		for ( int i = 0; i < b.length - 1; i++ )
-		{
-			if ( b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf( b[i + 1] ) > -1 )
-			{
-				b[i] = EnumColor.COLOR_CHAR;
-				b[i + 1] = Character.toLowerCase( b[i + 1] );
-			}
-		}
-		return new String( b );
-	}
-	
-	public static String removeAltColors( String var )
-	{
-		var = var.replaceAll( "&.", "" );
-		var = var.replaceAll( "§.", "" );
-		return var;
-	}
-	
-	public static String transAltColors( String var1 )
-	{
-		var1 = translateAlternateColorCodes( '&', var1 ) + EnumColor.RESET;
-		
-		for ( EnumColor color : values() )
-		{
-			if ( replacements.containsKey( color ) )
-				var1 = var1.replaceAll( "(?i)" + color.toString(), replacements.get( color ) );
-			else
-				var1 = var1.replaceAll( "(?i)" + color.toString(), "" );
-		}
-		
-		return var1;
-	}
-	
-	/**
-	 * Gets the ChatColors used at the end of the given input string.
-	 * 
-	 * @param input
-	 *            Input string to retrieve the colors from.
-	 * @return Any remaining ChatColors to pass onto the next line.
-	 */
-	public static String getLastColors( String input )
-	{
-		String result = "";
-		int length = input.length();
-		
-		// Search backwards from the end as it is faster
-		for ( int index = length - 1; index > -1; index-- )
-		{
-			char section = input.charAt( index );
-			if ( section == COLOR_CHAR && index < length - 1 )
-			{
-				char c = input.charAt( index + 1 );
-				EnumColor color = getByChar( c );
-				
-				if ( color != null )
-				{
-					result = color.toString() + result;
-					
-					// Once we find a color or reset we can stop searching
-					if ( color.isColor() || color.equals( RESET ) )
-					{
-						break;
-					}
-				}
-			}
-		}
-		
-		return result;
-	}
-	
+
 	static
 	{
 		for ( EnumColor color : values() )
@@ -341,7 +164,7 @@ public enum EnumColor
 			BY_CHAR.put( color.code, color );
 		}
 	}
-	
+
 	public static EnumColor fromLevel( Level var1 )
 	{
 		if ( var1 == Level.FINEST || var1 == Level.FINER || var1 == Level.FINE )
@@ -356,5 +179,178 @@ public enum EnumColor
 			return DARK_PURPLE;
 		else
 			return WHITE;
+	}
+
+	/**
+	 * Gets the color represented by the specified color code
+	 *
+	 * @param code
+	 *             Code to check
+	 * @return Associative ConsoleColor with the given code, or null if it doesn't exist
+	 */
+	public static EnumColor getByChar( char code )
+	{
+		return BY_CHAR.get( code );
+	}
+
+	/**
+	 * Gets the color represented by the specified color code
+	 *
+	 * @param code
+	 *             Code to check
+	 * @return Associative ConsoleColor with the given code, or null if it doesn't exist
+	 */
+	public static EnumColor getByChar( String code )
+	{
+		ObjectFunc.notNull( code, "Code cannot be null" );
+		ObjectFunc.isTrue( code.length() > 0, "Code must have at least one char" );
+
+		return BY_CHAR.get( code.charAt( 0 ) );
+	}
+
+	/**
+	 * Gets the ChatColors used at the end of the given input string.
+	 *
+	 * @param input
+	 *             Input string to retrieve the colors from.
+	 * @return Any remaining ChatColors to pass onto the next line.
+	 */
+	public static String getLastColors( String input )
+	{
+		String result = "";
+		int length = input.length();
+
+		// Search backwards from the end as it is faster
+		for ( int index = length - 1; index > -1; index-- )
+		{
+			char section = input.charAt( index );
+			if ( section == COLOR_CHAR && index < length - 1 )
+			{
+				char c = input.charAt( index + 1 );
+				EnumColor color = getByChar( c );
+
+				if ( color != null )
+				{
+					result = color.toString() + result;
+
+					// Once we find a color or reset we can stop searching
+					if ( color.isColor() || color.equals( RESET ) )
+						break;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public static String removeAltColors( String var )
+	{
+		var = var.replaceAll( "&.", "" );
+		var = var.replaceAll( "§.", "" );
+		return var;
+	}
+
+	/**
+	 * Strips the given message of all color codes
+	 *
+	 * @param input
+	 *             String to strip of color
+	 * @return A copy of the input string, without any coloring
+	 */
+	public static String stripColor( final String input )
+	{
+		if ( input == null )
+			return null;
+
+		return STRIP_COLOR_PATTERN.matcher( input ).replaceAll( "" );
+	}
+
+	public static String transAltColors( String var1 )
+	{
+		var1 = translateAlternateColorCodes( '&', var1 ) + EnumColor.RESET;
+
+		for ( EnumColor color : values() )
+			if ( replacements.containsKey( color ) )
+				var1 = var1.replaceAll( "(?i)" + color.toString(), replacements.get( color ) );
+			else
+				var1 = var1.replaceAll( "(?i)" + color.toString(), "" );
+
+		return var1;
+	}
+
+	/**
+	 * Translates a string using an alternate color code character into a string that uses the internal
+	 * ConsoleColor.COLOR_CODE color code character. The alternate color code character will only be replaced if it is
+	 * immediately followed by 0-9, A-F, a-f, K-O, k-o, R or r.
+	 *
+	 * @param altColorChar
+	 *             The alternate color code character to replace. Ex: &
+	 * @param textToTranslate
+	 *             Text containing the alternate color code character.
+	 * @return Text containing the ChatColor.COLOR_CODE color code character.
+	 */
+	public static String translateAlternateColorCodes( char altColorChar, String textToTranslate )
+	{
+		char[] b = textToTranslate.toCharArray();
+		for ( int i = 0; i < b.length - 1; i++ )
+			if ( b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf( b[i + 1] ) > -1 )
+			{
+				b[i] = EnumColor.COLOR_CHAR;
+				b[i + 1] = Character.toLowerCase( b[i + 1] );
+			}
+		return new String( b );
+	}
+
+	private final int intCode;
+
+	private final char code;
+
+	private final boolean isFormat;
+
+	private final String toString;
+
+	private EnumColor( char code, int intCode )
+	{
+		this( code, intCode, false );
+	}
+
+	private EnumColor( char code, int intCode, boolean isFormat )
+	{
+		this.code = code;
+		this.intCode = intCode;
+		this.isFormat = isFormat;
+		this.toString = new String( new char[] {COLOR_CHAR, code} );
+	}
+
+	/**
+	 * Gets the char value associated with this color
+	 *
+	 * @return A char value of this color code
+	 */
+	public char getChar()
+	{
+		return code;
+	}
+
+	/**
+	 * Checks if this code is a color code as opposed to a format code.
+	 */
+	public boolean isColor()
+	{
+		return !isFormat && this != RESET;
+	}
+
+	/**
+	 * Checks if this code is a format code as opposed to a color code.
+	 */
+	public boolean isFormat()
+	{
+		return isFormat;
+	}
+
+	@Override
+	public String toString()
+	{
+		return toString;
 	}
 }

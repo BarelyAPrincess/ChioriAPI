@@ -26,7 +26,7 @@ import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.util.Application;
 
 /**
  * Used to interact with commands and logs
@@ -56,8 +56,8 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 
 	public void displayWelcomeMessage()
 	{
-		handler.println( String.format( "%s%sWelcome to %s Version %s!", EnumColor.NEGATIVE, EnumColor.GOLD, Versioning.getProduct(), Versioning.getVersion() ) );
-		handler.println( String.format( "%s%s%s", EnumColor.NEGATIVE, EnumColor.GOLD, Versioning.getCopyright() ) );
+		handler.println( String.format( "%s%sWelcome to %s Version %s!", EnumColor.NEGATIVE, EnumColor.GOLD, Application.getProduct(), Application.getVersion() ) );
+		handler.println( String.format( "%s%s%s", EnumColor.NEGATIVE, EnumColor.GOLD, Application.getCopyright() ) );
 	}
 
 	public abstract void finish();

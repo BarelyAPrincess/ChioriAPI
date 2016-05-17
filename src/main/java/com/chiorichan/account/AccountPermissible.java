@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Set;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.auth.AccountCredentials;
 import com.chiorichan.account.event.AccountFailedLoginEvent;
@@ -190,10 +190,10 @@ public abstract class AccountPermissible extends Permissible implements Account
 					AccountInstance acct = meta.instance();
 
 					// TODO Single login per via method checks?
-					if ( acct.countAttachments() > 1 && AppController.config().getBoolean( "accounts.singleLogin" ) )
+					if ( acct.countAttachments() > 1 && AppConfig.get().getBoolean( "accounts.singleLogin" ) )
 						for ( AccountAttachment ap : acct.getAttachments() )
 							if ( ap instanceof Kickable )
-								( ( Kickable ) ap ).kick( AppController.config().getString( "accounts.singleLoginMessage", "You logged in from another location." ) );
+								( ( Kickable ) ap ).kick( AppConfig.get().getString( "accounts.singleLoginMessage", "You logged in from another location." ) );
 
 					meta.set( "lastLoginTime", Timings.epoch() );
 

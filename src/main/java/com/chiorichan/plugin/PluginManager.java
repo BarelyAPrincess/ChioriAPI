@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Validate;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.EventHandlers;
@@ -80,15 +80,15 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	public boolean canQueryPlugins()
 	{
-		return AppController.config().getBoolean( "plugins.allowQuery" );
+		return AppConfig.get().getBoolean( "plugins.allowQuery" );
 	}
 
 	private void checkUpdate( File file )
 	{
-		if ( AppController.config().getDirectoryUpdates() == null || !AppController.config().getDirectoryUpdates().isDirectory() )
+		if ( AppConfig.get().getDirectoryUpdates() == null || !AppConfig.get().getDirectoryUpdates().isDirectory() )
 			return;
 
-		File updateFile = new File( AppController.config().getDirectoryUpdates(), file.getName() );
+		File updateFile = new File( AppConfig.get().getDirectoryUpdates(), file.getName() );
 		if ( updateFile.isFile() && FileFunc.copy( updateFile, file ) )
 			updateFile.delete();
 	}
@@ -375,7 +375,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		registerInterface( JavaPluginLoader.class );
 		// registerInterface( GroovyPluginLoader.class );
 
-		File pluginFolder = AppController.config().getDirectoryPlugins();
+		File pluginFolder = AppConfig.get().getDirectoryPlugins();
 		if ( pluginFolder.exists() )
 		{
 			Plugin[] plugins = loadPlugins( pluginFolder );

@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountAttachment;
 import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountManager;
@@ -244,7 +244,7 @@ public abstract class PermissionBaseCommand implements CommandListener
 
 	protected void informEntityWithException( String entityId, String message ) throws MessageException
 	{
-		if ( !AppController.config().getBoolean( "permissions.informEntities.changes", false ) )
+		if ( !AppConfig.get().getBoolean( "permissions.informEntities.changes", false ) )
 			return; // User informing is disabled
 
 		AccountMeta meta = AccountManager.instance().getAccount( entityId );

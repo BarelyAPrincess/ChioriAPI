@@ -13,7 +13,7 @@ import java.sql.SQLException;
 
 import org.apache.commons.lang3.Validate;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.AccountPermissible;
@@ -51,7 +51,7 @@ public class OnetimeTokenAccountAuthenticator extends AccountAuthenticator imple
 		}
 	}
 
-	private final SQLDatastore db = AppController.config().getDatabase();
+	private final SQLDatastore db = AppConfig.get().getDatabase();
 
 	OnetimeTokenAccountAuthenticator()
 	{
@@ -67,7 +67,7 @@ public class OnetimeTokenAccountAuthenticator extends AccountAuthenticator imple
 			e.printStackTrace();
 		}
 
-		TaskManager.instance().scheduleAsyncRepeatingTask( AccountManager.instance(), 0L, Ticks.MINUTE * AppController.config().getInt( "sessions.cleanupInterval", 5 ), new Runnable()
+		TaskManager.instance().scheduleAsyncRepeatingTask( AccountManager.instance(), 0L, Ticks.MINUTE * AppConfig.get().getInt( "sessions.cleanupInterval", 5 ), new Runnable()
 		{
 			@Override
 			public void run()

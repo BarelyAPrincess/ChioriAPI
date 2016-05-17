@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.datastore.sql.SQLExecute;
 import com.chiorichan.datastore.sql.bases.SQLDatastore;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
@@ -147,7 +147,7 @@ public class SQLBackend extends PermissionBackend
 
 	public SQLDatastore getSQL()
 	{
-		return AppController.config().getDatabase();
+		return AppConfig.get().getDatabase();
 	}
 
 	@Override

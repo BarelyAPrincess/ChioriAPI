@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.Validate;
+import com.chiorichan.util.ObjectFunc;
 
 // TODO Fix the number type casting issues
 
@@ -56,7 +56,7 @@ public class MemorySection implements ConfigurationSection
 	 */
 	public static String createPath( ConfigurationSection section, String key, ConfigurationSection relativeTo )
 	{
-		Validate.notNull( section, "Cannot create path without a section" );
+		ObjectFunc.notNull( section, "Cannot create path without a section" );
 		Configuration root = section.getRoot();
 		if ( root == null )
 			throw new IllegalStateException( "Cannot create path without a root" );
@@ -122,14 +122,14 @@ public class MemorySection implements ConfigurationSection
 	 */
 	protected MemorySection( ConfigurationSection parent, String path )
 	{
-		Validate.notNull( parent, "Parent cannot be null" );
-		Validate.notNull( path, "Path cannot be null" );
+		ObjectFunc.notNull( parent, "Parent cannot be null" );
+		ObjectFunc.notNull( path, "Path cannot be null" );
 
 		this.path = path;
 		this.parent = parent;
 		root = parent.getRoot();
 
-		Validate.notNull( root, "Path cannot be orphaned" );
+		ObjectFunc.notNull( root, "Path cannot be orphaned" );
 
 		fullPath = createPath( parent, path );
 	}
@@ -137,7 +137,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public void addDefault( String path, Object value )
 	{
-		Validate.notNull( path, "Path cannot be null" );
+		ObjectFunc.notNull( path, "Path cannot be null" );
 
 		Configuration root = getRoot();
 		if ( root == null )
@@ -156,7 +156,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public ConfigurationSection createSection( String path )
 	{
-		Validate.notEmpty( path, "Cannot create section at empty path" );
+		ObjectFunc.notEmpty( path, "Cannot create section at empty path" );
 		Configuration root = getRoot();
 		if ( root == null )
 			throw new IllegalStateException( "Cannot create section without a root" );
@@ -209,7 +209,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public Object get( String path, Object def )
 	{
-		Validate.notNull( path, "Path cannot be null" );
+		ObjectFunc.notNull( path, "Path cannot be null" );
 
 		if ( path.length() == 0 )
 			return this;
@@ -410,7 +410,7 @@ public class MemorySection implements ConfigurationSection
 
 	protected Object getDefault( String path )
 	{
-		Validate.notNull( path, "Path cannot be null" );
+		ObjectFunc.notNull( path, "Path cannot be null" );
 
 		Configuration root = getRoot();
 		Configuration defaults = root == null ? null : root.getDefaults();
@@ -783,7 +783,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public boolean has( String path )
 	{
-		Validate.notNull( path, "Path cannot be null" );
+		ObjectFunc.notNull( path, "Path cannot be null" );
 
 		if ( path.length() == 0 )
 			return true;
@@ -938,7 +938,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public void set( String path, Object value )
 	{
-		Validate.notEmpty( path, "Cannot set to an empty path" );
+		ObjectFunc.notEmpty( path, "Cannot set to an empty path" );
 
 		Configuration root = getRoot();
 		if ( root == null )

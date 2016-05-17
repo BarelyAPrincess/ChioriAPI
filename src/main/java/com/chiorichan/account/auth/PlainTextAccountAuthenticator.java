@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.AccountPermissible;
@@ -37,7 +37,7 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 		}
 	}
 
-	private final SQLDatastore db = AppController.config().getDatabase();
+	private final SQLDatastore db = AppConfig.get().getDatabase();
 
 	PlainTextAccountAuthenticator()
 	{
@@ -127,11 +127,11 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 	 * Sets the Account Password which is stored in a separate table for security
 	 *
 	 * @param acct
-	 *            The Account to set password for
+	 *             The Account to set password for
 	 * @param password
-	 *            The password to set
+	 *             The password to set
 	 * @param expires
-	 *            The password expiration. Use -1 for no expiration
+	 *             The password expiration. Use -1 for no expiration
 	 * @return True if we successfully set the password
 	 */
 	public boolean setPassword( AccountMeta acct, String password, int expires )

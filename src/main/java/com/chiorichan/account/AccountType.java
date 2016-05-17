@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.types.AccountTypeCreator;
 import com.chiorichan.account.types.FileTypeCreator;
 import com.chiorichan.account.types.MemoryTypeCreator;
@@ -209,7 +209,7 @@ public final class AccountType
 		if ( this == AccountType.MEMORY )
 			return false;
 
-		boolean def = AppController.config().getBoolean( "accounts." + getName() + "Type.default", true );
+		boolean def = AppConfig.get().getBoolean( "accounts." + getName() + "Type.default", true );
 
 		if ( def && !isEnabled() )
 			AccountManager.getLogger().warning( "Your default Account Type is '" + getName() + "' and it's not enabled, possibly due to failure to start, account creation will most likely fail." );
@@ -233,6 +233,6 @@ public final class AccountType
 		 * Lastly we ask the AccountCreator directly if it's enabled.
 		 * Returning false would be the answer if there was a problem enabling the creator.
 		 */
-		return AppController.config().getBoolean( "accounts." + getName() + "Type.enabled", true ) && getCreator().isEnabled();
+		return AppConfig.get().getBoolean( "accounts." + getName() + "Type.enabled", true ) && getCreator().isEnabled();
 	}
 }

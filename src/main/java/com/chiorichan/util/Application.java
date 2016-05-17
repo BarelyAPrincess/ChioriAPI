@@ -18,14 +18,14 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.SystemUtils;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.AppLoader;
 import com.chiorichan.logger.Log;
 
 /**
  * Provides easy access to the server metadata plus operating system and jvm information
  */
-public class Versioning
+public class Application
 {
 	private static Properties metadata;
 
@@ -33,6 +33,8 @@ public class Versioning
 	{
 		loadMetaData( false );
 	}
+
+	private static String OS = System.getProperty( "os.name" ).toLowerCase();
 
 	/**
 	 * Get the server build number
@@ -98,7 +100,7 @@ public class Versioning
 	{
 		String path = System.getProperty( "java.home" ) + File.pathSeparator + "bin" + File.pathSeparator;
 
-		if ( Versioning.isWindows() )
+		if ( Application.isWindows() )
 			if ( new File( path + "javaw.exe" ).isFile() )
 				return path + "javaw.exe";
 			else if ( new File( path + "java.exe" ).isFile() )
@@ -215,7 +217,24 @@ public class Versioning
 	 */
 	public static boolean isDevelopment()
 	{
-		return "0".equals( getBuildNumber() ) || AppController.config() != null && AppController.config().getBoolean( "server.developmentMode", false );
+		return "0".equals( getBuildNumber() ) || AppConfig.get() != null && AppConfig.get().getBoolean( "server.developmentMode", false );
+	}
+
+	/**
+	 * Indicates if we are running Mac OS X
+	 *
+	 * @return True if we are running on Mac
+	 */
+	public static boolean isMac()
+	{
+		try
+		{
+			return SystemUtils.IS_OS_MAC;
+		}
+		catch ( NoClassDefFoundError e )
+		{
+			return OS.indexOf( "mac" ) >= 0;
+		}
 	}
 
 	/**
@@ -271,16 +290,37 @@ public class Versioning
 	}
 
 	/**
+	 * Indicates if we are running on Solaris OS
+	 *
+	 * @return True if we are running on Solaris
+	 */
+	public static boolean isSolaris()
+	{
+		try
+		{
+			return SystemUtils.IS_OS_SOLARIS;
+		}
+		catch ( NoClassDefFoundError e )
+		{
+			return OS.indexOf( "sunos" ) >= 0;
+		}
+	}
+
+	/**
 	 * Indicates if we are running on an Unix-like Operating System, e.g., Linux or Max OS X
 	 *
 	 * @return True if we are running on an Unix-like OS.
 	 */
 	public static boolean isUnixLikeOS()
 	{
-		// String os = System.getProperty( "os.name" );
-		// return "linux".equalsIgnoreCase( os ) || "unix".equalsIgnoreCase( os ) || "mac os x".equalsIgnoreCase( os );
-
-		return SystemUtils.IS_OS_UNIX;
+		try
+		{
+			return SystemUtils.IS_OS_UNIX;
+		}
+		catch ( NoClassDefFoundError e )
+		{
+			return OS.indexOf( "nix" ) >= 0 || OS.indexOf( "nux" ) >= 0 || OS.indexOf( "aix" ) > 0;
+		}
 	}
 
 	/**
@@ -290,7 +330,14 @@ public class Versioning
 	 */
 	public static boolean isWindows()
 	{
-		return SystemUtils.IS_OS_WINDOWS;
+		try
+		{
+			return SystemUtils.IS_OS_WINDOWS;
+		}
+		catch ( NoClassDefFoundError e )
+		{
+			return OS.indexOf( "win" ) >= 0;
+		}
 	}
 
 	/**

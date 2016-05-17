@@ -36,7 +36,7 @@ import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Ticks;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.util.Application;
 import com.google.common.collect.Lists;
 
 /**
@@ -106,11 +106,11 @@ public class Watchdog implements Runnable, TaskRegistrar
 		if ( !AppConfig.getApplicationJar().getName().endsWith( ".jar" ) )
 			throw new IllegalStateException( "Watchdog process can only run from compiled jar files" );
 
-		log( "Starting " + Versioning.getProduct() + " with Watchdog protection" );
+		log( "Starting " + Application.getProduct() + " with Watchdog protection" );
 
 		List<String> commands = Lists.newArrayList();
 
-		if ( Versioning.isWindows() )
+		if ( Application.isWindows() )
 			commands.add( "javaw" );
 		else
 			commands.add( "java" );
@@ -148,7 +148,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 		watchdogThread.setPriority( Thread.MAX_PRIORITY );
 		watchdogThread.start();
 
-		if ( Versioning.isUnixLikeOS() )
+		if ( Application.isUnixLikeOS() )
 		{
 			Signal.handle( new Signal( "TERM" ), new SignalHandler()
 			{
@@ -255,7 +255,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 					}
 					catch ( CancellationException e )
 					{
-						if ( Versioning.isUnixLikeOS() && getPid( process ) > 0 )
+						if ( Application.isUnixLikeOS() && getPid( process ) > 0 )
 							Runtime.getRuntime().exec( "kill -SIGTERM " + getPid( process ) );
 						else
 							process.destroy();
@@ -321,7 +321,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 
 				if ( state == RESTART || state == CRASHED )
 				{
-					log( "Restarting " + Versioning.getProduct() + "!" );
+					log( "Restarting " + Application.getProduct() + "!" );
 					lastRestart = Timings.epoch();
 				}
 

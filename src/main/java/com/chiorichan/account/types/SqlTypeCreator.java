@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountContext;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountMeta;
@@ -35,8 +35,8 @@ import com.chiorichan.event.EventHandler;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.tasks.Timings;
+import com.chiorichan.util.Application;
 import com.chiorichan.util.DbFunc;
-import com.chiorichan.util.Versioning;
 
 /**
  * Handles Accounts that are loaded from SQL
@@ -52,7 +52,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 
 	public SqlTypeCreator()
 	{
-		sql = AppController.config().getDatabase();
+		sql = AppConfig.get().getDatabase();
 
 		if ( sql == null )
 		{
@@ -60,13 +60,13 @@ public class SqlTypeCreator extends AccountTypeCreator
 			enabled = false;
 		}
 		else
-			AccountManager.getLogger().info( "The `SqlLoginHandler` was enabled successfully with database '" + AppController.config().getDatabase() + "'" );
+			AccountManager.getLogger().info( "The `SqlLoginHandler` was enabled successfully with database '" + AppConfig.get().getDatabase() + "'" );
 
 		// TODO Check if the database has the right tables.
 		// TODO Add the ability to select which database to use for logins
 
-		table = AppController.config().getString( "accounts.sqlType.table", "accounts" );
-		accountFields = AppController.config().getStringList( "accounts.sqlType.fields", new ArrayList<String>() );
+		table = AppConfig.get().getString( "accounts.sqlType.table", "accounts" );
+		accountFields = AppConfig.get().getStringList( "accounts.sqlType.fields", new ArrayList<String>() );
 	}
 
 
@@ -165,7 +165,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 		}
 		catch ( SQLException e )
 		{
-			if ( Versioning.isDevelopment() )
+			if ( Application.isDevelopment() )
 				e.printStackTrace();
 
 			event.setResult( null, AccountDescriptiveReason.INTERNAL_ERROR ).setCause( e );

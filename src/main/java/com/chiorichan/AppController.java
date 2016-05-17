@@ -5,7 +5,6 @@
  */
 package com.chiorichan;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -28,29 +27,20 @@ import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.terminal.CommandDispatch;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.util.Application;
 
 public final class AppController implements Runnable, EventRegistrar, TaskRegistrar, Listener
 {
 	public static final String BROADCAST_CHANNEL_ADMINISTRATIVE = "sys.admin";
 	public static final String BROADCAST_CHANNEL_USERS = "sys.user";
-
 	protected static final ExecutorService pool = Executors.newCachedThreadPool();
 	public static int currentTick = ( int ) ( System.currentTimeMillis() / 50 );
-	protected static final AppConfig config = new AppConfig();
 	private static boolean willRestart = false;
 	private static boolean isRunning = false;
 	private static String stopReason = null;
 	protected static AppController instance;
 	public static int lastFiveTick = -1;
 	public static Thread primaryThread;
-
-	public static AppConfig config()
-	{
-		if ( !config.isConfigLoaded() )
-			config.loadConfig( new File( "config.yaml" ), "com/chiorichan/config.yaml" );
-		return config;
-	}
 
 	public static void handleExceptions( Throwable... ts )
 	{
@@ -67,7 +57,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 
 			Log.get().severe( "Encountered " + list.size() + " exception(s):" );
 			for ( IException e : list )
-				Log.get().severe( e.getClass() + ": " + e.getMessage(), e instanceof Throwable && Versioning.isDevelopment() ? ( Throwable ) e : null );
+				Log.get().severe( e.getClass() + ": " + e.getMessage(), e instanceof Throwable && Application.isDevelopment() ? ( Throwable ) e : null );
 
 			stopApplication( "CRASHED" );
 
@@ -176,11 +166,11 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 		TaskManager.instance().shutdown();
 
 		Log.get().info( "Saving Configuration..." );
-		AppController.config().save();
+		AppConfig.get().save();
 
 		Log.get().info( "Clearing Excess Cache..." );
-		long keepHistory = config().getLong( "advanced.cache.keepHistory", 30L );
-		config().clearCache( keepHistory );
+		long keepHistory = AppConfig.get().getLong( "advanced.cache.keepHistory", 30L );
+		AppConfig.get().clearCache( keepHistory );
 
 		loader.runLevel( RunLevel.DISPOSED );
 
@@ -195,7 +185,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 	@Override
 	public String getName()
 	{
-		return Versioning.getProduct() + " " + Versioning.getVersion();
+		return Application.getProduct() + " " + Application.getVersion();
 	}
 
 	@Override
@@ -221,7 +211,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 
 				if ( l > 2000L && i - q >= 15000L )
 				{
-					if ( config().warnOnOverload() )
+					if ( AppConfig.get().warnOnOverload() )
 						Log.get().warning( "Can't keep up! Did the system time change, or is the server overloaded?" );
 					l = 2000L;
 					q = i;

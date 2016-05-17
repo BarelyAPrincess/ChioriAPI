@@ -11,7 +11,7 @@ package com.chiorichan.logger;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 
 public class ChildLogger extends Logger
 {
@@ -23,7 +23,7 @@ public class ChildLogger extends Logger
 	@Override
 	public void log( LogRecord logRecord )
 	{
-		if ( AppController.config() != null && !AppController.config().getBoolean( "console.hideLoggerName" ) )
+		if ( AppConfig.get().isConfigLoaded() && !AppConfig.get().getBoolean( "console.hideLoggerName" ) )
 			logRecord.setMessage( "&7[" + getName() + "]&f " + logRecord.getMessage() );
 
 		super.log( logRecord );

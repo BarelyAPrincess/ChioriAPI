@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.configuration.InvalidConfigurationException;
 import com.chiorichan.configuration.file.FileConfiguration;
@@ -142,15 +142,15 @@ public class FileBackend extends PermissionBackend
 	@Override
 	public void initialize() throws PermissionBackendException
 	{
-		String permissionFilename = AppController.config().getString( "permissions.file" );
+		String permissionFilename = AppConfig.get().getString( "permissions.file" );
 
 		if ( permissionFilename == null )
 		{
 			permissionFilename = "permissions.yaml";
-			AppController.config().set( "permissions.file", "permissions.yaml" );
+			AppConfig.get().set( "permissions.file", "permissions.yaml" );
 		}
 
-		permissionsFile = new File( permissionFilename );
+		permissionsFile = FileFunc.isAbsolute( permissionFilename ) ? new File( permissionFilename ) : new File( AppConfig.get().getDirectory().getAbsolutePath(), permissionFilename );
 
 		FileConfiguration newPermissions = new YamlConfiguration();
 		try

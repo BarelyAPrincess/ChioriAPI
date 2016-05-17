@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissibleGroup;
@@ -103,11 +103,11 @@ public class UtilityCommands extends PermissionBaseCommand
 
 		if ( args.get( "value" ) != null )
 		{
-			AppController.config().set( nodeName, parseValue( args.get( "value" ) ) );
-			AppController.config().save();
+			AppConfig.get().set( nodeName, parseValue( args.get( "value" ) ) );
+			AppConfig.get().save();
 		}
 
-		Object node = AppController.config().get( nodeName );
+		Object node = AppConfig.get().get( nodeName );
 		if ( node instanceof Map )
 		{
 			sender.sendMessage( "Node \"" + nodeName + "\": " );

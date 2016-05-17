@@ -14,17 +14,16 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.account.KickEvent;
-import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
+import com.chiorichan.util.Application;
 import com.chiorichan.util.SecureFunc;
 import com.chiorichan.util.StringFunc;
-import com.chiorichan.util.Versioning;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
@@ -33,19 +32,6 @@ import com.google.common.collect.Sets;
  */
 public final class AccountManager extends AccountEvents
 {
-	static
-	{
-		try
-		{
-			Log.get().info( "Initalizing the Account Manager..." );
-			AppManager.manager( AccountManager.class ).init();
-		}
-		catch ( ApplicationException e )
-		{
-			AppController.handleExceptions( e );
-		}
-	}
-
 	public static Log getLogger()
 	{
 		return Log.get( instance() );
@@ -353,8 +339,8 @@ public final class AccountManager extends AccountEvents
 	@Override
 	public void init()
 	{
-		isDebug = AppController.config().getBoolean( "accounts.debug" );
-		maxAccounts = AppController.config().getInt( "accounts.maxLogins", -1 );
+		isDebug = AppConfig.get().getBoolean( "accounts.debug" );
+		maxAccounts = AppConfig.get().getInt( "accounts.maxLogins", -1 );
 
 		EventBus.instance().registerEvents( AccountType.MEMORY.getCreator(), this );
 		EventBus.instance().registerEvents( AccountType.SQL.getCreator(), this );
@@ -363,7 +349,7 @@ public final class AccountManager extends AccountEvents
 
 	public boolean isDebug()
 	{
-		return isDebug || Versioning.isDevelopment();
+		return isDebug || Application.isDevelopment();
 	}
 
 	@Override

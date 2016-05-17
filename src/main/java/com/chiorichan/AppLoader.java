@@ -9,24 +9,18 @@
 package com.chiorichan;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-
-import org.joda.time.Duration;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.configuration.ConfigurationSection;
@@ -42,7 +36,6 @@ import com.chiorichan.lang.StartupException;
 import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.logger.DefaultLogFormatter;
 import com.chiorichan.logger.Log;
-import com.chiorichan.logger.LoggerOutputStream;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.permission.lang.PermissionBackendException;
 import com.chiorichan.plugin.PluginManager;
@@ -50,14 +43,19 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Worker;
+import com.chiorichan.util.Application;
 import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Versioning;
 
 /**
  * Provides a base AppController skeleton for you to extend or call directly using {@code AppAppController.init( Class<? extends AppAppController> loaderClass, String... args );}.
  */
 public abstract class AppLoader implements Listener
 {
+	static
+	{
+		System.setProperty( "file.encoding", "utf-8" );
+	}
+
 	static Watchdog watchdog = null;
 	private static OptionSet options;
 	private static boolean isRunning;
@@ -112,14 +110,15 @@ public abstract class AppLoader implements Listener
 
 	public static void main( String... args ) throws Exception
 	{
-		init( SimpleLoader.class, args );
+		parseArguments( args );
+		init( SimpleLoader.class );
 	}
 
 	protected void start() throws ApplicationException
 	{
 		try
 		{
-			ConfigurationSection logs = AppController.config().getConfigurationSection( "logs.loggers", true );
+			ConfigurationSection logs = AppConfig.get().getConfigurationSection( "logs.loggers", true );
 
 			if ( logs != null )
 				for ( String key : logs.getKeys( false ) )
@@ -137,7 +136,7 @@ public abstract class AppLoader implements Listener
 					}
 				}
 
-			ReportingLevel.enableErrorLevelOnly( ReportingLevel.parse( AppController.config().getString( "server.errorReporting", "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
+			ReportingLevel.enableErrorLevelOnly( ReportingLevel.parse( AppConfig.get().getString( "server.errorReporting", "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
 
 			// AppManager.manager( TaskManager.class ).init();
 			EventBus.instance().registerEvents( this, this );
@@ -153,6 +152,9 @@ public abstract class AppLoader implements Listener
 
 			runLevel( RunLevel.STARTUP );
 			runLevel( RunLevel.POSTSTARTUP );
+
+			AppManager.manager( AccountManager.class ).init();
+
 			runLevel( RunLevel.RUNNING );
 
 			// XXX There seems to be a problem registering sync'd tasks before this point
@@ -167,85 +169,113 @@ public abstract class AppLoader implements Listener
 		}
 	}
 
-	public static String uptime()
+	protected static boolean parseArguments( String... args )
 	{
-		Duration duration = new Duration( System.currentTimeMillis() - startTime );
-		PeriodFormatter formatter = new PeriodFormatterBuilder().appendDays().appendSuffix( " Day(s) " ).appendHours().appendSuffix( " Hour(s) " ).appendMinutes().appendSuffix( " Minute(s) " ).appendSeconds().appendSuffix( " Second(s)" ).toFormatter();
-		return formatter.print( duration.toPeriod() );
+		return parseArguments( ( Class<?> ) null, args );
 	}
 
-	protected static void init( Class<? extends AppLoader> loaderClass, String... args )
+	/**
+	 * Parses the provided raw arguments array.
+	 *
+	 * @param cls
+	 *             Class that provides the static populateOptionParser() method, i.e., AppLoader subclass. Set null to ignore.
+	 * @param args
+	 *             The string array to be parsed
+	 * @return
+	 *         True if and only if, loading can continue normally. Options such as --help will cause this method to return false.
+	 */
+	protected static boolean parseArguments( Class<?> cls, String... args )
+	{
+		if ( args == null )
+			args = new String[0];
+
+		OptionParser parser = new OptionParser()
+		{
+			{
+				// TODO This needs refinement and an API
+				acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
+				acceptsAll( Arrays.asList( "config" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "config.yaml" ) ).describedAs( "Yaml file" );
+				acceptsAll( Arrays.asList( "plugins-dir" ), "Specify plugin directory" ).withRequiredArg().ofType( String.class );
+				acceptsAll( Arrays.asList( "updates-dir" ), "Specify updates directory" ).withRequiredArg().ofType( String.class );
+				acceptsAll( Arrays.asList( "cache-dir" ), "Specify cache directory" ).withRequiredArg().ofType( String.class );
+				acceptsAll( Arrays.asList( "logs-dir" ), "Specify logs directory" ).withRequiredArg().ofType( String.class );
+				acceptsAll( Arrays.asList( "app-dir" ), "Specify application directory" ).withRequiredArg().ofType( String.class );
+				acceptsAll( Arrays.asList( "query-disable" ), "Disable the internal TCP Server" );
+				acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
+				acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
+				acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
+				acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
+				acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
+			}
+		};
+
+		if ( cls != null )
+			try
+			{
+				Method m = cls.getMethod( "populateOptionParser", OptionParser.class );
+				m.invoke( null, parser );
+			}
+			catch ( NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e )
+			{
+				if ( Application.isDevelopment() )
+					Log.get( AppController.class.getName() ).dev( "The class \"" + cls.getName() + "\" has no static populateOptionParser() method!" );
+			}
+
+		try
+		{
+			options = parser.parse( args );
+		}
+		catch ( OptionException ex )
+		{
+			Log.get().severe( "Failed to parse arguments: " + ex.getLocalizedMessage() );
+		}
+
+		if ( options.has( "config" ) )
+			AppConfig.get().configFile = new File( ( String ) options.valueOf( "config" ) );
+
+		Log.setConsoleFormatter( new DefaultLogFormatter( !options.has( "nocolor" ) ) );
+
+		if ( options == null || options.has( "?" ) )
+		{
+			try
+			{
+				parser.printHelpOn( System.out );
+			}
+			catch ( Throwable ex )
+			{
+				Log.get().severe( ex );
+			}
+			return false;
+		}
+		if ( options.has( "v" ) )
+		{
+			Log.get().info( "Running " + Application.getProduct() + " version " + Application.getVersion() );
+			return false;
+		}
+
+		if ( options.has( "app-dir" ) )
+		{
+			AppConfig.appDirectory = new File( ( String ) options.valueOf( "app-dir" ) );
+			Log.get().info( "Using application directory " + AppConfig.appDirectory.getAbsolutePath() );
+			if ( !AppConfig.appDirectory.exists() || !AppConfig.appDirectory.isDirectory() )
+				throw new StartupException( "Application directory '" + AppConfig.appDirectory.getAbsolutePath() + "' does not exist or is not a directory!" );
+		}
+
+		return true;
+	}
+
+	protected static void init( Class<? extends AppLoader> loaderClass )
 	{
 		try
 		{
-			System.setProperty( "file.encoding", "utf-8" );
-
 			AppLoader instance = null;
-			options = null;
 
 			if ( loaderClass == null )
 				loaderClass = SimpleLoader.class;
 
 			try
 			{
-				OptionParser parser = new OptionParser()
-				{
-					{
-						// TODO This needs refinement and an API
-						acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
-						acceptsAll( Arrays.asList( "config" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "server.yaml" ) ).describedAs( "Yml file" );
-						acceptsAll( Arrays.asList( "plugins-dir" ), "Specify plugin directory" ).withRequiredArg().ofType( String.class );
-						acceptsAll( Arrays.asList( "updates-dir" ), "Specify updates directory" ).withRequiredArg().ofType( String.class );
-						acceptsAll( Arrays.asList( "cache-dir" ), "Specify cache directory" ).withRequiredArg().ofType( String.class );
-						acceptsAll( Arrays.asList( "logs-dir" ), "Specify logs directory" ).withRequiredArg().ofType( String.class );
-						acceptsAll( Arrays.asList( "query-disable" ), "Disable the internal TCP Server" );
-						acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
-						acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
-						acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
-						acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
-						acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
-					}
-				};
-
-				try
-				{
-					Method m = loaderClass.getMethod( "populateOptionParser", OptionParser.class );
-					m.invoke( null, parser );
-				}
-				catch ( NoSuchMethodException e )
-				{
-					if ( Versioning.isDevelopment() )
-						Log.get( AppController.class.getName() ).dev( "The class \"" + loaderClass.getName() + "\" has no populateOptionParser() method!" );
-				}
-
-				try
-				{
-					options = parser.parse( args );
-				}
-				catch ( joptsimple.OptionException ex )
-				{
-					Log.get( AppController.class.getName() ).log( Level.SEVERE, ex.getLocalizedMessage() );
-				}
-
-				ConsoleHandler consoleHandler = new ConsoleHandler();
-				consoleHandler.setFormatter( new DefaultLogFormatter( !options.has( "nocolor" ) ) );
-				Log.addHandler( consoleHandler );
-
-				System.setOut( new PrintStream( new LoggerOutputStream( Log.get( "SysOut" ), Level.INFO ), true ) );
-				System.setErr( new PrintStream( new LoggerOutputStream( Log.get( "SysErr" ), Level.SEVERE ), true ) );
-
-				if ( options == null || options.has( "?" ) )
-					try
-					{
-						parser.printHelpOn( System.out );
-					}
-					catch ( IOException ex )
-					{
-						Logger.getLogger( AppController.class.getName() ).log( Level.SEVERE, null, ex );
-					}
-				else if ( options.has( "v" ) )
-					System.out.println( "Running " + Versioning.getProduct() + " version " + Versioning.getVersion() );
-				else if ( options.has( "watchdog" ) )
+				if ( options.has( "watchdog" ) )
 				{
 					watchdog = new Watchdog();
 
@@ -284,7 +314,7 @@ public abstract class AppLoader implements Listener
 			}
 
 			if ( isRunning && Log.get() != null )
-				Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
+				Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Application.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
 			else if ( instance != null )
 				instance.runLevel( RunLevel.DISPOSED );
 		}
@@ -306,7 +336,7 @@ public abstract class AppLoader implements Listener
 
 	protected void reload0() throws ApplicationException
 	{
-		ReportingLevel.enableErrorLevelOnly( ReportingLevel.parse( AppController.config().getString( "server.errorReporting", "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
+		ReportingLevel.enableErrorLevelOnly( ReportingLevel.parse( AppConfig.get().getString( "server.errorReporting", "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
 
 		PluginManager.instance().clearPlugins();
 		// ModuleBus.getCommandMap().clearCommands();

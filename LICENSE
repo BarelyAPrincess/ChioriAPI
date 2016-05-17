@@ -2,3 +2,4 @@ This file serves as the official license sheet for Chiori-chan's API and it's su
 The following license are also included per license requirements of the following libraries:
 	Jopt Simple - The MIT License - http://www.opensource.org/licenses/mit-license.php - https://github.com/pholser/jopt-simple
 	SnakeYAML - Apache License 2.0 - https://bitbucket.org/asomov/snakeyaml
+	Jansi - Apache License 2.0 - https://github.com/fusesource/jansi

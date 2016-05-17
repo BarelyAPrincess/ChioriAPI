@@ -12,37 +12,38 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
-import com.chiorichan.AppController;
+import com.chiorichan.AppConfig;
+import com.chiorichan.DeployWrapper;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.UncaughtException;
-import com.chiorichan.plugin.PluginManager;
+import com.chiorichan.logger.Log;
+import com.chiorichan.logger.LogSource;
 import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.NetworkFunc;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Used as a helper class for retrieving files from the central maven repository
  */
-public class Libraries implements LibrarySource
+public class Libraries implements LibrarySource, LogSource
 {
 	public static final String BASE_MAVEN_URL = "http://jcenter.bintray.com/";
 	public static final String BASE_MAVEN_URL_ALT = "http://search.maven.org/remotecontent?filepath=";
 	public static final File INCLUDES_DIR;
 	public static final File LIBRARY_DIR;
-	public static Map<String, MavenReference> loadedLibraries = Maps.newHashMap();
+	public static Map<String, MavenReference> loadedLibraries = new HashMap<>();
 
 	public static final Libraries SELF = new Libraries();
 
 	static
 	{
-		LIBRARY_DIR = new File( AppController.config().getString( "advanced.libraries.libPath", "libraries" ) );
+		LIBRARY_DIR = DeployWrapper.isDeployment() ? new File( "libraries" ) : AppConfig.get().getDirectory( "lib", "libraries" );
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 
 		if ( !FileFunc.setDirectoryAccess( LIBRARY_DIR ) )
@@ -83,7 +84,7 @@ public class Libraries implements LibrarySource
 			loadLibrary( f );
 	}
 
-	private static void addLoaded( String library )
+	public static void addLoaded( String library )
 	{
 		try
 		{
@@ -108,7 +109,7 @@ public class Libraries implements LibrarySource
 
 	public static List<MavenReference> getLoadedLibrariesBySource( LibrarySource source )
 	{
-		List<MavenReference> references = Lists.newArrayList();
+		List<MavenReference> references = new ArrayList<>();
 
 		for ( MavenReference ref : loadedLibraries.values() )
 			if ( ref.getSource() == source )
@@ -145,7 +146,7 @@ public class Libraries implements LibrarySource
 		if ( lib == null || !lib.exists() )
 			return false;
 
-		PluginManager.getLogger().info( EnumColor.GRAY + "Loading the library `" + lib.getName() + "`" );
+		Log.get( SELF ).info( ( Log.useColor() ? EnumColor.GRAY : "" ) + "Loading the library `" + lib.getName() + "`" );
 
 		try
 		{
@@ -163,7 +164,7 @@ public class Libraries implements LibrarySource
 		}
 		catch ( IOException e )
 		{
-			PluginManager.getLogger().severe( "We had a problem trying to extract native libraries from jar file '" + lib.getAbsolutePath() + "'", e );
+			Log.get( SELF ).severe( "We had a problem trying to extract native libraries from jar file '" + lib.getAbsolutePath() + "'", e );
 		}
 
 		return true;
@@ -184,7 +185,7 @@ public class Libraries implements LibrarySource
 		{
 			if ( !mavenLocalPom.exists() || !mavenLocalJar.exists() )
 			{
-				PluginManager.getLogger().info( EnumColor.GOLD + "Downloading the library `" + lib.toString() + "` from url `" + urlJar + "`... Please Wait!" );
+				Log.get( SELF ).info( ( Log.useColor() ? EnumColor.GOLD : "" ) + "Downloading the library `" + lib.toString() + "` from url `" + urlJar + "`... Please Wait!" );
 
 				// Try download from JCenter Bintray Maven Repository
 				if ( NetworkFunc.downloadFile( urlPom, mavenLocalPom ) )
@@ -202,7 +203,7 @@ public class Libraries implements LibrarySource
 					if ( urlJar == null || urlJar.isEmpty() || urlPom == null || urlPom.isEmpty() )
 						return false;
 
-					PluginManager.getLogger().warning( EnumColor.GOLD + "Primary download location failed, trying alternative url `" + urlJarAlt + "`... Please Wait!" );
+					Log.get( SELF ).warning( ( Log.useColor() ? EnumColor.GOLD : "" ) + "Primary download location failed, trying alternative url `" + urlJarAlt + "`... Please Wait!" );
 
 					if ( !NetworkFunc.downloadFile( urlPomAlt, mavenLocalPom ) )
 						return false;
@@ -211,7 +212,7 @@ public class Libraries implements LibrarySource
 				}
 			}
 
-			PluginManager.getLogger().info( EnumColor.DARK_GRAY + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
+			Log.get( SELF ).info( ( Log.useColor() ? EnumColor.DARK_GRAY : "" ) + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
 
 			LibraryClassLoader.addFile( mavenLocalJar );
 		}
@@ -228,7 +229,7 @@ public class Libraries implements LibrarySource
 		}
 		catch ( IOException e )
 		{
-			PluginManager.getLogger().severe( "We had a problem trying to extract native libraries from jar file '" + lib.jarFile() + "'", e );
+			Log.get( SELF ).severe( "We had a problem trying to extract native libraries from jar file '" + lib.jarFile() + "'", e );
 		}
 
 		return true;
@@ -237,6 +238,12 @@ public class Libraries implements LibrarySource
 	private Libraries()
 	{
 
+	}
+
+	@Override
+	public String getLoggerId()
+	{
+		return "LibMgr";
 	}
 
 	@Override

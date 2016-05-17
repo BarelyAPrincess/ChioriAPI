@@ -13,9 +13,11 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.sql.SQLException;
 
+import com.chiorichan.AppConfig;
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.datastore.sql.SQLWrapper;
 import com.chiorichan.lang.StartupException;
+import com.chiorichan.util.FileFunc;
 
 /**
  *
@@ -35,7 +37,7 @@ public class SQLiteDatastore extends SQLDatastore
 			throw new StartupException( "We could not locate the 'org.sqlite.JDBC' library, be sure to have this library in your build path." );
 		}
 
-		File sqliteDb = new File( filename );
+		File sqliteDb = FileFunc.isAbsolute( filename ) ? new File( filename ) : new File( AppConfig.get().getDirectory().getAbsolutePath(), filename );
 
 		if ( !sqliteDb.exists() )
 		{
@@ -59,7 +61,7 @@ public class SQLiteDatastore extends SQLDatastore
 		catch ( SQLException e )
 		{
 			if ( e.getCause() instanceof ConnectException )
-				throw new StartupException( "We had a problem connecting to SQLite file '" + filename + "', exception: " + e.getCause().getMessage() );
+				throw new StartupException( "We had a problem connecting to SQLite file '" + sqliteDb.getAbsolutePath() + "', exception: " + e.getCause().getMessage() );
 			else
 				throw new StartupException( e );
 		}

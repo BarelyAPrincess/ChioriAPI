@@ -146,10 +146,10 @@ subprojects
 dependencies
 {
 	// Used for Console ANSI Color Codes
-	compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.11'
+	// compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.11'
 
 	// Used to Parse Console Input
-	compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
+	// compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.1'
 
 	// Used to Make Database Connections
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.35'
@@ -164,7 +164,7 @@ dependencies
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 
 	// Used to load configs
-	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
+	// compile group: 'org.yaml', name: 'snakeyaml', version: '1.17'
 
 	// Used to format Time and Dates
 	compile group: 'joda-time', name: 'joda-time', version: '2.7'

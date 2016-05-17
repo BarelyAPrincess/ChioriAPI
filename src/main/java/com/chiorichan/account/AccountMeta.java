@@ -20,6 +20,7 @@ import java.util.Set;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.account.lang.AccountException;
+import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.services.AppManager;
@@ -134,7 +135,12 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	public PermissibleEntity getEntity()
 	{
 		if ( permissibleEntity == null || permissibleEntity.get() == null )
-			permissibleEntity = new WeakReference<PermissibleEntity>( ( ( PermissionManager ) AppManager.getService( PermissibleEntity.class ) ).getEntity( getId() ) );
+		{
+			PermissionManager mgr = ( PermissionManager ) AppManager.getService( PermissibleEntity.class );
+			if ( mgr == null )
+				throw new UncaughtException( "PermissibleEntity provider is not available, check load order!" );
+			permissibleEntity = new WeakReference<PermissibleEntity>( mgr.getEntity( getId() ) );
+		}
 
 		return permissibleEntity.get();
 	}
