@@ -11,8 +11,10 @@ package com.chiorichan.libraries;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 
 /**
  * Acts as the classloader for downloaded Maven Libraries
@@ -22,23 +24,22 @@ import java.net.URLClassLoader;
 public class LibraryClassLoader
 {
 	private static final Class[] parameters = new Class[] {URL.class};
-	
-	public static void addFile( String s ) throws IOException
+
+	public static void addPath( File f ) throws IOException
 	{
-		File f = new File( s );
-		addFile( f );
+		addPath( f.toURI().toURL() );
 	}
-	
-	public static void addFile( File f ) throws IOException
+
+	public static void addPath( String s ) throws IOException
 	{
-		addURL( f.toURI().toURL() );
+		addPath( new File( s ) );
 	}
-	
-	public static void addURL( URL u ) throws IOException
+
+	public static void addPath( URL u ) throws IOException
 	{
 		URLClassLoader sysloader = ( URLClassLoader ) ClassLoader.getSystemClassLoader();
 		Class sysclass = URLClassLoader.class;
-		
+
 		try
 		{
 			Method method = sysclass.getDeclaredMethod( "addURL", parameters );
@@ -47,9 +48,24 @@ public class LibraryClassLoader
 		}
 		catch ( Throwable t )
 		{
-			t.printStackTrace();
-			throw new IOException( "Error, could not add URL to system classloader" );
+			throw new IOException( String.format( "Error, could not add path '%s' to system classloader", u.toString() ), t );
 		}
-		
+
+	}
+
+	public static boolean pathLoaded( File f ) throws MalformedURLException
+	{
+		return pathLoaded( f.toURI().toURL() );
+	}
+
+	public static boolean pathLoaded( String s ) throws MalformedURLException
+	{
+		return pathLoaded( new File( s ) );
+	}
+
+	public static boolean pathLoaded( URL u )
+	{
+		URLClassLoader sysloader = ( URLClassLoader ) ClassLoader.getSystemClassLoader();
+		return Arrays.asList( sysloader.getURLs() ).contains( u );
 	}
 }

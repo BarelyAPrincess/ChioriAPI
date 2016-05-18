@@ -21,23 +21,25 @@ import com.google.common.collect.Lists;
 public enum ReportingLevel
 {
 	E_ALL( 0xff, false ),
-	E_DEPRECATED( 0x09, true ),
-	E_ERROR( 0x00, false ),
-	E_IGNORABLE( 0x08, true ),
-	E_NOTICE( 0x03, true ),
-	E_PARSE( 0x02, false ),
-	E_STRICT( 0x07, false ),
-	E_USER_ERROR( 0x04, false ),
-	E_USER_NOTICE( 0x06, true ),
-	E_USER_WARNING( 0x05, true ),
-	E_WARNING( 0x01, true ),
-	L_DEFAULT( 0xf0, true ),
+
+	L_ERROR( 0xf6, false ),
+	L_DENIED( 0xf5, false ),
+	L_EXPIRED( 0xf4, false ),
 	L_SECURITY( 0xf3, false ),
 	L_PERMISSION( 0xf2, false ),
 	L_SUCCESS( 0xf1, true ),
-	L_DENIED( 0xf5, false ),
-	L_ERROR( 0xf6, false ),
-	L_EXPIRED( 0xf4, false );
+	L_DEFAULT( 0xf0, true ),
+
+	E_DEPRECATED( 0x09, true ),
+	E_IGNORABLE( 0x08, true ),
+	E_STRICT( 0x07, false ),
+	E_USER_NOTICE( 0x06, true ),
+	E_USER_WARNING( 0x05, true ),
+	E_USER_ERROR( 0x04, false ),
+	E_NOTICE( 0x03, true ),
+	E_PARSE( 0x02, false ),
+	E_WARNING( 0x01, true ),
+	E_ERROR( 0x00, false );
 
 	private static final List<ReportingLevel> enabledErrorLevels = new ArrayList<ReportingLevel>( Arrays.asList( parse( "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
 

@@ -150,7 +150,7 @@ public class Libraries implements LibrarySource, LogSource
 
 		try
 		{
-			LibraryClassLoader.addFile( lib );
+			LibraryClassLoader.addPath( lib );
 		}
 		catch ( Throwable t )
 		{
@@ -214,7 +214,7 @@ public class Libraries implements LibrarySource, LogSource
 
 			Log.get( SELF ).info( ( Log.useColor() ? EnumColor.DARK_GRAY : "" ) + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
 
-			LibraryClassLoader.addFile( mavenLocalJar );
+			LibraryClassLoader.addPath( mavenLocalJar );
 		}
 		catch ( Throwable t )
 		{

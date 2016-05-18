@@ -979,11 +979,16 @@ public class FileFunc
 	 */
 	public static String relPath( File file )
 	{
-		if ( file == null )
+		return relPath( file, AppConfig.get().getDirectory() );
+	}
+
+	public static String relPath( File file, File relTo )
+	{
+		if ( file == null || relTo == null )
 			return null;
-		String serverRoot = AppConfig.get().getDirectory().getAbsolutePath();
-		if ( file.getAbsolutePath().startsWith( serverRoot ) )
-			return file.getAbsolutePath().substring( serverRoot.length() + 1 );
+		String root = relTo.getAbsolutePath();
+		if ( file.getAbsolutePath().startsWith( root ) )
+			return file.getAbsolutePath().substring( root.length() + 1 );
 		else
 			return file.getAbsolutePath();
 	}
