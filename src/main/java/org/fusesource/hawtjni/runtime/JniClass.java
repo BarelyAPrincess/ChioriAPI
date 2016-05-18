@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2009-2011 FuseSource Corp.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,21 +9,21 @@
 package org.fusesource.hawtjni.runtime;
 
 /**
- * 
+ *
  */
+import static java.lang.annotation.ElementType.TYPE;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.*;
+@Target( {TYPE} )
+@Retention( RetentionPolicy.RUNTIME )
+public @interface JniClass
+{
+	String conditional() default "";
 
-@Target({TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface JniClass {
-    
-    ClassFlag[] flags() default {};
+	ClassFlag[] flags() default {};
 
-    String conditional() default "";
-
-    String name() default "";
+	String name() default "";
 }

@@ -16,8 +16,6 @@
 
 package org.fusesource.jansi;
 
-import org.fusesource.jansi.AnsiOutputStream;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -27,71 +25,85 @@ import java.io.IOException;
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  * @since 1.1
  */
-public class AnsiString
-    implements CharSequence
+public class AnsiString implements CharSequence
 {
-    private final CharSequence encoded;
+	private final CharSequence encoded;
 
-    private final CharSequence plain;
+	private final CharSequence plain;
 
-    public AnsiString(final CharSequence str) {
-        assert str != null;
-        this.encoded = str;
-        this.plain = chew(str);
-    }
+	public AnsiString( final CharSequence str )
+	{
+		assert str != null;
+		this.encoded = str;
+		this.plain = chew( str );
+	}
 
-    private CharSequence chew(final CharSequence str) {
-        assert str != null;
+	@Override
+	public char charAt( final int index )
+	{
+		return getEncoded().charAt( index );
+	}
 
-        ByteArrayOutputStream buff = new ByteArrayOutputStream();
-        AnsiOutputStream out = new AnsiOutputStream(buff);
+	private CharSequence chew( final CharSequence str )
+	{
+		assert str != null;
 
-        try {
-            out.write(str.toString().getBytes());
-            out.flush();
-            out.close();
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+		ByteArrayOutputStream buff = new ByteArrayOutputStream();
+		AnsiOutputStream out = new AnsiOutputStream( buff );
 
-        return new String(buff.toByteArray());
-    }
+		try
+		{
+			out.write( str.toString().getBytes() );
+			out.flush();
+			out.close();
+		}
+		catch ( IOException e )
+		{
+			throw new RuntimeException( e );
+		}
 
-    public CharSequence getEncoded() {
-        return encoded;
-    }
+		return new String( buff.toByteArray() );
+	}
 
-    public CharSequence getPlain() {
-        return plain;
-    }
+	@Override
+	public boolean equals( final Object obj )
+	{
+		return getEncoded().equals( obj );
+	}
 
-    // FIXME: charAt() and subSequence() will make things barf, need to call toString() first to get expected results
+	// FIXME: charAt() and subSequence() will make things barf, need to call toString() first to get expected results
 
-    public char charAt(final int index) {
-        return getEncoded().charAt(index);
-    }
+	public CharSequence getEncoded()
+	{
+		return encoded;
+	}
 
-    public CharSequence subSequence(final int start, final int end) {
-        return getEncoded().subSequence(start, end);
-    }
+	public CharSequence getPlain()
+	{
+		return plain;
+	}
 
-    public int length() {
-        return getPlain().length();
-    }
+	@Override
+	public int hashCode()
+	{
+		return getEncoded().hashCode();
+	}
 
-    @Override
-    public boolean equals(final Object obj) {
-        return getEncoded().equals(obj);
-    }
+	@Override
+	public int length()
+	{
+		return getPlain().length();
+	}
 
-    @Override
-    public int hashCode() {
-        return getEncoded().hashCode();
-    }
+	@Override
+	public CharSequence subSequence( final int start, final int end )
+	{
+		return getEncoded().subSequence( start, end );
+	}
 
-    @Override
-    public String toString() {
-        return getEncoded().toString();
-    }
+	@Override
+	public String toString()
+	{
+		return getEncoded().toString();
+	}
 }

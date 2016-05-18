@@ -46,177 +46,190 @@ import org.fusesource.jansi.Ansi.Color;
  */
 public class AnsiRenderer
 {
-    public static final String BEGIN_TOKEN = "@|";
+	public static enum Code
+	{
+		//
+		// TODO: Find a better way to keep Code in sync with Color/Attribute/Erase
+		//
 
-    private static final int BEGIN_TOKEN_LEN = 2;
+		// Colors
+		BLACK( Color.BLACK ),
+		RED( Color.RED ),
+		GREEN( Color.GREEN ),
+		YELLOW( Color.YELLOW ),
+		BLUE( Color.BLUE ),
+		MAGENTA( Color.MAGENTA ),
+		CYAN( Color.CYAN ),
+		WHITE( Color.WHITE ),
 
-    public static final String END_TOKEN = "|@";
+		// Foreground Colors
+		FG_BLACK( Color.BLACK, false ),
+		FG_RED( Color.RED, false ),
+		FG_GREEN( Color.GREEN, false ),
+		FG_YELLOW( Color.YELLOW, false ),
+		FG_BLUE( Color.BLUE, false ),
+		FG_MAGENTA( Color.MAGENTA, false ),
+		FG_CYAN( Color.CYAN, false ),
+		FG_WHITE( Color.WHITE, false ),
 
-    private static final int END_TOKEN_LEN = 2;
+		// Background Colors
+		BG_BLACK( Color.BLACK, true ),
+		BG_RED( Color.RED, true ),
+		BG_GREEN( Color.GREEN, true ),
+		BG_YELLOW( Color.YELLOW, true ),
+		BG_BLUE( Color.BLUE, true ),
+		BG_MAGENTA( Color.MAGENTA, true ),
+		BG_CYAN( Color.CYAN, true ),
+		BG_WHITE( Color.WHITE, true ),
 
-    public static final String CODE_TEXT_SEPARATOR = " ";
+		// Attributes
+		RESET( Attribute.RESET ),
+		INTENSITY_BOLD( Attribute.INTENSITY_BOLD ),
+		INTENSITY_FAINT( Attribute.INTENSITY_FAINT ),
+		ITALIC( Attribute.ITALIC ),
+		UNDERLINE( Attribute.UNDERLINE ),
+		BLINK_SLOW( Attribute.BLINK_SLOW ),
+		BLINK_FAST( Attribute.BLINK_FAST ),
+		BLINK_OFF( Attribute.BLINK_OFF ),
+		NEGATIVE_ON( Attribute.NEGATIVE_ON ),
+		NEGATIVE_OFF( Attribute.NEGATIVE_OFF ),
+		CONCEAL_ON( Attribute.CONCEAL_ON ),
+		CONCEAL_OFF( Attribute.CONCEAL_OFF ),
+		UNDERLINE_DOUBLE( Attribute.UNDERLINE_DOUBLE ),
+		UNDERLINE_OFF( Attribute.UNDERLINE_OFF ),
 
-    public static final String CODE_LIST_SEPARATOR = ",";
+		// Aliases
+		BOLD( Attribute.INTENSITY_BOLD ),
+		FAINT( Attribute.INTENSITY_FAINT ), ;
 
-    private AnsiRenderer() {}
+		@SuppressWarnings( "unchecked" )
+		private final Enum n;
 
-    static public String render(final String input) throws IllegalArgumentException {
-        StringBuffer buff = new StringBuffer();
+		private final boolean background;
 
-        int i = 0;
-        int j, k;
+		@SuppressWarnings( "unchecked" )
+		private Code( final Enum n )
+		{
+			this( n, false );
+		}
 
-        while (true) {
-            j = input.indexOf(BEGIN_TOKEN, i);
-            if (j == -1) {
-                if (i == 0) {
-                    return input;
-                }
-                else {
-                    buff.append(input.substring(i, input.length()));
-                    return buff.toString();
-                }
-            }
-            else {
-                buff.append(input.substring(i, j));
-                k = input.indexOf(END_TOKEN, j);
+		@SuppressWarnings( "unchecked" )
+		private Code( final Enum n, boolean background )
+		{
+			this.n = n;
+			this.background = background;
+		}
 
-                if (k == -1) {
-                    return input;
-                }
-                else {
-                    j += BEGIN_TOKEN_LEN;
-                    String spec = input.substring(j, k);
+		public Attribute getAttribute()
+		{
+			return ( Attribute ) n;
+		}
 
-                    String[] items = spec.split(CODE_TEXT_SEPARATOR, 2);
-                    if (items.length == 1) {
-                        return input;
-                    }
-                    String replacement = render(items[1], items[0].split(CODE_LIST_SEPARATOR));
+		public Ansi.Color getColor()
+		{
+			return ( Ansi.Color ) n;
+		}
 
-                    buff.append(replacement);
+		public boolean isAttribute()
+		{
+			return n instanceof Attribute;
+		}
 
-                    i = k + END_TOKEN_LEN;
-                }
-            }
-        }
-    }
+		public boolean isBackground()
+		{
+			return background;
+		}
 
-    static private String render(final String text, final String... codes) {
-        Ansi ansi = Ansi.ansi();
-        for (String name : codes) {
-            Code code = Code.valueOf(name.toUpperCase(Locale.ENGLISH));
+		public boolean isColor()
+		{
+			return n instanceof Ansi.Color;
+		}
+	}
 
-            if (code.isColor()) {
-                if (code.isBackground()) {
-                    ansi = ansi.bg(code.getColor());
-                }
-                else {
-                    ansi = ansi.fg(code.getColor());
-                }
-            }
-            else if (code.isAttribute()) {
-                ansi = ansi.a(code.getAttribute());
-            }
-        }
+	public static final String BEGIN_TOKEN = "@|";
 
-        return ansi.a(text).reset().toString();
-    }
+	private static final int BEGIN_TOKEN_LEN = 2;
 
-    public static boolean test(final String text) {
-        return text != null && text.contains(BEGIN_TOKEN);
-    }
+	public static final String END_TOKEN = "|@";
 
-    public static enum Code
-    {
-        //
-        // TODO: Find a better way to keep Code in sync with Color/Attribute/Erase
-        //
-        
-        // Colors
-        BLACK(Color.BLACK),
-        RED(Color.RED),
-        GREEN(Color.GREEN),
-        YELLOW(Color.YELLOW),
-        BLUE(Color.BLUE),
-        MAGENTA(Color.MAGENTA),
-        CYAN(Color.CYAN),
-        WHITE(Color.WHITE),
+	private static final int END_TOKEN_LEN = 2;
 
-        // Foreground Colors
-        FG_BLACK(Color.BLACK, false),
-        FG_RED(Color.RED, false),
-        FG_GREEN(Color.GREEN, false),
-        FG_YELLOW(Color.YELLOW, false),
-        FG_BLUE(Color.BLUE, false),
-        FG_MAGENTA(Color.MAGENTA, false),
-        FG_CYAN(Color.CYAN, false),
-        FG_WHITE(Color.WHITE, false),
+	public static final String CODE_TEXT_SEPARATOR = " ";
 
-        // Background Colors
-        BG_BLACK(Color.BLACK, true),
-        BG_RED(Color.RED, true),
-        BG_GREEN(Color.GREEN, true),
-        BG_YELLOW(Color.YELLOW, true),
-        BG_BLUE(Color.BLUE, true),
-        BG_MAGENTA(Color.MAGENTA, true),
-        BG_CYAN(Color.CYAN, true),
-        BG_WHITE(Color.WHITE, true),
+	public static final String CODE_LIST_SEPARATOR = ",";
 
-        // Attributes
-        RESET(Attribute.RESET),
-        INTENSITY_BOLD(Attribute.INTENSITY_BOLD),
-        INTENSITY_FAINT(Attribute.INTENSITY_FAINT),
-        ITALIC(Attribute.ITALIC),
-        UNDERLINE(Attribute.UNDERLINE),
-        BLINK_SLOW(Attribute.BLINK_SLOW),
-        BLINK_FAST(Attribute.BLINK_FAST),
-        BLINK_OFF(Attribute.BLINK_OFF),
-        NEGATIVE_ON(Attribute.NEGATIVE_ON),
-        NEGATIVE_OFF(Attribute.NEGATIVE_OFF),
-        CONCEAL_ON(Attribute.CONCEAL_ON),
-        CONCEAL_OFF(Attribute.CONCEAL_OFF),
-        UNDERLINE_DOUBLE(Attribute.UNDERLINE_DOUBLE),
-        UNDERLINE_OFF(Attribute.UNDERLINE_OFF),
+	static public String render( final String input ) throws IllegalArgumentException
+	{
+		StringBuffer buff = new StringBuffer();
 
-        // Aliases
-        BOLD(Attribute.INTENSITY_BOLD),
-        FAINT(Attribute.INTENSITY_FAINT),;
+		int i = 0;
+		int j, k;
 
-        @SuppressWarnings("unchecked")
-        private final Enum n;
+		while ( true )
+		{
+			j = input.indexOf( BEGIN_TOKEN, i );
+			if ( j == -1 )
+			{
+				if ( i == 0 )
+					return input;
+				else
+				{
+					buff.append( input.substring( i, input.length() ) );
+					return buff.toString();
+				}
+			}
+			else
+			{
+				buff.append( input.substring( i, j ) );
+				k = input.indexOf( END_TOKEN, j );
 
-        private final boolean background;
+				if ( k == -1 )
+					return input;
+				else
+				{
+					j += BEGIN_TOKEN_LEN;
+					String spec = input.substring( j, k );
 
-        @SuppressWarnings("unchecked")
-        private Code(final Enum n, boolean background) {
-            this.n = n;
-            this.background = background;
-        }
+					String[] items = spec.split( CODE_TEXT_SEPARATOR, 2 );
+					if ( items.length == 1 )
+						return input;
+					String replacement = render( items[1], items[0].split( CODE_LIST_SEPARATOR ) );
 
-        @SuppressWarnings("unchecked")
-        private Code(final Enum n) {
-            this(n, false);
-        }
+					buff.append( replacement );
 
-        public boolean isColor() {
-            return n instanceof Ansi.Color;
-        }
+					i = k + END_TOKEN_LEN;
+				}
+			}
+		}
+	}
 
-        public Ansi.Color getColor() {
-            return (Ansi.Color) n;
-        }
+	static private String render( final String text, final String... codes )
+	{
+		Ansi ansi = Ansi.ansi();
+		for ( String name : codes )
+		{
+			Code code = Code.valueOf( name.toUpperCase( Locale.ENGLISH ) );
 
-        public boolean isAttribute() {
-            return n instanceof Attribute;
-        }
+			if ( code.isColor() )
+			{
+				if ( code.isBackground() )
+					ansi = ansi.bg( code.getColor() );
+				else
+					ansi = ansi.fg( code.getColor() );
+			}
+			else if ( code.isAttribute() )
+				ansi = ansi.a( code.getAttribute() );
+		}
 
-        public Attribute getAttribute() {
-            return (Attribute) n;
-        }
+		return ansi.a( text ).reset().toString();
+	}
 
-        public boolean isBackground() {
-            return background;
-        }
-    }
+	public static boolean test( final String text )
+	{
+		return text != null && text.contains( BEGIN_TOKEN );
+	}
+
+	private AnsiRenderer()
+	{
+	}
 }

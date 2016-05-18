@@ -1,148 +1,174 @@
 /*
- The MIT License
-
- Copyright (c) 2004-2015 Paul R. Holser, Jr.
-
- Permission is hereby granted, free of charge, to any person obtaining
- a copy of this software and associated documentation files (the
- "Software"), to deal in the Software without restriction, including
- without limitation the rights to use, copy, modify, merge, publish,
- distribute, sublicense, and/or sell copies of the Software, and to
- permit persons to whom the Software is furnished to do so, subject to
- the following conditions:
-
- The above copyright notice and this permission notice shall be
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ * The MIT License
+ *
+ * Copyright (c) 2004-2015 Paul R. Holser, Jr.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 package joptsimple;
+
+import static java.util.Collections.singletonList;
+import static java.util.Collections.sort;
+import static java.util.Collections.unmodifiableList;
+import static joptsimple.internal.Strings.EMPTY;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.*;
-
 import joptsimple.internal.Reflection;
 import joptsimple.internal.ReflectionException;
 
-import static joptsimple.internal.Strings.*;
-
 /**
- * @param <V> represents the type of the arguments this option accepts
+ * @param <V>
+ *             represents the type of the arguments this option accepts
  * @author <a href="mailto:pholser@alumni.rice.edu">Paul Holser</a>
  */
-public abstract class AbstractOptionSpec<V> implements OptionSpec<V>, OptionDescriptor {
-    private final List<String> options = new ArrayList<>();
-    private final String description;
-    private boolean forHelp;
+public abstract class AbstractOptionSpec<V> implements OptionSpec<V>, OptionDescriptor
+{
+	private final List<String> options = new ArrayList<>();
+	private final String description;
+	private boolean forHelp;
 
-    AbstractOptionSpec( String option ) {
-        this( singletonList( option ), EMPTY );
-    }
+	AbstractOptionSpec( List<String> options, String description )
+	{
+		arrangeOptions( options );
 
-    AbstractOptionSpec( List<String> options, String description ) {
-        arrangeOptions( options );
+		this.description = description;
+	}
 
-        this.description = description;
-    }
+	AbstractOptionSpec( String option )
+	{
+		this( singletonList( option ), EMPTY );
+	}
 
-    public final List<String> options() {
-        return unmodifiableList( options );
-    }
+	protected String argumentTypeIndicatorFrom( ValueConverter<V> converter )
+	{
+		if ( converter == null )
+			return null;
 
-    public final List<V> values( OptionSet detectedOptions ) {
-        return detectedOptions.valuesOf( this );
-    }
+		String pattern = converter.valuePattern();
+		return pattern == null ? converter.valueType().getName() : pattern;
+	}
 
-    public final V value( OptionSet detectedOptions ) {
-        return detectedOptions.valueOf( this );
-    }
+	private void arrangeOptions( List<String> unarranged )
+	{
+		if ( unarranged.size() == 1 )
+		{
+			options.addAll( unarranged );
+			return;
+		}
 
-    public String description() {
-        return description;
-    }
+		List<String> shortOptions = new ArrayList<>();
+		List<String> longOptions = new ArrayList<>();
 
-    public final AbstractOptionSpec<V> forHelp() {
-        forHelp = true;
-        return this;
-    }
+		for ( String each : unarranged )
+			if ( each.length() == 1 )
+				shortOptions.add( each );
+			else
+				longOptions.add( each );
 
-    public final boolean isForHelp() {
-        return forHelp;
-    }
+		sort( shortOptions );
+		sort( longOptions );
 
-    public boolean representsNonOptions() {
-        return false;
-    }
+		options.addAll( shortOptions );
+		options.addAll( longOptions );
+	}
 
-    protected abstract V convert( String argument );
+	protected abstract V convert( String argument );
 
-    protected V convertWith( ValueConverter<V> converter, String argument ) {
-        try {
-            return Reflection.convertWith( converter, argument );
-        } catch ( ReflectionException | ValueConversionException ex ) {
-            throw new OptionArgumentConversionException( this, argument, ex );
-        }
-    }
+	protected V convertWith( ValueConverter<V> converter, String argument )
+	{
+		try
+		{
+			return Reflection.convertWith( converter, argument );
+		}
+		catch ( ReflectionException | ValueConversionException ex )
+		{
+			throw new OptionArgumentConversionException( this, argument, ex );
+		}
+	}
 
-    protected String argumentTypeIndicatorFrom( ValueConverter<V> converter ) {
-        if ( converter == null )
-            return null;
+	@Override
+	public String description()
+	{
+		return description;
+	}
 
-        String pattern = converter.valuePattern();
-        return pattern == null ? converter.valueType().getName() : pattern;
-    }
+	@Override
+	public boolean equals( Object that )
+	{
+		if ( ! ( that instanceof AbstractOptionSpec<?> ) )
+			return false;
 
-    abstract void handleOption( OptionParser parser, ArgumentList arguments, OptionSet detectedOptions,
-        String detectedArgument );
+		AbstractOptionSpec<?> other = ( AbstractOptionSpec<?> ) that;
+		return options.equals( other.options );
+	}
 
-    private void arrangeOptions( List<String> unarranged ) {
-        if ( unarranged.size() == 1 ) {
-            options.addAll( unarranged );
-            return;
-        }
+	public final AbstractOptionSpec<V> forHelp()
+	{
+		forHelp = true;
+		return this;
+	}
 
-        List<String> shortOptions = new ArrayList<>();
-        List<String> longOptions = new ArrayList<>();
+	abstract void handleOption( OptionParser parser, ArgumentList arguments, OptionSet detectedOptions, String detectedArgument );
 
-        for ( String each : unarranged ) {
-            if ( each.length() == 1 )
-                shortOptions.add( each );
-            else
-                longOptions.add( each );
-        }
+	@Override
+	public int hashCode()
+	{
+		return options.hashCode();
+	}
 
-        sort( shortOptions );
-        sort( longOptions );
+	@Override
+	public final boolean isForHelp()
+	{
+		return forHelp;
+	}
 
-        options.addAll( shortOptions );
-        options.addAll( longOptions );
-    }
+	@Override
+	public final List<String> options()
+	{
+		return unmodifiableList( options );
+	}
 
-    @Override
-    public boolean equals( Object that ) {
-        if ( !( that instanceof AbstractOptionSpec<?> ) )
-            return false;
+	@Override
+	public boolean representsNonOptions()
+	{
+		return false;
+	}
 
-        AbstractOptionSpec<?> other = (AbstractOptionSpec<?>) that;
-        return options.equals( other.options );
-    }
+	@Override
+	public String toString()
+	{
+		return options.toString();
+	}
 
-    @Override
-    public int hashCode() {
-        return options.hashCode();
-    }
+	@Override
+	public final V value( OptionSet detectedOptions )
+	{
+		return detectedOptions.valueOf( this );
+	}
 
-    @Override
-    public String toString() {
-        return options.toString();
-    }
+	@Override
+	public final List<V> values( OptionSet detectedOptions )
+	{
+		return detectedOptions.valuesOf( this );
+	}
 }

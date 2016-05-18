@@ -11,41 +11,45 @@ import joptsimple.ValueConverter;
 /**
  * Converts command line options to {@link Path} objects and checks the status of the underlying file.
  */
-public class PathConverter implements ValueConverter<Path> {
-    private final PathProperties[] pathProperties;
+public class PathConverter implements ValueConverter<Path>
+{
+	private final PathProperties[] pathProperties;
 
-    public PathConverter( PathProperties... pathProperties ) {
-        this.pathProperties = pathProperties;
-    }
+	public PathConverter( PathProperties... pathProperties )
+	{
+		this.pathProperties = pathProperties;
+	}
 
-    @Override
-    public Path convert( String value ) {
-        Path path = Paths.get(value);
+	@Override
+	public Path convert( String value )
+	{
+		Path path = Paths.get( value );
 
-        if ( pathProperties != null ) {
-            for ( PathProperties each : pathProperties ) {
-                if ( !each.accept( path ) )
-                    throw new ValueConversionException( message( each.getMessageKey(), path.toString() ) );
-            }
-        }
+		if ( pathProperties != null )
+			for ( PathProperties each : pathProperties )
+				if ( !each.accept( path ) )
+					throw new ValueConversionException( message( each.getMessageKey(), path.toString() ) );
 
-        return path;
-    }
+		return path;
+	}
 
-    @Override
-    public Class<Path> valueType() {
-        return Path.class;
-    }
+	private String message( String errorKey, String value )
+	{
+		ResourceBundle bundle = ResourceBundle.getBundle( "joptsimple.ExceptionMessages" );
+		Object[] arguments = new Object[] {value, valuePattern()};
+		String template = bundle.getString( PathConverter.class.getName() + "." + errorKey + ".message" );
+		return new MessageFormat( template ).format( arguments );
+	}
 
-    @Override
-    public String valuePattern() {
-        return null;
-    }
+	@Override
+	public String valuePattern()
+	{
+		return null;
+	}
 
-    private String message( String errorKey, String value ) {
-        ResourceBundle bundle = ResourceBundle.getBundle( "joptsimple.ExceptionMessages" );
-        Object[] arguments = new Object[] { value, valuePattern() };
-        String template = bundle.getString( PathConverter.class.getName() + "." + errorKey + ".message" );
-        return new MessageFormat( template ).format( arguments );
-    }
+	@Override
+	public Class<Path> valueType()
+	{
+		return Path.class;
+	}
 }
