@@ -338,7 +338,17 @@ public class ObjectFunc<T>
 
 	public static boolean noLoopDetected( Class<?> cls, String method )
 	{
-		return noLoopDetected( cls.getCanonicalName(), method );
+		return noLoopDetected( cls.getCanonicalName(), method, 1 );
+	}
+
+	public static boolean noLoopDetected( Class<?> cls, String method, int max )
+	{
+		return noLoopDetected( cls.getCanonicalName(), method, max );
+	}
+
+	public static boolean noLoopDetected( String cls, String method )
+	{
+		return noLoopDetected( cls, method, 1 );
 	}
 
 	/**
@@ -348,14 +358,21 @@ public class ObjectFunc<T>
 	 *             The class to check.
 	 * @param method
 	 *             The method to check, null to ignore.
+	 * @param max
+	 *             The maximum number of recurrence until failure.
 	 * @return
 	 *         True if no loop was detected.
 	 */
-	public static boolean noLoopDetected( String cls, String method )
+	public static boolean noLoopDetected( String cls, String method, int max )
 	{
+		int cnt = 0;
 		for ( StackTraceElement ste : Thread.currentThread().getStackTrace() )
 			if ( ste.getClassName().equals( cls ) && ( method == null || ste.getMethodName().equals( method ) ) )
-				return false;
+			{
+				cnt++;
+				if ( cnt >= max )
+					return false;
+			}
 		return true;
 	}
 
@@ -366,6 +383,11 @@ public class ObjectFunc<T>
 		if ( chars.length() == 0 )
 			throw new IllegalArgumentException( String.format( message, values ) );
 		return chars;
+	}
+
+	public static <T> T notNull( final T object )
+	{
+		return notNull( object, "Object is null" );
 	}
 
 	public static <T> T notNull( final T object, final String message, final Object... values )

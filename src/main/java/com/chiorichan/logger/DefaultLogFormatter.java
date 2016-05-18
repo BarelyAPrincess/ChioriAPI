@@ -16,7 +16,7 @@ import java.util.logging.LogRecord;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.lang.EnumColor;
-import com.google.common.base.Strings;
+import com.chiorichan.util.StringFunc;
 
 public class DefaultLogFormatter extends Formatter
 {
@@ -61,7 +61,7 @@ public class DefaultLogFormatter extends Formatter
 			if ( threadName.length() > 10 )
 				threadName = threadName.substring( 0, 2 ) + ".." + threadName.substring( threadName.length() - 6 );
 			else if ( threadName.length() < 10 )
-				threadName = threadName + Strings.repeat( " ", 10 - threadName.length() );
+				threadName = threadName + StringFunc.repeat( " ", 10 - threadName.length() );
 
 			style = style.replaceAll( "%ct", threadName );
 		}

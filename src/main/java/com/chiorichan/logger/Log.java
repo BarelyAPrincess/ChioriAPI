@@ -28,8 +28,9 @@ import java.util.logging.Logger;
 import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.util.Application;
 import com.chiorichan.util.FileFunc;
+import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.util.Versioning;
 
 public class Log implements LogAPI
 {
@@ -200,7 +201,7 @@ public class Log implements LogAPI
 	@Override
 	public void debug( Object... var1 )
 	{
-		if ( !Application.isDevelopment() || var1.length < 1 )
+		if ( !Versioning.isDevelopment() || var1.length < 1 )
 			return;
 
 		for ( Object var2 : var1 )
@@ -211,7 +212,7 @@ public class Log implements LogAPI
 	@Override
 	public void dev( Object... var1 )
 	{
-		if ( !Application.isDevelopment() || var1.length < 1 )
+		if ( !Versioning.isDevelopment() || var1.length < 1 )
 			return;
 
 		for ( Object var2 : var1 )
@@ -277,7 +278,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( hasErrored )
+			if ( !ObjectFunc.noLoopDetected( Logger.class, "log" ) || hasErrored )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg );
@@ -285,7 +286,7 @@ public class Log implements LogAPI
 		catch ( Throwable t )
 		{
 			markError( t );
-			if ( Application.isDevelopment() )
+			if ( Versioning.isDevelopment() )
 				throw t;
 		}
 	}
@@ -295,7 +296,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( hasErrored )
+			if ( !ObjectFunc.noLoopDetected( Logger.class, "log" ) || hasErrored )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, params );
@@ -303,7 +304,7 @@ public class Log implements LogAPI
 		catch ( Throwable t )
 		{
 			markError( t );
-			if ( Application.isDevelopment() )
+			if ( Versioning.isDevelopment() )
 				throw t;
 		}
 	}
@@ -313,7 +314,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( hasErrored )
+			if ( !ObjectFunc.noLoopDetected( Logger.class, "log" ) || hasErrored )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, t );
@@ -321,7 +322,7 @@ public class Log implements LogAPI
 		catch ( Throwable tt )
 		{
 			markError( tt );
-			if ( Application.isDevelopment() )
+			if ( Versioning.isDevelopment() )
 				throw tt;
 		}
 	}
@@ -332,7 +333,7 @@ public class Log implements LogAPI
 
 		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "The child logger \"" + getId() + "\" has thrown an unrecoverable exception!" );
 		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Please report the following stacktrace to the application developer." );
-		if ( Application.isDevelopment() )
+		if ( Versioning.isDevelopment() )
 			altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "ATTENTION DEVELOPER: Calling the method \"Log.get( [log name] ).unmarkError()\" will reset the errored state." );
 		t.printStackTrace( altOutputStream );
 	}

@@ -101,7 +101,7 @@ public class NetworkFunc
 
 	public static String getUserAgent()
 	{
-		return Application.getProductSimple() + "/" + Application.getVersion() + "/" + Application.getJavaVersion();
+		return Versioning.getProductSimple() + "/" + Versioning.getVersion() + "/" + Application.getJavaVersion();
 	}
 
 	public static boolean isValidIPv4( String ip )

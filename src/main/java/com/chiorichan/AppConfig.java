@@ -41,7 +41,7 @@ import com.chiorichan.util.ObjectFunc;
 public class AppConfig implements Configuration, TaskRegistrar
 {
 	private static final AppConfig instance = new AppConfig();
-	private static File lockFile;
+	protected static File lockFile;
 	protected static File appDirectory = null;
 
 	static
@@ -80,7 +80,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 		}
 		catch ( IOException e )
 		{
-			throw new StartupException( "We had a problem locking the running server jar", e );
+			throw new StartupException( "We had a problem locking the application jar", e );
 		}
 
 		lockFile.deleteOnExit();
@@ -88,8 +88,8 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public static AppConfig get()
 	{
-		if ( !instance.isConfigLoaded() && instance.configFile != null && ObjectFunc.noLoopDetected( AppConfig.class, "loadConfig" ) )
-			instance.loadConfig();
+		if ( ObjectFunc.noLoopDetected( AppConfig.class, "loadConfig" ) && !instance.isConfigLoaded() )
+				instance.loadConfig();
 		return instance;
 	}
 
@@ -707,7 +707,9 @@ public class AppConfig implements Configuration, TaskRegistrar
 	{
 		try
 		{
-			yaml = YamlConfiguration.loadConfiguration( file() );
+			file();
+
+			yaml = YamlConfiguration.loadConfiguration( configFile );
 			yaml.options().copyDefaults( true );
 			yaml.setDefaults( YamlConfiguration.loadConfiguration( getClass().getClassLoader().getResourceAsStream( "com/chiorichan/config.yaml" ) ) );
 			directories.clear();
@@ -716,7 +718,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 		}
 		catch ( NoClassDefFoundError e )
 		{
-
+			Log.get().severe( "Failed to load config: " + e.getMessage() );
 		}
 	}
 

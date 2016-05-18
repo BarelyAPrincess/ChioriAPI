@@ -27,7 +27,7 @@ import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.terminal.CommandDispatch;
-import com.chiorichan.util.Application;
+import com.chiorichan.util.Versioning;
 
 public final class AppController implements Runnable, EventRegistrar, TaskRegistrar, Listener
 {
@@ -57,7 +57,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 
 			Log.get().severe( "Encountered " + list.size() + " exception(s):" );
 			for ( IException e : list )
-				Log.get().severe( e.getClass() + ": " + e.getMessage(), e instanceof Throwable && Application.isDevelopment() ? ( Throwable ) e : null );
+				Log.get().severe( e.getClass() + ": " + e.getMessage(), e instanceof Throwable && Versioning.isDevelopment() ? ( Throwable ) e : null );
 
 			stopApplication( "CRASHED" );
 
@@ -185,7 +185,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 	@Override
 	public String getName()
 	{
-		return Application.getProduct() + " " + Application.getVersion();
+		return Versioning.getProduct() + " " + Versioning.getVersion();
 	}
 
 	@Override

@@ -35,8 +35,8 @@ import com.chiorichan.event.EventHandler;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.Application;
 import com.chiorichan.util.DbFunc;
+import com.chiorichan.util.Versioning;
 
 /**
  * Handles Accounts that are loaded from SQL
@@ -165,7 +165,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 		}
 		catch ( SQLException e )
 		{
-			if ( Application.isDevelopment() )
+			if ( Versioning.isDevelopment() )
 				e.printStackTrace();
 
 			event.setResult( null, AccountDescriptiveReason.INTERNAL_ERROR ).setCause( e );

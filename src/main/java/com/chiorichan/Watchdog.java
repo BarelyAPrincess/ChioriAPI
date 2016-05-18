@@ -37,6 +37,7 @@ import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Ticks;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.util.Application;
+import com.chiorichan.util.Versioning;
 import com.google.common.collect.Lists;
 
 /**
@@ -106,7 +107,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 		if ( !AppConfig.getApplicationJar().getName().endsWith( ".jar" ) )
 			throw new IllegalStateException( "Watchdog process can only run from compiled jar files" );
 
-		log( "Starting " + Application.getProduct() + " with Watchdog protection" );
+		log( "Starting " + Versioning.getProduct() + " with Watchdog protection" );
 
 		List<String> commands = Lists.newArrayList();
 
@@ -321,7 +322,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 
 				if ( state == RESTART || state == CRASHED )
 				{
-					log( "Restarting " + Application.getProduct() + "!" );
+					log( "Restarting " + Versioning.getProduct() + "!" );
 					lastRestart = Timings.epoch();
 				}
 

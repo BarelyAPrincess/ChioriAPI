@@ -21,9 +21,9 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.event.account.KickEvent;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
-import com.chiorichan.util.Application;
 import com.chiorichan.util.SecureFunc;
 import com.chiorichan.util.StringFunc;
+import com.chiorichan.util.Versioning;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
@@ -349,7 +349,7 @@ public final class AccountManager extends AccountEvents
 
 	public boolean isDebug()
 	{
-		return isDebug || Application.isDevelopment();
+		return isDebug || Versioning.isDevelopment();
 	}
 
 	@Override

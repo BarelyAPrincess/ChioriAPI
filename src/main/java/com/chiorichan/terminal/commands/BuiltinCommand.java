@@ -29,9 +29,9 @@ import com.chiorichan.permission.References;
 import com.chiorichan.terminal.Command;
 import com.chiorichan.terminal.CommandDispatch;
 import com.chiorichan.terminal.TerminalEntity;
-import com.chiorichan.util.Application;
 import com.chiorichan.util.StringFunc;
 import com.chiorichan.util.Utils;
+import com.chiorichan.util.Versioning;
 import com.google.common.base.Joiner;
 
 /**
@@ -46,7 +46,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				sender.sendMessage( EnumColor.AQUA + Application.getProduct() + " is running version " + Application.getVersion() + ( Application.getBuildNumber().equals( "0" ) ? " (dev)" : " (build #" + Application.getBuildNumber() + ")" ) );
+				sender.sendMessage( EnumColor.AQUA + Versioning.getProduct() + " is running version " + Versioning.getVersion() + ( Versioning.getBuildNumber().equals( "0" ) ? " (dev)" : " (build #" + Versioning.getBuildNumber() + ")" ) );
 				return true;
 			}
 		} );

@@ -9,6 +9,7 @@
 package com.chiorichan;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -44,7 +45,9 @@ import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Worker;
 import com.chiorichan.util.Application;
+import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.util.Versioning;
 
 /**
  * Provides a base AppController skeleton for you to extend or call directly using {@code AppAppController.init( Class<? extends AppAppController> loaderClass, String... args );}.
@@ -206,6 +209,9 @@ public abstract class AppLoader implements Listener
 				acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
 				acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
 				acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
+
+				acceptsAll( Arrays.asList( "status" ), "Check daemon status" );
+				acceptsAll( Arrays.asList( "stop" ), "Stop daemon status" );
 			}
 		};
 
@@ -217,7 +223,7 @@ public abstract class AppLoader implements Listener
 			}
 			catch ( NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e )
 			{
-				if ( Application.isDevelopment() )
+				if ( Versioning.isDevelopment() )
 					Log.get( AppController.class.getName() ).dev( "The class \"" + cls.getName() + "\" has no static populateOptionParser() method!" );
 			}
 
@@ -229,6 +235,49 @@ public abstract class AppLoader implements Listener
 		{
 			Log.get().severe( "Failed to parse arguments: " + ex.getLocalizedMessage() );
 		}
+
+		if ( options.has( "status" ) || options.has( "stop" ) )
+			try
+			{
+				File run = new File( "/var/run" );
+				File lockFile;
+				if ( Application.isUnixLikeOS() && run.exists() && run.canWrite() )
+					lockFile = new File( "/var/run/chiori.pid" );
+				else
+					lockFile = new File( "chiori.pid" );
+
+				// TODO check that the enclosed lock PID number is currently running
+				if ( lockFile.exists() )
+				{
+					String pidraw = FileFunc.readFileToString( lockFile );
+
+					if ( pidraw != null && pidraw.length() > 0 )
+					{
+						int pid = Integer.parseInt( pidraw );
+						if ( Application.isPIDRunning( pid ) )
+						{
+							if ( options.has( "stop" ) )
+							{
+								if ( Application.terminatePID( pid ) )
+									Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " has been terminated!" );
+								else
+									Log.get().info( EnumColor.RED + "Failed to terminate pid " + pid + "!" );
+								return false;
+							}
+
+							Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " is running!" );
+							return false;
+						}
+					}
+				}
+
+				Log.get().info( EnumColor.RED + Versioning.getProduct() + " " + Versioning.getVersion() + " is not running!" );
+				return false;
+			}
+			catch ( IOException e )
+			{
+				throw new StartupException( "We had a problem reading the application PID file", e );
+			}
 
 		if ( options.has( "config" ) )
 			AppConfig.get().configFile = new File( ( String ) options.valueOf( "config" ) );
@@ -249,7 +298,7 @@ public abstract class AppLoader implements Listener
 		}
 		if ( options.has( "v" ) )
 		{
-			Log.get().info( "Running " + Application.getProduct() + " version " + Application.getVersion() );
+			Log.get().info( "Running " + Versioning.getProduct() + " version " + Versioning.getVersion() );
 			return false;
 		}
 
@@ -314,7 +363,7 @@ public abstract class AppLoader implements Listener
 			}
 
 			if ( isRunning && Log.get() != null )
-				Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Application.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
+				Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
 			else if ( instance != null )
 				instance.runLevel( RunLevel.DISPOSED );
 		}

@@ -14,82 +14,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
-import java.util.Properties;
 
 import org.apache.commons.lang3.SystemUtils;
-
-import com.chiorichan.AppConfig;
-import com.chiorichan.AppLoader;
-import com.chiorichan.logger.Log;
 
 /**
  * Provides easy access to the server metadata plus operating system and jvm information
  */
 public class Application
 {
-	private static Properties metadata;
-
-	static
-	{
-		loadMetaData( false );
-	}
-
 	private static String OS = System.getProperty( "os.name" ).toLowerCase();
-
-	/**
-	 * Get the server build number
-	 * The build number is only set when the server is built on our Jenkins Build Server or by Travis,
-	 * meaning this will be 0 for all development builds
-	 *
-	 * @return The server build number
-	 */
-	public static String getBuildNumber()
-	{
-		return metadata.getProperty( "project.build", "0" );
-	}
-
-	/**
-	 * Get the server copyright, e.g., Copyright (c) 2015 Chiori-chan
-	 *
-	 * @return The server copyright
-	 */
-	public static String getCopyright()
-	{
-		return metadata.getProperty( "project.copyright", "Copyright &copy; 2015 Chiori-chan" );
-	}
-
-	/**
-	 * Get the developer e-mail address
-	 * Suggested use is to report problems
-	 *
-	 * @return The developer e-mail address
-	 */
-	public static String getDeveloperContact()
-	{
-		return metadata.getProperty( "project.email", "me@chiorichan.com" );
-	}
-
-	/**
-	 * Get the GitHub Branch this was built from, e.g., master
-	 * Set by the Gradle build script
-	 *
-	 * @return The GitHub branch
-	 */
-	public static String getGitHubBranch()
-	{
-		return metadata.getProperty( "project.branch", "master" );
-	}
-
-	/**
-	 * Generates a HTML suitable footer for general server info and exception pages
-	 *
-	 * @return
-	 *         HTML footer string
-	 */
-	public static String getHTMLFooter()
-	{
-		return "<small>Running <a href=\"https://github.com/ChioriGreene/ChioriWebServer\">" + getProduct() + "</a> Version " + getVersion() + " (Build #" + getBuildNumber() + ")<br />" + getCopyright() + "</small>";
-	}
 
 	/**
 	 * Get the Java Binary
@@ -142,26 +75,6 @@ public class Application
 		return pid;
 	}
 
-	/**
-	 * Get the server product name, e.g., Chiori-chan's Web Server
-	 *
-	 * @return The Product Name
-	 */
-	public static String getProduct()
-	{
-		return metadata.getProperty( "project.name", "Chiori-chan's Web Server" );
-	}
-
-	/**
-	 * Get the server product name without spaces or special characters, e.g., ChioriWebServer
-	 *
-	 * @return The Product Name Simple
-	 */
-	public static String getProductSimple()
-	{
-		return metadata.getProperty( "project.name", "ChioriWebServer" ).replaceAll( " ", "" );
-	}
-
 	/*
 	 * Java and JVM Methods
 	 */
@@ -177,30 +90,6 @@ public class Application
 	}
 
 	/**
-	 * Get the server version, e.g., 9.2.1 (Milky Berry)
-	 *
-	 * @return The server version with code name
-	 */
-	public static String getVersion()
-	{
-		return metadata.getProperty( "project.version", "Unknown-Version" ) + " (" + metadata.getProperty( "project.codename" ) + ")";
-	}
-
-	/*
-	 * Operating System Methods
-	 */
-
-	/**
-	 * Get the server version number, e.g., 9.2.1
-	 *
-	 * @return The server version number
-	 */
-	public static String getVersionNumber()
-	{
-		return metadata.getProperty( "project.version", "Unknown-Version" );
-	}
-
-	/**
 	 * Indicates if we are running as either the root user for Unix-like or Administrator user for Windows
 	 *
 	 * @return True if Administrator or root
@@ -208,16 +97,6 @@ public class Application
 	public static boolean isAdminUser()
 	{
 		return "root".equalsIgnoreCase( System.getProperty( "user.name" ) ) || "administrator".equalsIgnoreCase( System.getProperty( "user.name" ) );
-	}
-
-	/**
-	 * Indicates if we are running a development build of the server
-	 *
-	 * @return True is we are running in development mode
-	 */
-	public static boolean isDevelopment()
-	{
-		return "0".equals( getBuildNumber() ) || AppConfig.get() != null && AppConfig.get().getBoolean( "server.developmentMode", false );
 	}
 
 	/**
@@ -340,46 +219,35 @@ public class Application
 		}
 	}
 
-	/**
-	 * Loads the server metadata from the file {@value "build.properties"},
-	 * which is usually updated by our Gradle build script
-	 *
-	 * @param force
-	 *             Force a metadata reload
-	 */
-	private static void loadMetaData( boolean force )
+	public static boolean terminatePID( int pid ) throws IOException
 	{
-		if ( metadata != null && !metadata.isEmpty() && !force )
-			return;
+		String[] cmds;
+		if ( isUnixLikeOS() )
+			cmds = new String[] {"sh", "-c", "kill -9 " + pid};
+		else
+			cmds = new String[] {"cmd", "/c", "taskkill /f /pid " + pid};
 
-		metadata = new Properties();
+		Runtime runtime = Runtime.getRuntime();
+		Process proc = runtime.exec( cmds );
 
-		InputStream is = null;
+		InputStream inputstream = proc.getInputStream();
+		InputStreamReader inputstreamreader = new InputStreamReader( inputstream );
+		BufferedReader bufferedreader = new BufferedReader( inputstreamreader );
+		String line;
+		while ( ( line = bufferedreader.readLine() ) != null )
+		{
+			// TODO Wait until process returns
+		}
+
 		try
 		{
-			is = AppLoader.class.getClassLoader().getResourceAsStream( "build.properties" );
-			if ( is == null )
-			{
-				Log.get().severe( "This application is missing the `build.properties` file, we will now default to the API build properties file." );
-				is = AppLoader.class.getClassLoader().getResourceAsStream( "api.properties" );
-			}
-
-			metadata.load( is );
+			Thread.sleep( 1000 );
 		}
-		catch ( IOException e )
+		catch ( InterruptedException e )
 		{
 			e.printStackTrace();
 		}
-		finally
-		{
-			try
-			{
-				if ( is != null )
-					is.close();
-			}
-			catch ( IOException e )
-			{
-			}
-		}
+
+		return !isPIDRunning(pid);
 	}
 }

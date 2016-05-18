@@ -16,7 +16,7 @@ import com.chiorichan.configuration.file.YamlConfiguration;
 import com.chiorichan.libraries.Libraries;
 import com.chiorichan.libraries.MavenReference;
 import com.chiorichan.logger.Log;
-import com.chiorichan.util.Application;
+import com.chiorichan.util.Versioning;
 
 /**
  * Provides a wrapper that downloads and maintains application version and libraries.
@@ -93,7 +93,7 @@ public class DeployWrapper
 			{
 				loadDeploymentConfig();
 
-				Log.get().info( "Starting deployment of " + Application.getProduct() + " (" + Application.getVersion() + ")" );
+				Log.get().info( "Starting deployment of " + Versioning.getProduct() + " (" + Versioning.getVersion() + ")" );
 				Log.get().info( "Loading deployment libraries: " + Libraries.LIBRARY_DIR.getAbsolutePath() );
 
 				// Fake it being loaded as it's internally included
