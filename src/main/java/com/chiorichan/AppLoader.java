@@ -154,10 +154,10 @@ public abstract class AppLoader implements Listener
 			PluginManager.instance().loadPlugins();
 
 			runLevel( RunLevel.STARTUP );
-			runLevel( RunLevel.POSTSTARTUP );
 
 			AppManager.manager( AccountManager.class ).init();
 
+			runLevel( RunLevel.POSTSTARTUP );
 			runLevel( RunLevel.RUNNING );
 
 			// XXX There seems to be a problem registering sync'd tasks before this point
