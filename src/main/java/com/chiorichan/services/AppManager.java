@@ -271,6 +271,11 @@ public class AppManager<T extends ServiceManager>
 		return instance;
 	}
 
+	public T instanceWithoutException()
+	{
+		return instance;
+	}
+
 	public boolean isInitalized()
 	{
 		return instance != null;

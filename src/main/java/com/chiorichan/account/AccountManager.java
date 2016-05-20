@@ -42,6 +42,11 @@ public final class AccountManager extends AccountEvents
 		return AppManager.manager( AccountManager.class ).instance();
 	}
 
+	public static AccountManager instanceWithoutException()
+	{
+		return AppManager.manager( AccountManager.class ).instanceWithoutException();
+	}
+
 	final AccountList accounts = new AccountList();
 
 	boolean isDebug = false;

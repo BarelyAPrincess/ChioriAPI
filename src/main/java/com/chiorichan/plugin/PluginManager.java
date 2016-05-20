@@ -65,6 +65,11 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		return AppManager.manager( PluginManager.class ).instance();
 	}
 
+	public static PluginManager instanceWithoutException()
+	{
+		return AppManager.manager( PluginManager.class ).instanceWithoutException();
+	}
+
 	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<Pattern, PluginLoader>();
 
 	private Set<String> loadedPlugins = new HashSet<String>();

@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.TimerTask;
 
 import com.chiorichan.AppConfig;
-import com.chiorichan.AppController;
 import com.chiorichan.account.AccountInstance;
 import com.chiorichan.account.AccountType;
 import com.chiorichan.account.event.AccountPreLoginEvent;
@@ -27,7 +26,6 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.EventPriority;
 import com.chiorichan.event.EventRegistrar;
-import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.logger.Log;
 import com.chiorichan.permission.backend.file.FileBackend;
@@ -51,19 +49,6 @@ import com.google.common.collect.Sets;
 
 public class PermissionManager implements EventRegistrar, TaskRegistrar, ServiceManager, ServiceProvider
 {
-	static
-	{
-		try
-		{
-			Log.get().info( "Initalizing the Permission Manager..." );
-			AppManager.manager( PermissionManager.class ).init();
-		}
-		catch ( ApplicationException e )
-		{
-			AppController.handleExceptions( e );
-		}
-	}
-
 	static boolean allowOps = true;
 	static boolean debugMode = false;
 
@@ -85,6 +70,11 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	public static PermissionManager instance()
 	{
 		return AppManager.manager( PermissionManager.class ).instance();
+	}
+
+	public static PermissionManager instanceWithoutException()
+	{
+		return AppManager.manager( PermissionManager.class ).instanceWithoutException();
 	}
 
 	/**

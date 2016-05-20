@@ -48,6 +48,11 @@ public class TaskManager implements ServiceManager
 		return AppManager.manager( TaskManager.class ).instance();
 	}
 
+	public static TaskManager instanceWithoutException()
+	{
+		return AppManager.manager( TaskManager.class ).instanceWithoutException();
+	}
+
 	/**
 	 * Checks in the provided creator and task are valid
 	 *

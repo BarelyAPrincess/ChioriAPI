@@ -154,16 +154,20 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 		pool.shutdown();
 
 		Log.get().info( "Shutting Down Plugin Manager..." );
-		PluginManager.instance().shutdown();
+		if ( PluginManager.instanceWithoutException() != null )
+			PluginManager.instanceWithoutException().shutdown();
 
 		Log.get().info( "Shutting Down Permission Manager..." );
-		PermissionManager.instance().saveData();
+		if ( PermissionManager.instanceWithoutException() != null )
+			PermissionManager.instanceWithoutException().saveData();
 
 		Log.get().info( "Shutting Down Account Manager..." );
-		AccountManager.instance().shutdown( stopReason );
+		if ( AccountManager.instanceWithoutException() != null )
+			AccountManager.instanceWithoutException().shutdown( stopReason );
 
 		Log.get().info( "Shutting Down Task Manager..." );
-		TaskManager.instance().shutdown();
+		if ( TaskManager.instanceWithoutException() != null )
+			TaskManager.instanceWithoutException().shutdown();
 
 		Log.get().info( "Saving Configuration..." );
 		AppConfig.get().save();

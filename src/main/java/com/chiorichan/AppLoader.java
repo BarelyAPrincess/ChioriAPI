@@ -25,6 +25,7 @@ import joptsimple.OptionSet;
 
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.configuration.ConfigurationSection;
+import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
@@ -155,6 +156,16 @@ public abstract class AppLoader implements Listener
 
 			runLevel( RunLevel.STARTUP );
 
+			Log.get().info( "Initalizing the Datastore Subsystem..." );
+			AppManager.manager( DatastoreManager.class ).init();
+
+			Log.get().info( "Initalizing the Database Subsystem..." );
+			AppConfig.get().initDatabase();
+
+			Log.get().info( "Initalizing the Permission Manager..." );
+			AppManager.manager( PermissionManager.class ).init();
+
+			Log.get().info( "Initalizing the Account Manager..." );
 			AppManager.manager( AccountManager.class ).init();
 
 			runLevel( RunLevel.POSTSTARTUP );
