@@ -40,6 +40,7 @@ import java.util.jar.JarFile;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -1054,6 +1055,44 @@ public class FileFunc
 		{
 			if ( out != null )
 				out.close();
+		}
+	}
+
+	public static void zipDir( File src, File dest ) throws IOException
+	{
+		if ( dest.isDirectory() )
+			dest = new File( dest, "temp.zip" );
+
+		ZipOutputStream out = new ZipOutputStream( new FileOutputStream( dest ) );
+		try
+		{
+			zipDirRecursive( src, src, out );
+		}
+		finally
+		{
+			out.close();
+		}
+	}
+
+	private static void zipDirRecursive( File origPath, File dirObj, ZipOutputStream out ) throws IOException
+	{
+		File[] files = dirObj.listFiles();
+		byte[] tmpBuf = new byte[1024];
+
+		for ( int i = 0; i < files.length; i++ )
+		{
+			if ( files[i].isDirectory() )
+			{
+				zipDirRecursive( origPath, files[i], out );
+				continue;
+			}
+			FileInputStream in = new FileInputStream( files[i].getAbsolutePath() );
+			out.putNextEntry( new ZipEntry( FileFunc.relPath( files[i], origPath ) ) );
+			int len;
+			while ( ( len = in.read( tmpBuf ) ) > 0 )
+				out.write( tmpBuf, 0, len );
+			out.closeEntry();
+			in.close();
 		}
 	}
 
