@@ -85,14 +85,14 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 	{
 		if ( !AppLoader.isWatchdogRunning() )
 		{
-			Log.get().highlight( "Server can not be restarted without Watchdog running." );
+			Log.get().notice( "Server can not be restarted without Watchdog running." );
 			return;
 		}
 
 		if ( reason == null )
-			Log.get().highlight( "Server is restarting, be back soon... :D" );
+			Log.get().notice( "Server is restarting, be back soon... :D" );
 		else if ( !reason.isEmpty() )
-			Log.get().highlight( reason );
+			Log.get().notice( reason );
 
 		stopReason = reason;
 		willRestart = true;
@@ -102,9 +102,9 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 	public static void restartApplication( String reason )
 	{
 		if ( reason == null )
-			Log.get().highlight( "Restarting!" );
+			Log.get().notice( "Restarting!" );
 		else if ( !reason.isEmpty() )
-			Log.get().highlight( "Restarting for Reason: " + reason );
+			Log.get().notice( "Restarting for Reason: " + reason );
 
 		stopReason = reason;
 		willRestart = true;
@@ -119,9 +119,9 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 	public static void stopApplication( String reason )
 	{
 		if ( reason == null )
-			Log.get().highlight( "Stopping... Goodbye!" );
+			Log.get().notice( "Stopping... Goodbye!" );
 		else if ( !reason.isEmpty() )
-			Log.get().highlight( "Stopping for Reason: " + reason );
+			Log.get().notice( "Stopping for Reason: " + reason );
 
 		stopReason = reason;
 		willRestart = false;

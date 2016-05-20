@@ -12,9 +12,11 @@ import java.util.logging.Level;
 
 public interface LogAPI
 {
-	void dev( Object... var1 );
+	void dev( String format, Object... var1 );
 
-	void debug( Object... var1 );
+	void debug( String format, Object... args );
+
+	void debug( String msg, Throwable t );
 
 	void fine( String var1 );
 
@@ -24,9 +26,13 @@ public interface LogAPI
 
 	String getId();
 
-	void highlight( String msg );
-
 	void info( String s );
+
+	void info( String format, Object... arguments );
+
+	void info( Throwable t );
+
+	void notice( String s );
 
 	void log( Level l, String msg );
 

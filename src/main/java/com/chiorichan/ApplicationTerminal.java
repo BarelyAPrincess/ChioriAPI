@@ -200,7 +200,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	{
 		Scanner scanner = new Scanner( System.in );
 
-		Log.get().highlight( msg );
+		Log.get().notice( msg );
 
 		while ( true )
 		{

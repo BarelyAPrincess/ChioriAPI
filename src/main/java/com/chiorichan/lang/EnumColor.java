@@ -309,12 +309,12 @@ public enum EnumColor
 
 	private final String toString;
 
-	private EnumColor( char code, int intCode )
+	EnumColor( char code, int intCode )
 	{
 		this( code, intCode, false );
 	}
 
-	private EnumColor( char code, int intCode, boolean isFormat )
+	EnumColor( char code, int intCode, boolean isFormat )
 	{
 		this.code = code;
 		this.intCode = intCode;

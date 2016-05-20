@@ -199,25 +199,27 @@ public class Log implements LogAPI
 	}
 
 	@Override
-	public void debug( Object... var1 )
+	public void debug( String format, Object... args )
 	{
-		if ( !Versioning.isDevelopment() || var1.length < 1 )
+		if ( !Versioning.isDevelopment() )
 			return;
 
-		for ( Object var2 : var1 )
-			if ( var2 != null )
-				highlight( ">>>>   " + var2.toString() + "   <<<< " );
+		log( Level.INFO, EnumColor.GOLD + "" + EnumColor.NEGATIVE + ">>>>   " + format + "   <<<< ", args );
 	}
 
 	@Override
-	public void dev( Object... var1 )
+	public void debug( String msg, Throwable t )
 	{
-		if ( !Versioning.isDevelopment() || var1.length < 1 )
+		log( Level.INFO, ">>>>   " + EnumColor.GOLD + "" + EnumColor.NEGATIVE + msg + "   <<<< ", t );
+	}
+
+	@Override
+	public void dev( String format, Object... args )
+	{
+		if ( !Versioning.isDevelopment() )
 			return;
 
-		for ( Object var2 : var1 )
-			if ( var2 != null )
-				highlight( "[DEV NOTICE] " + var2.toString() );
+		log( Level.INFO, EnumColor.GOLD + "" + EnumColor.NEGATIVE + "[DEV NOTICE] " + format, args );
 	}
 
 	@Override
@@ -255,22 +257,26 @@ public class Log implements LogAPI
 	}
 
 	@Override
-	public void highlight( String msg )
-	{
-		try
-		{
-			log( Level.INFO, EnumColor.GOLD + "" + EnumColor.NEGATIVE + msg );
-		}
-		catch ( NoClassDefFoundError e )
-		{
-			log( Level.INFO, msg );
-		}
-	}
-
-	@Override
 	public void info( String s )
 	{
 		log( Level.INFO, s );
+	}
+
+	@Override
+	public void info( String format, Object... arguments )
+	{
+		log( Level.INFO, format, arguments );
+	}
+
+	@Override
+	public void info( Throwable t )
+	{
+		log( Level.INFO, "Unexpected Exception", t );
+	}
+
+	public boolean isEnabled( Level level )
+	{
+		return logger.isLoggable( level );
 	}
 
 	@Override
@@ -361,6 +367,13 @@ public class Log implements LogAPI
 	}
 
 	@Override
+	public void notice( String msg )
+	{
+		log( Level.WARNING, EnumColor.GOLD + "" + EnumColor.NEGATIVE + msg );
+
+	}
+
+	@Override
 	public void panic( String var1 )
 	{
 		severe( var1 );
@@ -409,7 +422,7 @@ public class Log implements LogAPI
 	@Override
 	public void severe( Throwable t )
 	{
-		log( Level.SEVERE, "Encountered An Exception:", t );
+		log( Level.SEVERE, "Unexcepted Exception", t );
 	}
 
 	public void unmarkError()
@@ -430,8 +443,8 @@ public class Log implements LogAPI
 	}
 
 	@Override
-	public void warning( String s, Throwable throwable )
+	public void warning( String s, Throwable t )
 	{
-		log( Level.WARNING, s, throwable );
+		log( Level.WARNING, s, t );
 	}
 }
