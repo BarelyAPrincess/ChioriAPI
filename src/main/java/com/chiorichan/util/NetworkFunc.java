@@ -241,7 +241,7 @@ public class NetworkFunc
 		}
 		catch ( IOException e )
 		{
-			Log.get().severe( "Reading URL \"" + url + "\" failed!" );
+			// Log.get().severe( "Reading URL \"" + url + "\" failed!" );
 			return null;
 		}
 	}
@@ -254,7 +254,7 @@ public class NetworkFunc
 		}
 		catch ( IOException e )
 		{
-			Log.get().severe( "Reading URL \"" + url + "\" failed!" );
+			// Log.get().severe( "Reading URL \"" + url + "\" failed!" );
 			return null;
 		}
 	}
@@ -267,7 +267,7 @@ public class NetworkFunc
 		}
 		catch ( IOException e )
 		{
-			Log.get().severe( "Reading URL \"" + url + "\" failed!" );
+			// Log.get().severe( "Reading URL \"" + url + "\" failed!" );
 			return null;
 		}
 	}

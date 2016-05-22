@@ -294,6 +294,12 @@ public class PluginInformation
 		return getName() + " v" + getVersion();
 	}
 
+	/**
+	 * Gets the URL base for the plugin source code.
+	 * e.g., https://raw.githubusercontent.com/[username]/[repository]/[branch]/src/main/java/
+	 *
+	 * @return The github raw file base URL
+	 */
 	public String getGitHubBaseUrl()
 	{
 		return yaml.getString( "gitHubBaseUrl" );

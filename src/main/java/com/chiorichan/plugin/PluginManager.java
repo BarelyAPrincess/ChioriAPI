@@ -228,7 +228,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 			e.printStackTrace();
 		}
 
-		throw new PluginNotFoundException( "We could not find a plugin with the class '" + clz + "', maybe it's not loaded." );
+		throw new PluginNotFoundException( "We could not find a plugin with the class '" + clz.getSimpleName() + "', maybe it's not loaded." );
 	}
 
 	public Plugin getPluginByClassname( String className ) throws PluginNotFoundException
@@ -268,7 +268,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		}
 		catch ( PluginNotFoundException e )
 		{
-			getLogger().warning( e.getMessage() );
+			getLogger().fine( e.getMessage() );
 			return null;
 		}
 	}
