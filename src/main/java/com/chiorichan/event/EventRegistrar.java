@@ -1,0 +1,28 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Right Reserved.
+ */
+package com.chiorichan.event;
+
+public interface EventRegistrar
+{
+	/**
+	 * Returns a value indicating whether or not this plugin is currently enabled
+	 *
+	 * @return true if this plugin is enabled, otherwise false
+	 */
+	boolean isEnabled();
+
+	/**
+	 * Returns the name of the plugin.
+	 * <p>
+	 * This should return the bare name of the plugin and should be used for comparison.
+	 *
+	 * @return name of the plugin
+	 */
+	String getName();
+}
