@@ -17,14 +17,14 @@ public class StartupException extends UncaughtException
 		super( ReportingLevel.E_ERROR, msg );
 	}
 
-	public StartupException( String msg, Throwable e )
+	public StartupException( String msg, Throwable e ) throws UncaughtException
 	{
-		super( ReportingLevel.E_ERROR, msg, e );
+		super( ReportingLevel.E_ERROR, msg, e, true );
 	}
 
-	public StartupException( Throwable e )
+	public StartupException( Throwable e ) throws UncaughtException
 	{
-		super( ReportingLevel.E_ERROR, e );
+		super( ReportingLevel.E_ERROR, e, true );
 	}
 
 	@Override
