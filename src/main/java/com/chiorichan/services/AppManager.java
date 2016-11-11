@@ -276,7 +276,7 @@ public class AppManager<T extends ServiceManager>
 		return instance;
 	}
 
-	public boolean isInitalized()
+	public boolean isInitialized()
 	{
 		return instance != null;
 	}
