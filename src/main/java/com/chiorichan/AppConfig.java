@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.Validate;
+import com.chiorichan.util.Validation;
 
 import com.chiorichan.configuration.Configuration;
 import com.chiorichan.configuration.ConfigurationOptions;
@@ -48,11 +48,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 	{
 		try
 		{
-			File run = new File( "/var/run" );
-			if ( Application.isUnixLikeOS() && run.exists() && run.canWrite() )
-				lockFile = new File( "/var/run/chiori.pid" );
-			else
-				lockFile = new File( "chiori.pid" );
+			lockFile = AppLoader.getLockFile();
 
 			// TODO check that the enclosed lock PID number is currently running
 			if ( lockFile.exists() )
@@ -66,7 +62,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 					try
 					{
 						if ( pid != Integer.parseInt( Application.getProcessID() ) && Application.isPIDRunning( pid ) )
-							throw new StartupException( "We have detected the server jar is already running. Please terminate process ID " + pid + " or disregard this notice and try again." );
+							throw new StartupException( "We have detected the server jar is already running. Please terminate PID " + pid + " or disregard this notice and try again." );
 					}
 					catch ( IOException e )
 					{
@@ -146,8 +142,8 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public void clearCache( File path, long keepHistory )
 	{
-		Validate.notNull( path );
-		Validate.notNull( keepHistory );
+		Validation.notNull( path );
+		Validation.notNull( keepHistory );
 
 		if ( !path.exists() || !path.isDirectory() )
 			throw new IllegalArgumentException( "Path must exist and be a directory." );
@@ -696,12 +692,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 	}
 
 	/**
-	 * Loads a new config file into the AppConfig
-	 *
-	 * @param location
-	 *             The config file location
-	 * @param resourcePath
-	 *             The packaged jar file resource path
+	 * Loads a the config file into AppConfig
 	 */
 	protected void loadConfig()
 	{

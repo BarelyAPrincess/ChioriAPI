@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -183,6 +183,30 @@ public abstract class AppLoader implements Listener
 		}
 	}
 
+	protected static File getLockFile()
+	{
+		File lockFile;
+		if ( Application.isUnixLikeOS() )
+		{
+			lockFile = options != null && options.has( "pid" ) ? ( File ) options.valueOf( "pid" ) : new File( "/var/run/chiori/chiori.pid" );
+			File runDir = lockFile.getParentFile();
+
+			if ( !runDir.exists() )
+			{
+				if ( runDir.getParentFile().canWrite() && !runDir.mkdirs() )
+					throw new StartupException( String.format( "Failed to create the lock file parent directory at [%s].", runDir.getAbsolutePath() ) );
+				else
+					throw new StartupException( String.format( "The lock directory [%s] was non-existent.", lockFile.getAbsolutePath() ) );
+			}
+		}
+		else
+		{
+			lockFile = new File( "chiori.pid" );
+		}
+
+		return lockFile;
+	}
+
 	protected static boolean parseArguments( String... args )
 	{
 		return parseArguments( ( Class<?> ) null, args );
@@ -191,12 +215,9 @@ public abstract class AppLoader implements Listener
 	/**
 	 * Parses the provided raw arguments array.
 	 *
-	 * @param cls
-	 *             Class that provides the static populateOptionParser() method, i.e., AppLoader subclass. Set null to ignore.
-	 * @param args
-	 *             The string array to be parsed
-	 * @return
-	 *         True if and only if, loading can continue normally. Options such as --help will cause this method to return false.
+	 * @param cls  Class that provides the static populateOptionParser() method, i.e., AppLoader subclass. Set null to ignore.
+	 * @param args The string array to be parsed
+	 * @return True if and only if, loading can continue normally. Options such as --help will cause this method to return false.
 	 */
 	protected static boolean parseArguments( Class<?> cls, String... args )
 	{
@@ -206,7 +227,6 @@ public abstract class AppLoader implements Listener
 		OptionParser parser = new OptionParser()
 		{
 			{
-				// TODO This needs refinement and an API
 				acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
 				acceptsAll( Arrays.asList( "config" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "config.yaml" ) ).describedAs( "Yaml file" );
 				acceptsAll( Arrays.asList( "plugins-dir" ), "Specify plugin directory" ).withRequiredArg().ofType( String.class );
@@ -218,6 +238,7 @@ public abstract class AppLoader implements Listener
 				acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
 				acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
 				acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
+				acceptsAll( Arrays.asList( "pid" ), "Specifies the application PID file. This file is created and removed by the server, be sure the local running user has access." ).withRequiredArg().ofType( File.class ).describedAs( "PID File" ).defaultsTo( new File( "/var/run/chiori/chiori.pid" ) );
 				acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
 				acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
 
@@ -247,15 +268,11 @@ public abstract class AppLoader implements Listener
 			Log.get().severe( "Failed to parse arguments: " + ex.getLocalizedMessage() );
 		}
 
+		// Check if application is already running and stop if specified
 		if ( options.has( "status" ) || options.has( "stop" ) )
 			try
 			{
-				File run = new File( "/var/run" );
-				File lockFile;
-				if ( Application.isUnixLikeOS() && run.exists() && run.canWrite() )
-					lockFile = new File( "/var/run/chiori.pid" );
-				else
-					lockFile = new File( "chiori.pid" );
+				File lockFile = getLockFile();
 
 				// TODO check that the enclosed lock PID number is currently running
 				if ( lockFile.exists() )
