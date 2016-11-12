@@ -173,7 +173,7 @@ public abstract class AppLoader implements Listener
 
 			// XXX There seems to be a problem registering sync'd tasks before this point
 		}
-		catch ( ApplicationException | StartupException e )
+		catch ( ApplicationException | UncaughtException e )
 		{
 			throw e;
 		}
