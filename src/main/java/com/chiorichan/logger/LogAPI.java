@@ -20,7 +20,9 @@ public interface LogAPI
 
 	void fine( String var1 );
 
-	void finer( String var1 );
+    void fine( String var1, Object... args );
+
+    void finer( String var1 );
 
 	void finest( String var1 );
 

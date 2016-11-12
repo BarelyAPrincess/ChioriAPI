@@ -229,6 +229,12 @@ public class Log implements LogAPI
 	}
 
 	@Override
+	public void fine(String var1, Object... args)
+	{
+		log( Level.FINE, var1, args );
+	}
+
+	@Override
 	public void finer( String var1 )
 	{
 		log( Level.FINER, var1 );
