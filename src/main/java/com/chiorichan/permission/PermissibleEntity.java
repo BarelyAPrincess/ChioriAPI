@@ -2,21 +2,16 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
 package com.chiorichan.permission;
 
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.commons.lang3.Validate;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.chiorichan.event.EventBus;
 import com.chiorichan.lang.EnumColor;
@@ -24,18 +19,16 @@ import com.chiorichan.permission.event.PermissibleEntityEvent;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.services.ProviderChild;
 import com.chiorichan.tasks.Timings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.chiorichan.util.Validation;
 
 public abstract class PermissibleEntity implements ProviderChild
 {
-	private final Map<String, PermissionResult> cachedResults = Maps.newConcurrentMap();
+	private final Map<String, PermissionResult> cachedResults = new ConcurrentHashMap<>();
 
-	private final Map<ChildPermission, References> permissions = Maps.newConcurrentMap();
-	private final Map<ChildPermission, TimedReferences> timedPermissions = Maps.newConcurrentMap();
-	private final Map<PermissibleGroup, References> groups = Maps.newConcurrentMap();
-	private final Map<PermissibleGroup, TimedReferences> timedGroups = Maps.newConcurrentMap();
+	private final Map<ChildPermission, References> permissions = new ConcurrentHashMap<>();
+	private final Map<ChildPermission, TimedReferences> timedPermissions = new ConcurrentHashMap<>();
+	private final Map<PermissibleGroup, References> groups = new ConcurrentHashMap<>();
+	private final Map<PermissibleGroup, TimedReferences> timedGroups = new ConcurrentHashMap<>();
 
 	protected boolean debugMode = false;
 	private String id;
@@ -72,7 +65,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	protected final void addPermission( ChildPermission perm, References refs )
 	{
-		Validate.notNull( perm );
+		Validation.notNull( perm );
 
 		if ( checkPermission( perm.getPermission() ).isAssigned() )
 		{
@@ -126,14 +119,10 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Adds timed permission with specified references and a lifetime to live
 	 *
-	 * @param perm
-	 *             The Permission Node
-	 * @param val
-	 *             The custom permission value
-	 * @param refs
-	 *             The References
-	 * @param lifeTime
-	 *             Lifetime of permission in seconds. 0 for transient permission (reference disappear only after server reload)
+	 * @param perm     The Permission Node
+	 * @param val      The custom permission value
+	 * @param refs     The References
+	 * @param lifeTime Lifetime of permission in seconds. 0 for transient permission (reference disappear only after server reload)
 	 */
 	public void addTimedPermission( final Permission perm, Object val, References refs, int lifeTime )
 	{
@@ -152,8 +141,8 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public PermissionResult checkPermission( Permission perm, References refs )
 	{
-		Validate.notNull( perm );
-		Validate.notNull( refs );
+		Validation.notNull( perm );
+		Validation.notNull( refs );
 
 		/**
 		 * We cache the results to reduce lag when a permission is checked multiple times over.
@@ -259,10 +248,8 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Check it's self and each {@link PermissibleEntity} group until it finds the {@link ChildPermission} associated with {@link Permission}
 	 *
-	 * @param perm
-	 *             The {@link Permission} we associate with
-	 * @param refs
-	 *             Reference to be looking for
+	 * @param perm The {@link Permission} we associate with
+	 * @param refs Reference to be looking for
 	 * @return The resulting {@link ChildPermission}
 	 */
 	protected ChildPermission getChildPermissionRecursive( Permission perm, References refs )
@@ -296,7 +283,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	protected Collection<ChildPermission> getChildPermissions( References refs )
 	{
-		Set<ChildPermission> result = Sets.newHashSet();
+		Set<ChildPermission> result = new HashSet<>();
 		for ( Entry<ChildPermission, References> entry : permissions.entrySet() )
 			if ( entry.getValue().match( refs ) )
 				result.add( entry.getKey() );
@@ -305,7 +292,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public Collection<Entry<PermissibleGroup, References>> getGroupEntrys( References refs )
 	{
-		Set<Entry<PermissibleGroup, References>> result = Sets.newHashSet();
+		Set<Entry<PermissibleGroup, References>> result = new HashSet<>();
 		for ( Entry<PermissibleGroup, References> entry : groups.entrySet() )
 			if ( entry.getValue().match( refs ) )
 				result.add( entry );
@@ -314,7 +301,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public Collection<String> getGroupNames( References refs )
 	{
-		List<String> result = Lists.newArrayList();
+		List<String> result = new ArrayList<>();
 		for ( PermissibleGroup group : getGroups( refs ) )
 			result.add( group.getId() );
 		return result;
@@ -344,7 +331,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public final Collection<PermissibleGroup> getGroups( References refs )
 	{
-		Set<PermissibleGroup> result = Sets.newHashSet();
+		Set<PermissibleGroup> result = new HashSet<>();
 		for ( Entry<PermissibleGroup, References> entry : groups.entrySet() )
 			if ( entry.getValue().match( refs ) )
 				result.add( entry.getKey() );
@@ -359,8 +346,7 @@ public abstract class PermissibleEntity implements ProviderChild
 	 *
 	 * @return id
 	 */
-	@Override
-	public String getId()
+	@Override public String getId()
 	{
 		return id;
 	}
@@ -385,12 +371,12 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public Map<String, String> getOptions( References refs )
 	{
-		return Maps.newHashMap();// TODO Auto-generated method stub
+		return new HashMap<>(); // TODO Auto-generated method stub
 	}
 
 	public Collection<Entry<Permission, References>> getPermissionEntrys( References refs )
 	{
-		Set<Entry<Permission, References>> result = Sets.newHashSet();
+		Set<Entry<Permission, References>> result = new HashSet<>();
 		for ( Entry<ChildPermission, References> entry : permissions.entrySet() )
 			if ( entry.getValue().match( refs ) )
 				result.add( new SimpleEntry<Permission, References>( entry.getKey().getPermission(), entry.getValue() ) );
@@ -399,7 +385,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public Collection<String> getPermissionNames( References refs )
 	{
-		List<String> result = Lists.newArrayList();
+		List<String> result = new ArrayList<>();
 		for ( Permission perm : getPermissions( refs ) )
 			result.add( perm.getNamespace() );
 		return result;
@@ -429,7 +415,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public Collection<Permission> getPermissions( References refs )
 	{
-		Set<Permission> result = Sets.newHashSet();
+		Set<Permission> result = new HashSet<>();
 		for ( Entry<ChildPermission, References> entry : permissions.entrySet() )
 			if ( entry.getValue().match( refs ) )
 				result.add( entry.getKey().getPermission() );
@@ -449,7 +435,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public Collection<Entry<Permission, PermissionValue>> getPermissionValues( References refs )
 	{
-		Set<Entry<Permission, PermissionValue>> result = Sets.newHashSet();
+		Set<Entry<Permission, PermissionValue>> result = new HashSet<>();
 		for ( Entry<ChildPermission, References> entry : permissions.entrySet() )
 			if ( entry.getValue().match( refs ) )
 				result.add( new SimpleEntry<Permission, PermissionValue>( entry.getKey().getPermission(), entry.getKey().getValue() ) );
@@ -482,10 +468,8 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Returns remaining lifetime of specified permission in ref
 	 *
-	 * @param perm
-	 *             Name of permission
-	 * @param refs
-	 *             The permission references
+	 * @param perm Name of permission
+	 * @param refs The permission references
 	 * @return remaining lifetime in seconds of timed permission. 0 if permission is transient
 	 */
 	public int getTimedPermissionLifetime( Permission perm, References refs )
@@ -504,13 +488,12 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Return entity timed (temporary) permission
 	 *
-	 * @param refs
-	 *             The Reference to check
+	 * @param refs The Reference to check
 	 * @return Collection of timed permissions
 	 */
 	public Collection<Permission> getTimedPermissions( References refs )
 	{
-		Set<Permission> result = Sets.newHashSet();
+		Set<Permission> result = new HashSet<>();
 		for ( Entry<ChildPermission, TimedReferences> entry : timedPermissions.entrySet() )
 			if ( entry.getValue().match( refs ) && !entry.getValue().isExpired() )
 				result.add( entry.getKey().getPermission() );
@@ -675,10 +658,8 @@ public abstract class PermissibleEntity implements ProviderChild
 	/**
 	 * Removes specified timed permission for references
 	 *
-	 * @param group
-	 *             The PermissibleGroup
-	 * @param refs
-	 *             The references
+	 * @param group The PermissibleGroup
+	 * @param refs  The references
 	 */
 	public void removeTimedGroup( PermissibleGroup group, References refs )
 	{
@@ -751,8 +732,7 @@ public abstract class PermissibleEntity implements ProviderChild
 		this.virtual = virtual;
 	}
 
-	@Override
-	public String toString()
+	@Override public String toString()
 	{
 		return this.getClass().getSimpleName() + "{" + getId() + "}";
 	}

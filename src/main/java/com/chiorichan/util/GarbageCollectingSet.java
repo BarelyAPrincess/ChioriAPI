@@ -10,12 +10,10 @@ package com.chiorichan.util;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import org.apache.commons.lang3.Validate;
-
-import com.google.common.collect.Sets;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Implements a self garbage collecting Set, that is Thread-safe
@@ -71,12 +69,12 @@ public class GarbageCollectingSet<V, G> implements Iterable<V>
 		new CleanupThread().start();
 	}
 	
-	private final Set<GarbageReference<V, G>> list = Sets.newCopyOnWriteArraySet();
+	private final Set<GarbageReference<V, G>> list = new CopyOnWriteArraySet<>();
 	
 	public void add( V value, G garbageObject )
 	{
-		Validate.notNull( garbageObject );
-		Validate.notNull( value );
+		Validation.notNull( garbageObject );
+		Validation.notNull( value );
 		
 		if ( value == garbageObject )
 			throw new IllegalArgumentException( "value can't be equal to garbageObject for gc to work" );
@@ -104,7 +102,7 @@ public class GarbageCollectingSet<V, G> implements Iterable<V>
 	
 	public Set<V> toSet()
 	{
-		Set<V> values = Sets.newHashSet();
+		Set<V> values = new HashSet<V>();
 		for ( GarbageReference<V, G> v : list )
 			values.add( v.value );
 		return values;

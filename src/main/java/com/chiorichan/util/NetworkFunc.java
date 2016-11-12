@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -32,8 +32,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.net.ntp.NTPUDPClient;
-import org.apache.commons.net.ntp.TimeInfo;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.logger.Log;
@@ -70,7 +68,7 @@ public class NetworkFunc
 		return true;
 	}
 
-	public static Date getNTPDate()
+	/* public static Date getNTPDate()
 	{
 		String[] hosts = new String[] {"ntp02.oal.ul.pt", "ntp04.oal.ul.pt", "ntp.xs4all.nl"};
 
@@ -97,7 +95,7 @@ public class NetworkFunc
 
 		return null;
 
-	}
+	} */
 
 	public static String getUserAgent()
 	{

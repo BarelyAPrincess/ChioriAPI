@@ -2,29 +2,30 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
 package com.chiorichan.permission;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.chiorichan.ApplicationTerminal;
 import com.chiorichan.account.AccountAttachment;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.util.Namespace;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.chiorichan.util.StringFunc;
 
 /**
  * Permission class for each permission node
  */
 public final class Permission implements Comparable<Permission>
 {
-	protected final List<Permission> children = Lists.newCopyOnWriteArrayList();
+	protected final List<Permission> children = new CopyOnWriteArrayList<>();
 	protected final String localName;
 	protected PermissionModelValue model;
 	protected final Permission parent;
@@ -76,8 +77,7 @@ public final class Permission implements Comparable<Permission>
 		PermissionManager.instance().getBackend().nodeCommit( this );
 	}
 
-	@Override
-	public int compareTo( Permission perm )
+	@Override public int compareTo( Permission perm )
 	{
 		if ( getNamespace().equals( perm.getNamespace() ) )
 			return 0;
@@ -96,7 +96,7 @@ public final class Permission implements Comparable<Permission>
 
 	public void debugPermissionStack( AccountAttachment sender, int deepth )
 	{
-		String spacing = deepth > 0 ? Strings.repeat( "      ", deepth - 1 ) + "|---> " : "";
+		String spacing = deepth > 0 ? StringFunc.repeat( "      ", deepth - 1 ) + "|---> " : "";
 
 		sender.sendMessage( String.format( "%s%s%s=%s", EnumColor.YELLOW, spacing, getLocalName(), model ) );
 
@@ -141,13 +141,12 @@ public final class Permission implements Comparable<Permission>
 	/**
 	 * Returns all children of this
 	 *
-	 * @param includeParents
-	 *             Shall we include parent Permission of all children
+	 * @param includeParents Shall we include parent Permission of all children
 	 * @return List of Permission Children
 	 */
 	public List<Permission> getChildrenRecursive( boolean includeParents )
 	{
-		List<Permission> result = Lists.newArrayList();
+		List<Permission> result = new ArrayList<>();
 
 		getChildrenRecursive( result, includeParents );
 
@@ -234,8 +233,7 @@ public final class Permission implements Comparable<Permission>
 		model = new PermissionModelValue( localName, type, this );
 	}
 
-	@Override
-	public String toString()
+	@Override public String toString()
 	{
 		return String.format( "Permission{name=%s,parent=%s,modelValue=%s}", getLocalName(), getParent(), model );
 	}
