@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -59,8 +59,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 	/**
 	 * Sets if this SQL class will auto execute any changes made to it's query
 	 *
-	 * @param autoExecute
-	 *             The new autoExecute value
+	 * @param autoExecute The new autoExecute value
 	 */
 	public T autoExecute( boolean autoExecute )
 	{
@@ -227,11 +226,9 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 	/**
 	 * Gets the ResultSet for the last execution
 	 *
-	 * @return
-	 *         The resulting {@link ResultSet} from the last execution, will return null is query was update or there were no results
-	 * @throws SQLException
-	 *              if a database access error occurs or this method is called on a closed
-	 *              Statement
+	 * @return The resulting {@link ResultSet} from the last execution, will return null is query was update or there were no results
+	 * @throws SQLException if a database access error occurs or this method is called on a closed
+	 *                      Statement
 	 */
 	ResultSet resultSet() throws SQLException
 	{
@@ -252,6 +249,33 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 		}
 
 		return resultSetCache;
+	}
+
+	@Override
+	public Map<String, Object> rowAbsolute( int row ) throws SQLException
+	{
+		ResultSet result = resultSet();
+		if ( result.absolute( row ) )
+			return DbFunc.rowToMap( result );
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> rowFirst() throws SQLException
+	{
+		ResultSet result = resultSet();
+		if ( result.first() )
+			return DbFunc.rowToMap( result );
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> rowLast() throws SQLException
+	{
+		ResultSet result = resultSet();
+		if ( result.last() )
+			return DbFunc.rowToMap( result );
+		return null;
 	}
 
 	@Override

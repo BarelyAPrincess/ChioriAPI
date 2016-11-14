@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -33,8 +33,7 @@ import com.google.common.collect.Sets;
  */
 public class DbFunc
 {
-	@SuppressWarnings( "serial" )
-	private static class FoundException extends Exception
+	@SuppressWarnings( "serial" ) private static class FoundException extends Exception
 	{
 		int matchingType = 0;
 
@@ -280,8 +279,7 @@ public class DbFunc
 		return result;
 	}
 
-	@Deprecated
-	public static int rowCount( ResultSet result )
+	@Deprecated public static int rowCount( ResultSet result )
 	{
 		try
 		{

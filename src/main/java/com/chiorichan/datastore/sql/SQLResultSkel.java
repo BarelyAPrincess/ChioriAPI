@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -24,6 +24,12 @@ public interface SQLResultSkel
 	Map<String, Map<String, String>> stringMap() throws SQLException;
 
 	Map<String, Object> row() throws SQLException;
+
+	Map<String, Object> rowAbsolute( int row ) throws SQLException;
+
+	Map<String, Object> rowFirst() throws SQLException;
+
+	Map<String, Object> rowLast() throws SQLException;
 
 	Map<String, String> stringRow() throws SQLException;
 

@@ -51,7 +51,7 @@ import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.Versioning;
 
 /**
- * Provides a base AppController skeleton for you to extend or call directly using {@code AppAppController.init( Class<? extends AppAppController> loaderClass, String... args );}.
+ * Provides a base AppLoader skeleton for you to extend or call directly using {@code AppLoader.init( Class<? extends AppAppController> loaderClass, String... args );}.
  */
 public abstract class AppLoader implements Listener
 {
@@ -228,22 +228,22 @@ public abstract class AppLoader implements Listener
 		{
 			{
 				acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
-				acceptsAll( Arrays.asList( "config" ), "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "config.yaml" ) ).describedAs( "Yaml file" );
-				acceptsAll( Arrays.asList( "plugins-dir" ), "Specify plugin directory" ).withRequiredArg().ofType( String.class );
-				acceptsAll( Arrays.asList( "updates-dir" ), "Specify updates directory" ).withRequiredArg().ofType( String.class );
-				acceptsAll( Arrays.asList( "cache-dir" ), "Specify cache directory" ).withRequiredArg().ofType( String.class );
-				acceptsAll( Arrays.asList( "logs-dir" ), "Specify logs directory" ).withRequiredArg().ofType( String.class );
-				acceptsAll( Arrays.asList( "app-dir" ), "Specify application directory" ).withRequiredArg().ofType( String.class );
-				acceptsAll( Arrays.asList( "query-disable" ), "Disable the internal TCP Server" );
+				accepts( "config", "File for chiori settings" ).withRequiredArg().ofType( File.class ).defaultsTo( new File( "config.yaml" ) ).describedAs( "Yaml file" );
+				accepts( "plugins-dir", "Specify plugin directory" ).withRequiredArg().ofType( String.class );
+				accepts( "updates-dir", "Specify updates directory" ).withRequiredArg().ofType( String.class );
+				accepts( "cache-dir", "Specify cache directory" ).withRequiredArg().ofType( String.class );
+				accepts( "logs-dir", "Specify logs directory" ).withRequiredArg().ofType( String.class );
+				accepts( "app-dir", "Specify application directory" ).withRequiredArg().ofType( String.class );
+				accepts( "query-disable", "Disable the internal TCP Server" );
 				acceptsAll( Arrays.asList( "d", "date-format" ), "Format of the date to display in the console (for log entries)" ).withRequiredArg().ofType( SimpleDateFormat.class ).describedAs( "Log date format" );
-				acceptsAll( Arrays.asList( "nocolor" ), "Disables the console color formatting" );
+				accepts( "nocolor", "Disables the console color formatting" );
 				acceptsAll( Arrays.asList( "v", "version" ), "Show the Version" );
-				acceptsAll( Arrays.asList( "pid" ), "Specifies the application PID file. This file is created and removed by the server, be sure the local running user has access." ).withRequiredArg().ofType( File.class ).describedAs( "PID File" ).defaultsTo( new File( "/var/run/chiori/chiori.pid" ) );
-				acceptsAll( Arrays.asList( "child" ), "Watchdog Child Mode. DO NOT USE!" );
-				acceptsAll( Arrays.asList( "watchdog" ), "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
+				accepts( "pid", "Specifies the application PID file. This file is created and removed by the server, be sure the local running user has access." ).withRequiredArg().ofType( File.class ).describedAs( "PID File" ).defaultsTo( new File( "/var/run/chiori/chiori.pid" ) );
+				accepts( "child", "Watchdog Child Mode. DO NOT USE!" );
+				accepts( "watchdog", "Launch the server with Watchdog protection, allows the server to restart itself. WARNING: May be buggy!" ).requiredIf( "child" ).withOptionalArg().ofType( String.class ).describedAs( "Child JVM launch arguments" ).defaultsTo( "" );
 
-				acceptsAll( Arrays.asList( "status" ), "Check daemon status" );
-				acceptsAll( Arrays.asList( "stop" ), "Stop daemon status" );
+				accepts( "status", "Check daemon status" );
+				accepts( "stop", "Stop daemon status" );
 			}
 		};
 
@@ -287,13 +287,13 @@ public abstract class AppLoader implements Listener
 							if ( options.has( "stop" ) )
 							{
 								if ( Application.terminatePID( pid ) )
-									Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " has been terminated!" );
+									Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " has been terminated! (PID " + pid + ")" );
 								else
-									Log.get().info( EnumColor.RED + "Failed to terminate pid " + pid + "!" );
+									Log.get().info( EnumColor.RED + "Failed to terminate PID " + pid + "!" );
 								return false;
 							}
 
-							Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " is running!" );
+							Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " is running with PID " + pid + "!" );
 							return false;
 						}
 					}
