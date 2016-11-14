@@ -293,7 +293,9 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 					if ( e.seperator() != SQLWhereElementSep.NONE && e != elements.get( 0 ) )
 						segments.add( e.seperator().toString() );
 					segments.add( String.format( e.toSqlQuery(), "?" ) );
-					if ( e.value() != null )
+					if ( e.value() == null )
+						sqlValues.add( "null" );
+					else
 						sqlValues.add( e.value() );
 				}
 			}
