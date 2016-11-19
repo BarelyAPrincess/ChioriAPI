@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -10,11 +10,7 @@ package com.chiorichan.datastore.sql.query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.chiorichan.datastore.DatastoreManager;
@@ -35,19 +31,19 @@ import com.google.common.collect.Lists;
 /**
  *
  */
-public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQLSkelWhere<SQLQuerySelect, SQLQuerySelect>, SQLSkelLimit<SQLQuerySelect>, SQLSkelOrderBy<SQLQuerySelect>, SQLSkelGroupBy<SQLQuerySelect>
+public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQLSkelWhere<SQLQuerySelect, SQLQuerySelect>, SQLSkelLimit<SQLQuerySelect>, SQLSkelOrderBy<SQLQuerySelect>, SQLSkelGroupBy<SQLQuerySelect>, Cloneable
 {
-	private final List<SQLWhereElement> elements = Lists.newLinkedList();
 	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;
-	private final List<String> orderBy = Lists.newLinkedList();
+	private final List<SQLWhereElement> elements = new LinkedList<>();
+	private final List<Object> sqlValues = new LinkedList<>();
+	private final List<String> orderBy = new LinkedList<>();
+	private final List<String> groupBy = new LinkedList<>();
+	private final List<String> fields = new LinkedList<>();
 	private boolean orderAscending = true;
-	private final List<String> groupBy = Lists.newLinkedList();
-	private final List<String> fields = Lists.newLinkedList();
-	private final List<Object> sqlValues = Lists.newLinkedList();
 	private boolean needsUpdate = true;
-	private String table;
-	private int limit = -1;
 	private int offset = -1;
+	private int limit = -1;
+	private String table;
 
 	public SQLQuerySelect( SQLWrapper sql, String table )
 	{
@@ -156,6 +152,12 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	}
 
 	@Override
+	public SQLQuerySelect take( int take )
+	{
+		return this.limit( take );
+	}
+
+	@Override
 	public SQLQuerySelect limit( int limit, int offset )
 	{
 		this.limit = limit;
@@ -177,6 +179,12 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 		this.offset = offset;
 		needsUpdate = true;
 		return this;
+	}
+
+	@Override
+	public SQLQuerySelect skip( int skip )
+	{
+		return this.offset( skip );
 	}
 
 	@Override
@@ -435,4 +443,25 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	}
 
 	// TODO Consider adding whereLessThan, whereMoreThan, whereLike, whereLikeWild, whereBetween, whereNotLike, whereNot, whereRegEx methods, unless this is lazy!
+
+	@Override
+	public SQLQuerySelect clone()
+	{
+		SQLQuerySelect clone = new SQLQuerySelect( sql, table );
+
+		super.clone( clone );
+
+		clone.elements.addAll( this.elements );
+		clone.currentSeperator = this.currentSeperator;
+		clone.orderBy.addAll( this.orderBy );
+		clone.orderAscending = this.orderAscending;
+		clone.groupBy.addAll( this.groupBy );
+		clone.fields.addAll( this.fields );
+		clone.sqlValues.addAll( this.sqlValues );
+		clone.needsUpdate = this.needsUpdate;
+		clone.limit = this.limit;
+		clone.offset = this.offset;
+
+		return clone;
+	}
 }

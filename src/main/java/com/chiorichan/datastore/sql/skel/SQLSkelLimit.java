@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -15,12 +15,16 @@ package com.chiorichan.datastore.sql.skel;
 public interface SQLSkelLimit<T>
 {
 	int limit();
-	
+
 	T limit( int limit, int offset );
-	
+
 	T limit( int limit );
-	
+
+	T take( int take );
+
 	int offset();
-	
+
 	T offset( int offset );
+
+	T skip( int skip );
 }

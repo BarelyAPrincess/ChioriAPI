@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -33,13 +33,13 @@ import com.google.common.collect.Lists;
  */
 public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQLSkelWhere<SQLQueryDelete, SQLQueryDelete>, SQLSkelLimit<SQLQueryDelete>
 {
-	private final List<SQLWhereElement> elements = Lists.newLinkedList();
 	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;
+	private final List<SQLWhereElement> elements = Lists.newLinkedList();
 	private final List<Object> sqlValues = Lists.newLinkedList();
 	private boolean needsUpdate = true;
-	private String table;
-	private int limit = -1;
 	private int offset = -1;
+	private int limit = -1;
+	private String table;
 
 	public SQLQueryDelete( SQLWrapper sql, String table )
 	{
@@ -96,6 +96,12 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 	}
 
 	@Override
+	public SQLQueryDelete take( int take )
+	{
+		return this.limit( take );
+	}
+
+	@Override
 	public SQLQueryDelete limit( int limit, int offset )
 	{
 		this.limit = limit;
@@ -116,6 +122,12 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 		this.offset = offset;
 		needsUpdate = true;
 		return this;
+	}
+
+	@Override
+	public SQLQueryDelete skip( int skip )
+	{
+		return this.offset( skip );
 	}
 
 	@Override
@@ -310,5 +322,22 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 	public SQLQueryDelete whereMatches( String key, Object value )
 	{
 		return new SQLWhereKeyValue<SQLQueryDelete>( this, key ).matches( value );
+	}
+
+	@Override
+	public SQLQueryDelete clone()
+	{
+		SQLQueryDelete clone = new SQLQueryDelete( sql, table );
+
+		super.clone( clone );
+
+		clone.currentSeperator = this.currentSeperator;
+		clone.elements.addAll( this.elements );
+		clone.sqlValues.addAll( this.sqlValues );
+		clone.needsUpdate = this.needsUpdate;
+		clone.offset = this.offset;
+		clone.limit = this.limit;
+
+		return clone;
 	}
 }

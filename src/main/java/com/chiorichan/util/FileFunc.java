@@ -1012,7 +1012,7 @@ public class FileFunc
 	public static boolean setDirectoryAccess( File file )
 	{
 		if ( file.exists() && file.isDirectory() && file.canRead() && file.canWrite() )
-			Log.get().fine( "This application has read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
+			Log.get().finest( "This application has read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
 		else
 			try
 			{

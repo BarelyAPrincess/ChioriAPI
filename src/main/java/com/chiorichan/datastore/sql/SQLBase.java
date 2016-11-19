@@ -27,18 +27,15 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
  * Provides the SQL Base Class for all SQL Classes
  */
 @SuppressWarnings( {"unchecked", "rawtypes"} )
-public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
+public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Cloneable
 {
+	protected SQLException lastException = null;
+	protected ResultSet resultSetCache = null;
+	protected PreparedStatement stmt = null;
+	protected boolean isFirstCall = true;
+	protected boolean debug = false;
+	protected boolean autoExecute;
 	protected SQLWrapper sql;
-
-	private PreparedStatement stmt = null;
-	private boolean autoExecute;
-	private boolean debug = false;
-	private SQLException lastException = null;
-
-	private ResultSet resultSetCache = null;
-
-	private boolean isFirstCall = true;
 
 	protected SQLBase( SQLWrapper sql, boolean autoExecute )
 	{
@@ -230,7 +227,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 	 * @throws SQLException if a database access error occurs or this method is called on a closed
 	 *                      Statement
 	 */
-	ResultSet resultSet() throws SQLException
+	public ResultSet resultSet() throws SQLException
 	{
 		if ( resultSetCache == null )
 		{
@@ -255,7 +252,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 	public Map<String, Object> rowAbsolute( int row ) throws SQLException
 	{
 		ResultSet result = resultSet();
-		if ( result.absolute( row ) )
+		if ( result != null && result.absolute( row ) )
 			return DbFunc.rowToMap( result );
 		return null;
 	}
@@ -264,7 +261,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 	public Map<String, Object> rowFirst() throws SQLException
 	{
 		ResultSet result = resultSet();
-		if ( result.first() )
+		if ( result != null && result.first() )
 			return DbFunc.rowToMap( result );
 		return null;
 	}
@@ -273,7 +270,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 	public Map<String, Object> rowLast() throws SQLException
 	{
 		ResultSet result = resultSet();
-		if ( result.last() )
+		if ( result != null && result.last() )
 			return DbFunc.rowToMap( result );
 		return null;
 	}
@@ -327,7 +324,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 				throw lastException;
 
 			if ( stmt == null && lastException == null )
-				throw new IllegalStateException( "There was an unknown problem encountered while trying to auto execute the SQL query. Both Statement and lastException was null." );
+				throw new IllegalStateException( "There was an unknown problem encountered while trying to auto execute the SQL query. Both Statement and lastException were null." );
 		}
 
 		return stmt;
@@ -384,4 +381,18 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel
 			stmt = null;
 		}
 	}
+
+	public void clone( T clone )
+	{
+		clone.resultSetCache = this.resultSetCache;
+		clone.lastException = this.lastException;
+		clone.isFirstCall = this.isFirstCall;
+		clone.autoExecute = this.autoExecute;
+		clone.debug = this.debug;
+		clone.stmt = this.stmt;
+		clone.sql = this.sql;
+	}
+
+	@Override
+	public abstract T clone();
 }

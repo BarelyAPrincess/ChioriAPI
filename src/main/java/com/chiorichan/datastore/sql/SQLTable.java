@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -22,6 +22,7 @@ import com.chiorichan.datastore.sql.query.SQLQuerySelect;
 import com.chiorichan.datastore.sql.query.SQLQueryUpdate;
 import com.chiorichan.util.ObjectFunc;
 import com.google.common.collect.Sets;
+import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 /**
@@ -42,6 +43,21 @@ public class SQLTable extends SQLBase<SQLTable>
 	public SQLTable addColumn( String colType, String colName ) throws SQLException
 	{
 		return addColumn( colType, colName, null );
+	}
+
+	/**
+	 * This method is tailored for use with MySQL and returns a result for the primary key.
+	 * This method needs patching for other sql types and the ability to return more than one primary key
+	 *
+	 * @return The tables primary key
+	 * @throws SQLException
+	 */
+	public String primaryKey() throws SQLException
+	{
+		ResultSet rs = query( String.format( "SHOW INDEX FROM `%s`", table ), false ).getResultSet();
+		if ( !rs.first() )
+			return null;
+		return rs.getString( "Column_name" );
 	}
 
 	public SQLTable addColumn( String colType, String colName, Object def ) throws SQLException
@@ -203,6 +219,22 @@ public class SQLTable extends SQLBase<SQLTable>
 	public Object[] sqlValues()
 	{
 		return new Object[0];
+	}
+
+	@Override
+	public SQLTable clone()
+	{
+		try
+		{
+			SQLTable clone = new SQLTable( sql, table );
+			super.clone( clone );
+			return clone;
+		}
+		catch ( SQLException e )
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override

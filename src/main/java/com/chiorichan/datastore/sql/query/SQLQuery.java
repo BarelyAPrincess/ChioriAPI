@@ -2,13 +2,14 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
 package com.chiorichan.datastore.sql.query;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -101,6 +102,20 @@ public final class SQLQuery extends SQLBase<SQLQuery>
 	public Object[] sqlValues()
 	{
 		return values.toArray();
+	}
+
+	@Override
+	public SQLQuery clone()
+	{
+		SQLQuery clone = new SQLQuery( sql );
+
+		super.clone( clone );
+
+		clone.query = this.query;
+		clone.update = this.update;
+		clone.values = new ArrayList<>( this.values );
+
+		return clone;
 	}
 
 	@Override

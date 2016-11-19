@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -35,16 +35,16 @@ import com.google.common.collect.Maps;
 /**
  * SQL Query for Update
  */
-public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQLSkelValues<SQLQueryUpdate>, SQLSkelWhere<SQLQueryUpdate, SQLQueryUpdate>, SQLSkelLimit<SQLQueryUpdate>
+public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQLSkelValues<SQLQueryUpdate>, SQLSkelWhere<SQLQueryUpdate, SQLQueryUpdate>, SQLSkelLimit<SQLQueryUpdate>, Cloneable
 {
-	private final List<SQLWhereElement> elements = Lists.newLinkedList();
 	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;
-	private final Map<String, Object> values = Maps.newHashMap();
+	private final List<SQLWhereElement> elements = Lists.newLinkedList();
 	private final List<Object> sqlValues = Lists.newLinkedList();
+	private final Map<String, Object> values = Maps.newHashMap();
 	private boolean needsUpdate = true;
-	private String table;
-	private int limit = -1;
 	private int offset = -1;
+	private int limit = -1;
+	private String table;
 
 	public SQLQueryUpdate( SQLWrapper sql, String table )
 	{
@@ -101,6 +101,12 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 	}
 
 	@Override
+	public SQLQueryUpdate take( int take )
+	{
+		return this.limit( take );
+	}
+
+	@Override
 	public SQLQueryUpdate limit( int limit, int offset )
 	{
 		this.limit = limit;
@@ -121,6 +127,12 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 		this.offset = offset;
 		needsUpdate = true;
 		return this;
+	}
+
+	@Override
+	public SQLQueryUpdate skip( int skip )
+	{
+		return this.offset( skip );
 	}
 
 	@Override
@@ -354,5 +366,23 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 	public SQLQueryUpdate whereMatches( String key, Object value )
 	{
 		return new SQLWhereKeyValue<SQLQueryUpdate>( this, key ).matches( value );
+	}
+
+	@Override
+	public SQLQueryUpdate clone()
+	{
+		SQLQueryUpdate clone = new SQLQueryUpdate( sql, table );
+
+		super.clone( clone );
+
+		clone.currentSeperator = this.currentSeperator;
+		clone.sqlValues.addAll( this.sqlValues );
+		clone.elements.addAll( this.elements );
+		clone.needsUpdate = this.needsUpdate;
+		clone.values.putAll( this.values );
+		clone.offset = this.offset;
+		clone.limit = this.limit;
+
+		return clone;
 	}
 }

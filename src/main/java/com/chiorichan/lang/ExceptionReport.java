@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -10,6 +10,7 @@ package com.chiorichan.lang;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,10 +41,8 @@ public class ExceptionReport
 	/**
 	 * Registers an expected exception to be thrown
 	 *
-	 * @param callback
-	 *             The Callback to call when such exception is thrown
-	 * @param clzs
-	 *             Classes to be registered
+	 * @param callback The Callback to call when such exception is thrown
+	 * @param clzs     Classes to be registered
 	 */
 	@SafeVarargs
 	public static void registerException( ExceptionCallback callback, Class<? extends Throwable>... clzs )
@@ -123,10 +122,8 @@ public class ExceptionReport
 	/**
 	 * Processes and appends the throwable to the context provided.
 	 *
-	 * @param cause
-	 *             The exception thrown
-	 * @param context
-	 *             The EvalContext associated with the eval request
+	 * @param cause   The exception thrown
+	 * @param context The EvalContext associated with the eval request
 	 * @return True if we should abort any further execution of code
 	 */
 	public final boolean handleException( Throwable cause, ExceptionContext context )
@@ -149,7 +146,7 @@ public class ExceptionReport
 			}
 			return abort;
 		}
-		else if ( cause instanceof NullPointerException || cause instanceof ArrayIndexOutOfBoundsException || cause instanceof IOException )
+		else if ( cause instanceof NullPointerException || cause instanceof ArrayIndexOutOfBoundsException || cause instanceof IOException || cause instanceof StackOverflowError )
 		{
 			addException( ReportingLevel.E_ERROR, cause );
 			return true;
@@ -158,7 +155,7 @@ public class ExceptionReport
 		{
 			boolean handled = false;
 
-			Map<Class<? extends Throwable>, ExceptionCallback> assignable = Maps.newHashMap();
+			Map<Class<? extends Throwable>, ExceptionCallback> assignable = new HashMap<>();
 
 			for ( Entry<Class<? extends Throwable>, ExceptionCallback> entry : registered.entrySet() )
 				if ( cause.getClass().equals( entry.getKey() ) )
@@ -218,10 +215,8 @@ public class ExceptionReport
 	/**
 	 * Checks if exception is present by class name
 	 *
-	 * @param clz
-	 *             The exception to check for
-	 * @return
-	 *         Is it present
+	 * @param clz The exception to check for
+	 * @return Is it present
 	 */
 	public boolean hasException( Class<? extends Throwable> clz )
 	{

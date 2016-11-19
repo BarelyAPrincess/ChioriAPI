@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
 /**
  * SQL Query for Insert
  */
-public final class SQLQueryInsert extends SQLBase<SQLQueryInsert> implements SQLSkelValues<SQLQueryInsert>
+public final class SQLQueryInsert extends SQLBase<SQLQueryInsert> implements SQLSkelValues<SQLQueryInsert>, Cloneable
 {
 	private List<String> requiredValues = Lists.newArrayList();
 	private Map<String, Object> values = Maps.newHashMap();
@@ -141,5 +141,18 @@ public final class SQLQueryInsert extends SQLBase<SQLQueryInsert> implements SQL
 			DatastoreManager.getLogger().warning( "SQLQueryInsert omited values/keys because the two lengths did not match, so we used the minimum of the two. Keys: (" + Joiner.on( ", " ).join( keys ) + ") Values: (" + Joiner.on( ", " ).join( valuesArray ) + ")" );
 
 		return this;
+	}
+
+	@Override
+	public SQLQueryInsert clone()
+	{
+		SQLQueryInsert clone = new SQLQueryInsert( sql, table );
+
+		super.clone( clone );
+
+		clone.requiredValues.addAll( this.requiredValues );
+		clone.values.putAll( this.values );
+
+		return clone;
 	}
 }

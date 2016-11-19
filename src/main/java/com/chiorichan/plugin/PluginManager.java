@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -255,7 +255,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		}
 		catch ( PluginNotFoundException e )
 		{
-			getLogger().warning( e.getMessage() );
+			getLogger().finest( e.getMessage() );
 			return null;
 		}
 	}
@@ -268,7 +268,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		}
 		catch ( PluginNotFoundException e )
 		{
-			getLogger().fine( e.getMessage() );
+			getLogger().finest( e.getMessage() );
 			return null;
 		}
 	}
@@ -297,7 +297,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		}
 		catch ( PluginNotFoundException e )
 		{
-			getLogger().warning( e.getMessage() );
+			getLogger().finest( e.getMessage() );
 			return null;
 		}
 	}
@@ -324,13 +324,10 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 * <p>
 	 * File must be valid according to the current enabled Plugin interfaces
 	 *
-	 * @param file
-	 *             File containing the plugin to load
+	 * @param file File containing the plugin to load
 	 * @return The Plugin instance
-	 * @throws PluginInvalidException
-	 *              Thrown when the specified file is not a valid plugin
-	 * @throws UnknownDependencyException
-	 *              If a required dependency could not be found
+	 * @throws PluginInvalidException     Thrown when the specified file is not a valid plugin
+	 * @throws UnknownDependencyException If a required dependency could not be found
 	 */
 	public synchronized Plugin loadPlugin( File file ) throws PluginInvalidException, UnknownDependencyException
 	{
@@ -403,8 +400,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	/**
 	 * Loads the plugins contained within the specified directory
 	 *
-	 * @param directory
-	 *             Directory to check for plugins
+	 * @param directory Directory to check for plugins
 	 * @return A list of all plugins loaded
 	 */
 	public Plugin[] loadPlugins( File directory )
@@ -555,7 +551,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 					if ( softDependencies.get( plugin ).isEmpty() )
 						softDependencies.remove( plugin );
 				}
-				if ( ! ( dependencies.containsKey( plugin ) || softDependencies.containsKey( plugin ) ) && plugins.containsKey( plugin ) )
+				if ( !( dependencies.containsKey( plugin ) || softDependencies.containsKey( plugin ) ) && plugins.containsKey( plugin ) )
 				{
 					// We're clear to load, no more soft or hard dependencies left
 					File file = plugins.get( plugin );
@@ -642,10 +638,8 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	/**
 	 * Registers the specified plugin loader
 	 *
-	 * @param loader
-	 *             Class name of the PluginLoader to register
-	 * @throws IllegalArgumentException
-	 *              Thrown when the given Class is not a valid PluginLoader
+	 * @param loader Class name of the PluginLoader to register
+	 * @throws IllegalArgumentException Thrown when the given Class is not a valid PluginLoader
 	 */
 	public void registerInterface( Class<? extends PluginLoader> loader ) throws IllegalArgumentException
 	{

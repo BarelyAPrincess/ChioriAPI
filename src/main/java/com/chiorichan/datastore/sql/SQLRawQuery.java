@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -21,7 +21,7 @@ import com.chiorichan.util.DbFunc;
 public class SQLRawQuery extends SQLBase<SQLRawQuery>
 {
 	private String query;
-	private List<Object> objs = new ArrayList<>();
+	private final List<Object> objs = new ArrayList<>();
 
 	public SQLRawQuery( SQLWrapper sql, String query )
 	{
@@ -61,6 +61,15 @@ public class SQLRawQuery extends SQLBase<SQLRawQuery>
 	public Object[] sqlValues()
 	{
 		return objs.toArray( new Object[0] );
+	}
+
+	@Override
+	public SQLRawQuery clone()
+	{
+		SQLRawQuery clone = new SQLRawQuery( sql, query );
+		super.clone( clone );
+		clone.objs.addAll( this.objs );
+		return clone;
 	}
 
 	@Override
