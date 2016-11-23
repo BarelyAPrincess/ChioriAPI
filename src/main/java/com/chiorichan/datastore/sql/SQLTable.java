@@ -12,8 +12,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 import com.chiorichan.datastore.sql.bases.SQLiteDatastore;
 import com.chiorichan.datastore.sql.query.SQLQueryDelete;
@@ -115,9 +114,9 @@ public class SQLTable extends SQLBase<SQLTable>
 			return addColumn( "VARCHAR(" + i + ")", colName, def );
 	}
 
-	public Collection<String> columnNames() throws SQLException
+	public List<String> columnNames() throws SQLException
 	{
-		Set<String> rtn = Sets.newLinkedHashSet();
+		List<String> rtn = new LinkedList<>();
 
 		query( "SELECT * FROM `" + table + "` LIMIT 1;", false );
 
