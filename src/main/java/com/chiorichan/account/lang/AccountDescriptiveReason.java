@@ -36,12 +36,12 @@ public class AccountDescriptiveReason
 	public static final AccountDescriptiveReason FEATURE_NOT_IMPLEMENTED = new AccountDescriptiveReason( "The requested feature has not been implemented per this version.", ReportingLevel.L_ERROR );
 
 	public static final AccountDescriptiveReason UNCONFIGURED = new AccountDescriptiveReason( "The Accounts Manager is unconfigured.", ReportingLevel.L_ERROR );
-	public static final AccountDescriptiveReason UNDER_ATTACK = new AccountDescriptiveReason( "Max fail login tries reached. Account temporarily locked.", ReportingLevel.L_SECURITY );
+	public static final AccountDescriptiveReason UNDER_ATTACK = new AccountDescriptiveReason( "Max fail login tries reached, account temporarily locked.", ReportingLevel.L_SECURITY );
 	public static final AccountDescriptiveReason CANCELLED_BY_EVENT = new AccountDescriptiveReason( "Your login has been cancelled by an internal event for unknown reason, check logs.", ReportingLevel.L_ERROR );
 
-	public static final AccountDescriptiveReason EMPTY_USERNAME = new AccountDescriptiveReason( "The specified username was empty or null.", ReportingLevel.L_ERROR );
+	public static final AccountDescriptiveReason EMPTY_USERNAME = new AccountDescriptiveReason( "The specified username was not provided.", ReportingLevel.L_ERROR );
 	public static final AccountDescriptiveReason EMPTY_CREDENTIALS = new AccountDescriptiveReason( "The specified password (or credentials) was empty or null.", ReportingLevel.L_ERROR );
-	public static final AccountDescriptiveReason EMPTY_ACCTID = new AccountDescriptiveReason( "The specified Account Id was empty or null.", ReportingLevel.L_ERROR );
+	public static final AccountDescriptiveReason EMPTY_ACCTID = new AccountDescriptiveReason( "The specified account id was not provided.", ReportingLevel.L_ERROR );
 
 	public static final AccountDescriptiveReason INCORRECT_LOGIN = new AccountDescriptiveReason( "There were no accounts that matched the provided credentials.", ReportingLevel.L_DENIED );
 	public static final AccountDescriptiveReason EXPIRED_LOGIN = new AccountDescriptiveReason( "The provided login credentials were marked as expired.", ReportingLevel.L_EXPIRED );
