@@ -146,7 +146,7 @@ public class ExceptionReport
 			}
 			return abort;
 		}
-		else if ( cause instanceof NullPointerException || cause instanceof ArrayIndexOutOfBoundsException || cause instanceof IOException || cause instanceof StackOverflowError )
+		else if ( cause instanceof NullPointerException || cause instanceof ArrayIndexOutOfBoundsException || cause instanceof IOException || cause instanceof StackOverflowError || cause instanceof ClassFormatError )
 		{
 			addException( ReportingLevel.E_ERROR, cause );
 			return true;
