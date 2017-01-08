@@ -8,32 +8,23 @@
  */
 package com.chiorichan.util;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-
 import com.chiorichan.tasks.Timings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Provides basic methods for database convenience
  */
 public class DbFunc
 {
-	@SuppressWarnings( "serial" ) private static class FoundException extends Exception
+	@SuppressWarnings( "serial" )
+	private static class FoundException extends Exception
 	{
 		int matchingType = 0;
 
@@ -279,7 +270,8 @@ public class DbFunc
 		return result;
 	}
 
-	@Deprecated public static int rowCount( ResultSet result )
+	@Deprecated
+	public static int rowCount( ResultSet result )
 	{
 		try
 		{
@@ -429,10 +421,9 @@ public class DbFunc
 	 * Translates a data type from an integer (java.sql.Types value) to a string
 	 * that represents the corresponding class.
 	 *
-	 * @param type
-	 *             The java.sql.Types value to convert to its corresponding class.
+	 * @param type The java.sql.Types value to convert to its corresponding class.
 	 * @return The class that corresponds to the given java.sql.Types
-	 *         value, or Object.class if the type has no known mapping.
+	 * value, or Object.class if the type has no known mapping.
 	 */
 	public static Class<?> sqlTypeToClass( int type )
 	{

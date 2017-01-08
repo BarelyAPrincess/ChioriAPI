@@ -8,17 +8,17 @@
  */
 package com.chiorichan.permission;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.chiorichan.ApplicationTerminal;
 import com.chiorichan.account.AccountAttachment;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.util.Namespace;
 import com.chiorichan.util.StringFunc;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Permission class for each permission node
@@ -77,7 +77,8 @@ public final class Permission implements Comparable<Permission>
 		PermissionManager.instance().getBackend().nodeCommit( this );
 	}
 
-	@Override public int compareTo( Permission perm )
+	@Override
+	public int compareTo( Permission perm )
 	{
 		if ( getNamespace().equals( perm.getNamespace() ) )
 			return 0;
@@ -233,7 +234,8 @@ public final class Permission implements Comparable<Permission>
 		model = new PermissionModelValue( localName, type, this );
 	}
 
-	@Override public String toString()
+	@Override
+	public String toString()
 	{
 		return String.format( "Permission{name=%s,parent=%s,modelValue=%s}", getLocalName(), getParent(), model );
 	}

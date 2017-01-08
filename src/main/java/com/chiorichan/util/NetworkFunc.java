@@ -8,16 +8,15 @@
  */
 package com.chiorichan.util;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.chiorichan.AppConfig;
+import com.chiorichan.logger.Log;
+import com.google.common.base.Joiner;
+import org.apache.commons.io.IOUtils;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Channels;
@@ -25,17 +24,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-
-import org.apache.commons.io.IOUtils;
-
-import com.chiorichan.AppConfig;
-import com.chiorichan.logger.Log;
-import com.google.common.base.Joiner;
 
 /**
  * Provides Network Utilities
@@ -94,7 +83,6 @@ public class NetworkFunc
 		client.close();
 
 		return null;
-
 	} */
 
 	public static String getUserAgent()

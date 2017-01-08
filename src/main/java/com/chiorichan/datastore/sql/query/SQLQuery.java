@@ -8,14 +8,14 @@
  */
 package com.chiorichan.datastore.sql.query;
 
+import com.chiorichan.datastore.sql.SQLBase;
+import com.chiorichan.datastore.sql.SQLWrapper;
+import com.chiorichan.util.DbFunc;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.chiorichan.datastore.sql.SQLBase;
-import com.chiorichan.datastore.sql.SQLWrapper;
-import com.chiorichan.util.DbFunc;
 
 
 /**

@@ -8,29 +8,19 @@
  */
 package com.chiorichan.datastore.sql.query;
 
+import com.chiorichan.datastore.DatastoreManager;
+import com.chiorichan.datastore.sql.SQLBase;
+import com.chiorichan.datastore.sql.SQLWrapper;
+import com.chiorichan.datastore.sql.skel.*;
+import com.chiorichan.util.StringFunc;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.chiorichan.datastore.DatastoreManager;
-import com.chiorichan.datastore.sql.SQLBase;
-import com.chiorichan.datastore.sql.SQLWrapper;
-import com.chiorichan.datastore.sql.skel.SQLSkelGroupBy;
-import com.chiorichan.datastore.sql.skel.SQLSkelLimit;
-import com.chiorichan.datastore.sql.skel.SQLSkelOrderBy;
-import com.chiorichan.datastore.sql.skel.SQLSkelWhere;
-import com.chiorichan.datastore.sql.skel.SQLWhereElement;
-import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
-import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
-import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
-import com.chiorichan.util.StringFunc;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-
-/**
- *
- */
 public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQLSkelWhere<SQLQuerySelect, SQLQuerySelect>, SQLSkelLimit<SQLQuerySelect>, SQLSkelOrderBy<SQLQuerySelect>, SQLSkelGroupBy<SQLQuerySelect>, Cloneable
 {
 	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;

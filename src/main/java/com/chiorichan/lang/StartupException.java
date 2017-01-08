@@ -10,7 +10,7 @@ package com.chiorichan.lang;
 
 public class StartupException extends UncaughtException
 {
-	private static final long serialVersionUID = 13L;
+	private static final long serialVersionUID = 1L;
 
 	public StartupException( String msg )
 	{

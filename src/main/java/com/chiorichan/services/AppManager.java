@@ -2,20 +2,11 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
 package com.chiorichan.services;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
 
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.services.ServiceRegisterEvent;
@@ -25,6 +16,8 @@ import com.chiorichan.logger.Log;
 import com.chiorichan.util.ObjectFunc;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
+import java.util.*;
 
 public class AppManager<T extends ServiceManager>
 {
@@ -134,7 +127,7 @@ public class AppManager<T extends ServiceManager>
 			// Insert the provider into the collection, much more efficient big O than sort
 			int position = Collections.binarySearch( registered, registeredProvider );
 			if ( position < 0 )
-				registered.add( - ( position + 1 ), ( RegisteredServiceProvider<?, ServiceProvider> ) registeredProvider );
+				registered.add( -( position + 1 ), ( RegisteredServiceProvider<?, ServiceProvider> ) registeredProvider );
 			else
 				registered.add( position, ( RegisteredServiceProvider<?, ServiceProvider> ) registeredProvider );
 
@@ -161,7 +154,7 @@ public class AppManager<T extends ServiceManager>
 	{
 		synchronized ( providers )
 		{
-			return ImmutableSet.<Class<?>> copyOf( providers.keySet() );
+			return ImmutableSet.<Class<?>>copyOf( providers.keySet() );
 		}
 	}
 
@@ -222,9 +215,9 @@ public class AppManager<T extends ServiceManager>
 			List<RegisteredServiceProvider<?, ServiceProvider>> registered = providers.get( service );
 
 			if ( registered == null )
-				return ImmutableList.<RegisteredServiceProvider<C, ServiceProvider>> of();
+				return ImmutableList.<RegisteredServiceProvider<C, ServiceProvider>>of();
 
-			ret = ImmutableList.<RegisteredServiceProvider<C, ServiceProvider>> builder();
+			ret = ImmutableList.<RegisteredServiceProvider<C, ServiceProvider>>builder();
 
 			for ( RegisteredServiceProvider<?, ServiceProvider> provider : registered )
 				ret.add( ( RegisteredServiceProvider<C, ServiceProvider> ) provider );
@@ -242,7 +235,7 @@ public class AppManager<T extends ServiceManager>
 	 */
 	public List<RegisteredServiceProvider<?, ServiceProvider>> getServiceRegistrations( ObjectContext context )
 	{
-		ImmutableList.Builder<RegisteredServiceProvider<?, ServiceProvider>> ret = ImmutableList.<RegisteredServiceProvider<?, ServiceProvider>> builder();
+		ImmutableList.Builder<RegisteredServiceProvider<?, ServiceProvider>> ret = ImmutableList.<RegisteredServiceProvider<?, ServiceProvider>>builder();
 		synchronized ( providers )
 		{
 			for ( List<RegisteredServiceProvider<?, ServiceProvider>> registered : providers.values() )

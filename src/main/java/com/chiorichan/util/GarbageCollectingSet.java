@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
@@ -28,7 +28,7 @@ public class GarbageCollectingSet<V, G> implements Iterable<V>
 			setName( "GarbageCollectingSet-cleanupthread" );
 			setDaemon( true );
 		}
-		
+
 		@Override
 		public void run()
 		{
@@ -48,12 +48,12 @@ public class GarbageCollectingSet<V, G> implements Iterable<V>
 				}
 		}
 	}
-	
+
 	static class GarbageReference<V, G> extends WeakReference<G>
 	{
 		final V value;
 		final Set<GarbageReference<V, G>> list;
-		
+
 		GarbageReference( G referent, V value, Set<GarbageReference<V, G>> list )
 		{
 			super( referent, referenceQueue );
@@ -61,45 +61,45 @@ public class GarbageCollectingSet<V, G> implements Iterable<V>
 			this.list = list;
 		}
 	}
-	
+
 	private static final ReferenceQueue<Object> referenceQueue = new ReferenceQueue<Object>();
-	
+
 	static
 	{
 		new CleanupThread().start();
 	}
-	
+
 	private final Set<GarbageReference<V, G>> list = new CopyOnWriteArraySet<>();
-	
+
 	public void add( V value, G garbageObject )
 	{
 		Validation.notNull( garbageObject );
 		Validation.notNull( value );
-		
+
 		if ( value == garbageObject )
 			throw new IllegalArgumentException( "value can't be equal to garbageObject for gc to work" );
-		
+
 		GarbageReference<V, G> reference = new GarbageReference<V, G>( garbageObject, value, list );
 		list.add( reference );
 	}
-	
+
 	public void addAll( Iterable<V> values, G garbageObject )
 	{
 		for ( V v : values )
 			add( v, garbageObject );
 	}
-	
+
 	public void clear()
 	{
 		list.clear();
 	}
-	
+
 	@Override
 	public Iterator<V> iterator()
 	{
 		return toSet().iterator();
 	}
-	
+
 	public Set<V> toSet()
 	{
 		Set<V> values = new HashSet<V>();

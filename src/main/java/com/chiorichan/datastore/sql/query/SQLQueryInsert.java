@@ -8,10 +8,6 @@
  */
 package com.chiorichan.datastore.sql.query;
 
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.datastore.sql.SQLBase;
 import com.chiorichan.datastore.sql.SQLTable;
@@ -22,6 +18,10 @@ import com.chiorichan.util.StringFunc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * SQL Query for Insert

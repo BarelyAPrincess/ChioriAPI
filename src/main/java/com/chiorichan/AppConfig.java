@@ -1,21 +1,30 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * The MIT License
+ * <p>
+ * Copyright (c) 2004-2015 Paul R. Holser, Jr.
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com> All Right Reserved.
  */
 package com.chiorichan;
-
-import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.chiorichan.util.Validation;
 
 import com.chiorichan.configuration.Configuration;
 import com.chiorichan.configuration.ConfigurationOptions;
@@ -37,6 +46,17 @@ import com.chiorichan.tasks.Ticks;
 import com.chiorichan.util.Application;
 import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.util.Validation;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class AppConfig implements Configuration, TaskRegistrar
 {
@@ -85,7 +105,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 	public static AppConfig get()
 	{
 		if ( ObjectFunc.noLoopDetected( AppConfig.class, "loadConfig" ) && !instance.isConfigLoaded() )
-				instance.loadConfig();
+			instance.loadConfig();
 		return instance;
 	}
 

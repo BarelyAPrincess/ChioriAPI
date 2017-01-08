@@ -8,37 +8,10 @@
  */
 package com.chiorichan.plugin;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.Validate;
-
 import com.chiorichan.AppConfig;
-import com.chiorichan.event.EventBus;
-import com.chiorichan.event.EventHandler;
-import com.chiorichan.event.EventHandlers;
-import com.chiorichan.event.EventPriority;
-import com.chiorichan.event.EventRegistrar;
-import com.chiorichan.event.Listener;
+import com.chiorichan.event.*;
 import com.chiorichan.event.application.RunlevelEvent;
-import com.chiorichan.lang.PluginException;
-import com.chiorichan.lang.PluginInformationException;
-import com.chiorichan.lang.PluginInvalidException;
-import com.chiorichan.lang.PluginNotFoundException;
-import com.chiorichan.lang.RunLevel;
-import com.chiorichan.lang.UnknownDependencyException;
+import com.chiorichan.lang.*;
 import com.chiorichan.libraries.Libraries;
 import com.chiorichan.libraries.MavenReference;
 import com.chiorichan.logger.Log;
@@ -52,6 +25,14 @@ import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.util.FileFunc;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.Validate;
+
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PluginManager implements Listener, ServiceManager, EventRegistrar, TaskRegistrar
 {
@@ -323,7 +304,9 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 * Loads the plugin in the specified file
 	 * <p>
 	 * File must be valid according to the current enabled Plugin interfaces
+	 * <p>
 	 *
+	 * @param file File containing the plugin to load
 	 * @param file File containing the plugin to load
 	 * @return The Plugin instance
 	 * @throws PluginInvalidException     Thrown when the specified file is not a valid plugin
@@ -399,6 +382,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	/**
 	 * Loads the plugins contained within the specified directory
+	 * <p>
 	 *
 	 * @param directory Directory to check for plugins
 	 * @return A list of all plugins loaded
@@ -637,7 +621,9 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	/**
 	 * Registers the specified plugin loader
+	 * <p>
 	 *
+	 * @param loader Class name of the PluginLoader to register
 	 * @param loader Class name of the PluginLoader to register
 	 * @throws IllegalArgumentException Thrown when the given Class is not a valid PluginLoader
 	 */

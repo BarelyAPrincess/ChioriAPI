@@ -8,21 +8,21 @@
  */
 package com.chiorichan.datastore.sql;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.*;
-
 import com.chiorichan.datastore.sql.bases.SQLiteDatastore;
 import com.chiorichan.datastore.sql.query.SQLQueryDelete;
 import com.chiorichan.datastore.sql.query.SQLQueryInsert;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
 import com.chiorichan.datastore.sql.query.SQLQueryUpdate;
 import com.chiorichan.util.ObjectFunc;
-import com.google.common.collect.Sets;
-import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Interfaces with MySQL Table

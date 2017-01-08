@@ -8,34 +8,13 @@
  */
 package com.chiorichan;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
-import com.chiorichan.lang.ApplicationException;
-import com.chiorichan.lang.EnumColor;
-import com.chiorichan.lang.ReportingLevel;
-import com.chiorichan.lang.RunLevel;
-import com.chiorichan.lang.StartupAbortException;
-import com.chiorichan.lang.StartupException;
-import com.chiorichan.lang.UncaughtException;
+import com.chiorichan.lang.*;
 import com.chiorichan.logger.DefaultLogFormatter;
 import com.chiorichan.logger.Log;
 import com.chiorichan.permission.PermissionManager;
@@ -49,6 +28,20 @@ import com.chiorichan.util.Application;
 import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.Versioning;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Provides a base AppLoader skeleton for you to extend or call directly using {@code AppLoader.init( Class<? extends AppAppController> loaderClass, String... args );}.

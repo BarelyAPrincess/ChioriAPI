@@ -8,29 +8,22 @@
  */
 package com.chiorichan.datastore.sql.query;
 
+import com.chiorichan.datastore.DatastoreManager;
+import com.chiorichan.datastore.sql.SQLBase;
+import com.chiorichan.datastore.sql.SQLWrapper;
+import com.chiorichan.datastore.sql.skel.*;
+import com.chiorichan.util.StringFunc;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import com.chiorichan.datastore.DatastoreManager;
-import com.chiorichan.datastore.sql.SQLBase;
-import com.chiorichan.datastore.sql.SQLWrapper;
-import com.chiorichan.datastore.sql.skel.SQLSkelLimit;
-import com.chiorichan.datastore.sql.skel.SQLSkelValues;
-import com.chiorichan.datastore.sql.skel.SQLSkelWhere;
-import com.chiorichan.datastore.sql.skel.SQLWhereElement;
-import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
-import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
-import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
-import com.chiorichan.util.StringFunc;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * SQL Query for Update

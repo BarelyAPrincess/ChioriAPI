@@ -2,28 +2,11 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * <p>
  * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Right Reserved.
  */
 package com.chiorichan.logger;
-
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.PrintStream;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
@@ -31,6 +14,14 @@ import com.chiorichan.lang.EnumColor;
 import com.chiorichan.util.FileFunc;
 import com.chiorichan.util.ObjectFunc;
 import com.chiorichan.util.Versioning;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.*;
 
 public class Log implements LogAPI
 {
@@ -130,8 +121,7 @@ public class Log implements LogAPI
 	/**
 	 * Gets an instance of Log for provided loggerId. If the logger does not exist one will be created.
 	 *
-	 * @param id
-	 *             The logger id
+	 * @param id The logger id
 	 * @return ConsoleLogger An empty loggerId will return the System Logger.
 	 */
 	public static Log get( String id )
@@ -181,8 +171,7 @@ public class Log implements LogAPI
 	/**
 	 * Attempts to find a logger based on the id provided. If you would like to use your own Logger, be sure to create it with the same id prior to using any of the built-in getLogger() methods or you will need to use the replaceLogger() method.
 	 *
-	 * @param id
-	 *             The logger id
+	 * @param id The logger id
 	 */
 	protected Log( String id )
 	{
@@ -229,7 +218,7 @@ public class Log implements LogAPI
 	}
 
 	@Override
-	public void fine(String var1, Object... args)
+	public void fine( String var1, Object... args )
 	{
 		log( Level.FINE, var1, args );
 	}

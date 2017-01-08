@@ -8,20 +8,19 @@
  */
 package com.chiorichan.datastore.sql;
 
+import com.chiorichan.datastore.DatastoreManager;
+import com.chiorichan.util.DbFunc;
+import com.google.common.base.Joiner;
+import com.mysql.jdbc.CommunicationsException;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
+import org.apache.commons.lang3.Validate;
+
 import java.io.NotSerializableException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.lang3.Validate;
-
-import com.chiorichan.datastore.DatastoreManager;
-import com.chiorichan.util.DbFunc;
-import com.google.common.base.Joiner;
-import com.mysql.jdbc.CommunicationsException;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
 /**
  * Provides the SQL Base Class for all SQL Classes
@@ -224,8 +223,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	 * Gets the ResultSet for the last execution
 	 *
 	 * @return The resulting {@link ResultSet} from the last execution, will return null is query was update or there were no results
-	 * @throws SQLException if a database access error occurs or this method is called on a closed
-	 *                      Statement
+	 * @throws SQLException if a database access error occurs or this method is called on a closed statement
 	 */
 	public ResultSet resultSet() throws SQLException
 	{

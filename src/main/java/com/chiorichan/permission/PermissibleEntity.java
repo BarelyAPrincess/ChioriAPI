@@ -8,11 +8,6 @@
  */
 package com.chiorichan.permission;
 
-import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.chiorichan.event.EventBus;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.event.PermissibleEntityEvent;
@@ -20,6 +15,11 @@ import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.services.ProviderChild;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.util.Validation;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class PermissibleEntity implements ProviderChild
 {
@@ -346,7 +346,8 @@ public abstract class PermissibleEntity implements ProviderChild
 	 *
 	 * @return id
 	 */
-	@Override public String getId()
+	@Override
+	public String getId()
 	{
 		return id;
 	}
@@ -657,6 +658,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	/**
 	 * Removes specified timed permission for references
+	 * <p>
 	 *
 	 * @param group The PermissibleGroup
 	 * @param refs  The references
@@ -732,7 +734,8 @@ public abstract class PermissibleEntity implements ProviderChild
 		this.virtual = virtual;
 	}
 
-	@Override public String toString()
+	@Override
+	public String toString()
 	{
 		return this.getClass().getSimpleName() + "{" + getId() + "}";
 	}
