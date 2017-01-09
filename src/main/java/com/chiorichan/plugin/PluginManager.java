@@ -1,17 +1,26 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- * <p>
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ *
+ * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Rights Reserved
  */
 package com.chiorichan.plugin;
 
 import com.chiorichan.AppConfig;
-import com.chiorichan.event.*;
+import com.chiorichan.event.EventBus;
+import com.chiorichan.event.EventHandler;
+import com.chiorichan.event.EventHandlers;
+import com.chiorichan.event.EventPriority;
+import com.chiorichan.event.EventRegistrar;
+import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
-import com.chiorichan.lang.*;
+import com.chiorichan.lang.PluginException;
+import com.chiorichan.lang.PluginInformationException;
+import com.chiorichan.lang.PluginInvalidException;
+import com.chiorichan.lang.PluginNotFoundException;
+import com.chiorichan.lang.RunLevel;
+import com.chiorichan.lang.UnknownDependencyException;
 import com.chiorichan.libraries.Libraries;
 import com.chiorichan.libraries.MavenReference;
 import com.chiorichan.logger.Log;
@@ -29,7 +38,15 @@ import org.apache.commons.lang3.Validate;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

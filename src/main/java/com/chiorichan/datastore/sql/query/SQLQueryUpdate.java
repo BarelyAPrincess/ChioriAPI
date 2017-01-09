@@ -1,17 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Rights Reserved
  */
 package com.chiorichan.datastore.sql.query;
 
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.datastore.sql.SQLBase;
 import com.chiorichan.datastore.sql.SQLWrapper;
-import com.chiorichan.datastore.sql.skel.*;
+import com.chiorichan.datastore.sql.skel.SQLSkelLimit;
+import com.chiorichan.datastore.sql.skel.SQLSkelValues;
+import com.chiorichan.datastore.sql.skel.SQLSkelWhere;
+import com.chiorichan.datastore.sql.skel.SQLWhereElement;
+import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
+import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
+import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
 import com.chiorichan.util.StringFunc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;

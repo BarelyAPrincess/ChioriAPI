@@ -1,10 +1,9 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Rights Reserved
  */
 package com.chiorichan;
 
@@ -14,7 +13,13 @@ import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
-import com.chiorichan.lang.*;
+import com.chiorichan.lang.ApplicationException;
+import com.chiorichan.lang.EnumColor;
+import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.lang.RunLevel;
+import com.chiorichan.lang.StartupAbortException;
+import com.chiorichan.lang.StartupException;
+import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.logger.DefaultLogFormatter;
 import com.chiorichan.logger.Log;
 import com.chiorichan.permission.PermissionManager;

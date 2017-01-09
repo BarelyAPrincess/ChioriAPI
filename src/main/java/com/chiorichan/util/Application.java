@@ -1,12 +1,13 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
- * Copyright 2016 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Right Reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * All Rights Reserved
  */
 package com.chiorichan.util;
+
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,14 +16,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 
-import org.apache.commons.lang3.SystemUtils;
-
 /**
  * Provides easy access to the server metadata plus operating system and jvm information
  */
 public class Application
 {
-	private static String OS = System.getProperty( "os.name" ).toLowerCase();
+	private static final String OS = System.getProperty( "os.name" ).toLowerCase();
 
 	/**
 	 * Get the Java Binary
@@ -248,6 +247,6 @@ public class Application
 			e.printStackTrace();
 		}
 
-		return !isPIDRunning(pid);
+		return !isPIDRunning( pid );
 	}
 }
