@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.zutils;
@@ -261,9 +261,9 @@ public class ZObjects
 		if ( value instanceof BigDecimal )
 			return value.toString();
 		if ( value instanceof Map )
-			return ( ( Map<Object, Object> ) value ).entrySet().stream().map( e -> castToString( e.getKey() ) + "=\"" + castToString( e.getValue() ) + "\"" ).collect( Collectors.joining( "," ) );
+			return ( ( Map<?, ?> ) value ).entrySet().stream().map( e -> castToString( e.getKey() ) + "=\"" + castToString( e.getValue() ) + "\"" ).collect( Collectors.joining( "," ) );
 		if ( value instanceof List )
-			return ( ( List<Object> ) value ).stream().map( o -> castToString( o ) ).collect( Collectors.joining( "," ) );
+			return ( ( List<?> ) value ).stream().map( ZObjects::castToString ).collect( Collectors.joining( "," ) );
 		throw new ClassCastException( "Uncaught Convertion to String of Type: " + value.getClass().getName() );
 	}
 

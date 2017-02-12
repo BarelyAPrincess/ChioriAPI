@@ -32,11 +32,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -634,18 +635,7 @@ public class ZIO
 
 	public static List<String> readFileToLines( File file ) throws IOException
 	{
-		try ( BufferedReader reader = new BufferedReader( new FileReader( file ) ) )
-		{
-			List<String> result = new ArrayList<>();
-			for ( ; ; )
-			{
-				String line = reader.readLine();
-				if ( line == null )
-					break;
-				result.add( line );
-			}
-			return result;
-		}
+		return new BufferedReader( new InputStreamReader( new FileInputStream( file ) ) ).lines().collect( Collectors.toList() );
 	}
 
 	public static List<File> recursiveFiles( final File dir )

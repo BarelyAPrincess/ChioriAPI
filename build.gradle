@@ -68,7 +68,7 @@ def travis_build = System.getenv( "TRAVIS_BUILD_NUMBER" )
 def buildNumber = '0'
 
 group = 'com.chiorichan'
-description = 'Common API for Chiori\'s Java Development'
+description = 'Feature Rich Application API for Java Development'
 
 if ( System.getenv( "releaseBuild" ) != null )
 {
@@ -96,8 +96,6 @@ distsDirName = 'dist'
 libsDirName = 'dist'
 
 compileJava {options.encoding = 'UTF-8'}
-
-
 javadoc {options.encoding = "UTF-8"}
 
 checkstyle {
