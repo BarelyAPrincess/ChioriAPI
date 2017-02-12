@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.terminal;
 
@@ -16,8 +18,8 @@ import com.chiorichan.lang.EnumColor;
 import com.chiorichan.messaging.MessageReceiver;
 import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionManager;
-import com.chiorichan.util.Namespace;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.helpers.Namespace;
+import com.chiorichan.zutils.ZStrings;
 import com.google.common.collect.Sets;
 
 /**
@@ -43,12 +45,12 @@ public abstract class Command
 
 		if ( permission != null )
 		{
-			Namespace ns = new Namespace( permission );
+			Namespace ns = Namespace.parseString( permission );
 
 			if ( !ns.containsOnlyValidChars() )
-				throw new RuntimeException( "We detected that the required permission '" + ns.getNamespace() + "' for command '" + name + "' contains invalid characters, this is most likely a programmers bug." );
+				throw new RuntimeException( "We detected that the required permission '" + ns.getString() + "' for command '" + name + "' contains invalid characters, this is most likely a programmers bug." );
 
-			this.permission = ns.getNamespace();
+			this.permission = ns.getString();
 		}
 	}
 
@@ -145,7 +147,7 @@ public abstract class Command
 	public Command setAliases( Collection<String> aliases )
 	{
 		this.aliases.clear();
-		this.aliases.addAll( StringFunc.toLowerCaseList( aliases ) );
+		this.aliases.addAll( ZStrings.toLowerCaseList( aliases ) );
 		return this;
 	}
 
@@ -212,10 +214,10 @@ public abstract class Command
 
 		if ( target instanceof MessageReceiver )
 			if ( permissionMessage == null )
-				( ( MessageReceiver ) target ).sendMessage( EnumColor.RED + "I'm sorry, but you do not have permission to perform the command '" + name + "'." );
+				target.sendMessage( EnumColor.RED + "I'm sorry, but you do not have permission to perform the command '" + name + "'." );
 			else if ( permissionMessage.length() != 0 )
 				for ( String line : permissionMessage.replace( "<permission>", permission ).split( "\n" ) )
-					( ( MessageReceiver ) target ).sendMessage( line );
+					target.sendMessage( line );
 
 		return false;
 	}

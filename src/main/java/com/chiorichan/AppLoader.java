@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan;
 
@@ -13,6 +15,8 @@ import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
+import com.chiorichan.zutils.ZIO;
+import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.lang.ReportingLevel;
@@ -29,10 +33,7 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Worker;
-import com.chiorichan.util.Application;
-import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.zutils.ZSystem;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -68,7 +69,7 @@ public abstract class AppLoader implements Listener
 	public static List<AppLoader> instances()
 	{
 		if ( instances.size() == 0 )
-			throw new StartupException( "There are no initalized application instances!" );
+			throw new StartupException( "There are no initialized application instances!" );
 		return Collections.unmodifiableList( instances );
 	}
 
@@ -154,16 +155,16 @@ public abstract class AppLoader implements Listener
 
 			runLevel( RunLevel.STARTUP );
 
-			Log.get().info( "Initalizing the Datastore Subsystem..." );
+			Log.get().info( "Initializing the Datastore Subsystem..." );
 			AppManager.manager( DatastoreManager.class ).init();
 
-			Log.get().info( "Initalizing the Database Subsystem..." );
+			Log.get().info( "Initializing the Database Subsystem..." );
 			AppConfig.get().initDatabase();
 
-			Log.get().info( "Initalizing the Permission Manager..." );
+			Log.get().info( "Initializing the Permission Manager..." );
 			AppManager.manager( PermissionManager.class ).init();
 
-			Log.get().info( "Initalizing the Account Manager..." );
+			Log.get().info( "Initializing the Account Manager..." );
 			AppManager.manager( AccountManager.class ).init();
 
 			runLevel( RunLevel.POSTSTARTUP );
@@ -177,37 +178,13 @@ public abstract class AppLoader implements Listener
 		}
 		catch ( Throwable e )
 		{
-			throw new StartupException( "There was a problem initializing one or more of the managers", e );
+			throw new StartupException( "There was a problem initializing one or more of the application managers", e );
 		}
-	}
-
-	protected static File getLockFile()
-	{
-		File lockFile;
-		if ( Application.isUnixLikeOS() )
-		{
-			lockFile = options != null && options.has( "pid" ) ? ( File ) options.valueOf( "pid" ) : new File( "/var/run/chiori/chiori.pid" );
-			File runDir = lockFile.getParentFile();
-
-			if ( !runDir.exists() )
-			{
-				if ( runDir.getParentFile().canWrite() && !runDir.mkdirs() )
-					throw new StartupException( String.format( "Failed to create the lock file parent directory at [%s].", runDir.getAbsolutePath() ) );
-				else
-					throw new StartupException( String.format( "The lock directory [%s] was non-existent.", lockFile.getAbsolutePath() ) );
-			}
-		}
-		else
-		{
-			lockFile = new File( "chiori.pid" );
-		}
-
-		return lockFile;
 	}
 
 	protected static boolean parseArguments( String... args )
 	{
-		return parseArguments( ( Class<?> ) null, args );
+		return parseArguments( null, args );
 	}
 
 	/**
@@ -270,21 +247,22 @@ public abstract class AppLoader implements Listener
 		if ( options.has( "status" ) || options.has( "stop" ) )
 			try
 			{
-				File lockFile = getLockFile();
+				File lockFile = AppConfig.getLockFile();
+				// File lockFile = getLockFile();
 
 				// TODO check that the enclosed lock PID number is currently running
 				if ( lockFile.exists() )
 				{
-					String pidraw = FileFunc.readFileToString( lockFile );
+					String pidraw = ZIO.readFileToString( lockFile );
 
 					if ( pidraw != null && pidraw.length() > 0 )
 					{
 						int pid = Integer.parseInt( pidraw );
-						if ( Application.isPIDRunning( pid ) )
+						if ( ZSystem.isPIDRunning( pid ) )
 						{
 							if ( options.has( "stop" ) )
 							{
-								if ( Application.terminatePID( pid ) )
+								if ( ZSystem.terminatePID( pid ) )
 									Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " has been terminated! (PID " + pid + ")" );
 								else
 									Log.get().info( EnumColor.RED + "Failed to terminate PID " + pid + "!" );
@@ -370,7 +348,7 @@ public abstract class AppLoader implements Listener
 					AppManager.manager( TaskManager.class ).init();
 					AppManager.manager( EventBus.class ).init();
 
-					instance = ObjectFunc.initClass( loaderClass );
+					instance = ZObjects.initClass( loaderClass );
 					instances.add( instance );
 
 					instance.start();
@@ -389,7 +367,7 @@ public abstract class AppLoader implements Listener
 			}
 
 			if ( isRunning && Log.get() != null )
-				Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initalizing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
+				Log.get().info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Finished Initializing " + Versioning.getProduct() + "! It took " + ( System.currentTimeMillis() - startTime ) + "ms!" );
 			else if ( instance != null )
 				instance.runLevel( RunLevel.DISPOSED );
 		}
@@ -427,7 +405,7 @@ public abstract class AppLoader implements Listener
 			}
 			catch ( InterruptedException e )
 			{
-
+				// Ignore
 			}
 			pollCount++;
 		}
@@ -455,7 +433,7 @@ public abstract class AppLoader implements Listener
 			e.printStackTrace();
 		}
 
-		Log.get().info( "Reinitalizing the Accounts Manager..." );
+		Log.get().info( "Reinitializing the Accounts Manager..." );
 		AccountManager.instance().reload();
 
 		runLevel( RunLevel.RUNNING );

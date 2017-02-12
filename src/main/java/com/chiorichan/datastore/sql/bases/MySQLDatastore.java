@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.bases;
 
@@ -55,6 +57,6 @@ public class MySQLDatastore extends SQLDatastore
 				throw new StartupException( e );
 		}
 
-		DatastoreManager.getLogger().info( "We succesully connected to the sql database using '" + connection + "'." );
+		DatastoreManager.getLogger().info( "We successfully connected to the sql database using '" + connection + "'." );
 	}
 }

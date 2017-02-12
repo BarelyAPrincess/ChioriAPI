@@ -3,9 +3,18 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.plugin.loader;
+
+import com.chiorichan.configuration.types.yaml.YamlConfiguration;
+import com.chiorichan.lang.PluginException;
+import com.chiorichan.logger.Log;
+import com.chiorichan.plugin.PluginBase;
+import com.chiorichan.plugin.PluginInformation;
+import org.apache.commons.lang3.Validate;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,14 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.apache.commons.lang3.Validate;
-
-import com.chiorichan.configuration.file.YamlConfiguration;
-import com.chiorichan.lang.PluginException;
-import com.chiorichan.logger.Log;
-import com.chiorichan.plugin.PluginBase;
-import com.chiorichan.plugin.PluginInformation;
 
 public abstract class Plugin extends PluginBase
 {
@@ -50,7 +51,7 @@ public abstract class Plugin extends PluginBase
 		if ( !Plugin.class.isAssignableFrom( clazz ) )
 			throw new IllegalArgumentException( clazz + " does not extend " + Plugin.class );
 		final ClassLoader cl = clazz.getClassLoader();
-		if ( ! ( cl instanceof PluginClassLoader ) )
+		if ( !( cl instanceof PluginClassLoader ) )
 			throw new IllegalArgumentException( clazz + " is not initialized by " + PluginClassLoader.class );
 		Plugin plugin = ( ( PluginClassLoader ) cl ).plugin;
 		if ( plugin == null )
@@ -72,7 +73,7 @@ public abstract class Plugin extends PluginBase
 	{
 		Validate.notNull( clazz, "Null class cannot have a plugin" );
 		final ClassLoader cl = clazz.getClassLoader();
-		if ( ! ( cl instanceof PluginClassLoader ) )
+		if ( !( cl instanceof PluginClassLoader ) )
 			throw new IllegalArgumentException( clazz + " is not provided by " + PluginClassLoader.class );
 		Plugin plugin = ( ( PluginClassLoader ) cl ).plugin;
 		if ( plugin == null )
@@ -99,7 +100,7 @@ public abstract class Plugin extends PluginBase
 
 	public Plugin()
 	{
-		PluginClassLoader.initalize( this );
+		PluginClassLoader.initialize( this );
 	}
 
 	/**

@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.auth;
 
@@ -63,12 +65,12 @@ public final class PlainTextAccountAuthenticator extends AccountAuthenticator
 	}
 
 	@Override
-	public AccountCredentials authorize( AccountMeta acct, Object... creds ) throws AccountException
+	public AccountCredentials authorize( AccountMeta acct, Object... credentials ) throws AccountException
 	{
-		if ( creds.length < 1 || ! ( creds[0] instanceof String ) )
+		if ( credentials.length < 1 || ! ( credentials[0] instanceof String ) )
 			throw new AccountException( AccountDescriptiveReason.INTERNAL_ERROR, acct );
 
-		String pass = ( String ) creds[0];
+		String pass = ( String ) credentials[0];
 
 		if ( acct == null )
 			throw new AccountException( AccountDescriptiveReason.INCORRECT_LOGIN, AccountType.ACCOUNT_NONE );

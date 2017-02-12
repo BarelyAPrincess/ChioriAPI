@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission.backend.sql;
 
@@ -19,6 +21,7 @@ import com.chiorichan.AppConfig;
 import com.chiorichan.datastore.sql.SQLExecute;
 import com.chiorichan.datastore.sql.bases.SQLDatastore;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
+import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissibleGroup;
 import com.chiorichan.permission.Permission;
@@ -31,8 +34,7 @@ import com.chiorichan.permission.References;
 import com.chiorichan.permission.lang.PermissionBackendException;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.permission.lang.PermissionValueException;
-import com.chiorichan.util.Namespace;
-import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.helpers.Namespace;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
@@ -180,7 +182,7 @@ public class SQLBackend extends PermissionBackend
 
 		// TODO Create these tables.
 
-		PermissionManager.getLogger().info( "Successfully initalized SQL Backend!" );
+		PermissionManager.getLogger().info( "Successfully initialized SQL Backend!" );
 	}
 
 	@Override
@@ -207,13 +209,13 @@ public class SQLBackend extends PermissionBackend
 				do
 					try
 					{
-						Namespace ns = new Namespace( result.getString( "permission" ) );
+						Namespace ns = Namespace.parseString( result.getString( "permission" ) );
 
 						if ( !ns.containsOnlyValidChars() )
 						{
 							PermissionManager.getLogger().warning( String.format( "The permission '%s' contains invalid characters, namespaces can only contain the characters a-z, 0-9, and _, this will be fixed automatically.", ns ) );
 							ns.fixInvalidChars();
-							this.updateDBValue( ns, "permission", ns.getNamespace() );
+							this.updateDBValue( ns, "permission", ns.getString() );
 						}
 
 						Permission perm = new Permission( ns, PermissionType.valueOf( result.getString( "type" ) ) );
@@ -414,7 +416,7 @@ public class SQLBackend extends PermissionBackend
 	{
 		try
 		{
-			return updateDBValue( ns, key, ObjectFunc.castToStringWithException( val ) );
+			return updateDBValue( ns, key, ZObjects.castToStringWithException( val ) );
 		}
 		catch ( ClassCastException e )
 		{
@@ -432,7 +434,7 @@ public class SQLBackend extends PermissionBackend
 		if ( val == null )
 			val = "";
 
-		return db.table( "permissions" ).update().value( key, val ).where( "permission" ).matches( ns.getNamespace() ).execute().rowCount();
+		return db.table( "permissions" ).update().value( key, val ).where( "permission" ).matches( ns.getString() ).execute().rowCount();
 		// return db.queryUpdate( "UPDATE `permissions` SET `" + key + "` = ? WHERE `permission` = ?;", val, ns.getNamespace() );
 	}
 }

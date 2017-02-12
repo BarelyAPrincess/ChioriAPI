@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.lang;
 
@@ -37,7 +39,7 @@ public class AccountDescriptiveReason
 
 	public static final AccountDescriptiveReason EMPTY_USERNAME = new AccountDescriptiveReason( "The specified username was not provided.", ReportingLevel.L_ERROR );
 	public static final AccountDescriptiveReason EMPTY_CREDENTIALS = new AccountDescriptiveReason( "The specified password (or credentials) was empty or null.", ReportingLevel.L_ERROR );
-	public static final AccountDescriptiveReason EMPTY_ACCTID = new AccountDescriptiveReason( "The specified account id was not provided.", ReportingLevel.L_ERROR );
+	public static final AccountDescriptiveReason EMPTY_ID = new AccountDescriptiveReason( "The specified account id was not provided.", ReportingLevel.L_ERROR );
 
 	public static final AccountDescriptiveReason INCORRECT_LOGIN = new AccountDescriptiveReason( "There were no accounts that matched the provided credentials.", ReportingLevel.L_DENIED );
 	public static final AccountDescriptiveReason EXPIRED_LOGIN = new AccountDescriptiveReason( "The provided login credentials were marked as expired.", ReportingLevel.L_EXPIRED );

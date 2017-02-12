@@ -38,7 +38,7 @@ def gitDescribe()
 		}
 		return stdout.toString().trim()
 	}
-	catch ( e )
+	catch ( Throwable e )
 	{
 		return "unknown"
 	}
@@ -53,7 +53,7 @@ def getVersionNumber()
 
 		return props.getProperty( "project.versionMajor" ) + "." + props.getProperty( "project.versionMinor" ) + "." + props.getProperty( "project.versionRevision" )
 	}
-	catch ( e )
+	catch ( Throwable e )
 	{
 		return 0
 	}
@@ -126,6 +126,9 @@ license {
 			'**/*.bmp',
 			'**/*.png',
 			'**/*.jpg',
+			'**/*.yaml',
+			'**/*.yml',
+			'**/*.properties',
 			'**/config.yaml',
 			'**/joptsimple/**',
 			'**/org/yaml/snakeyaml/**',
@@ -159,7 +162,7 @@ dependencies {
 	compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
 	compile group: 'com.h2database', name: 'h2', version: '1.4.187'
 
-	// Used for Programming Convinience
+	// Used for Programming Convenience
 	compile group: 'com.google.guava', name: 'guava', version: '18.0'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
 	compile group: 'commons-io', name: 'commons-io', version: '2.4'
@@ -167,7 +170,7 @@ dependencies {
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 
 	// Used to load configs
-	// compile group: 'org.yaml', name: 'snakeyaml', version: '1.17'
+	/* compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' */
 
 	// Used to format Time and Dates
 	compile group: 'joda-time', name: 'joda-time', version: '2.7'
@@ -176,11 +179,13 @@ dependencies {
 	// Used to format Phone Numbers
 	compile group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '7.0.4'
 
-	// Used for serilization within Sites and Autoupdater
+	// Used for serialization within Sites and Autoupdater
 	compile group: 'com.google.code.gson', name: 'gson', version: '2.3'
 
 	// Used by MavenUtils and some scripts
 	compile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.3.5'
+
+	compile group: 'org.json', name: 'json', version: '20160810'
 }
 
 // shadowJar

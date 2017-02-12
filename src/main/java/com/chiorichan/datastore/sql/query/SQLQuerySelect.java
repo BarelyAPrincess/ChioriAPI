@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.query;
 
@@ -18,7 +20,7 @@ import com.chiorichan.datastore.sql.skel.SQLWhereElement;
 import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
 import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
 import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.zutils.ZStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -34,7 +36,7 @@ import java.util.Map.Entry;
 
 public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQLSkelWhere<SQLQuerySelect, SQLQuerySelect>, SQLSkelLimit<SQLQuerySelect>, SQLSkelOrderBy<SQLQuerySelect>, SQLSkelGroupBy<SQLQuerySelect>, Cloneable
 {
-	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;
+	private SQLWhereElementSep currentSeparator = SQLWhereElementSep.NONE;
 	private final List<SQLWhereElement> elements = new LinkedList<>();
 	private final List<Object> sqlValues = new LinkedList<>();
 	private final List<String> orderBy = new LinkedList<>();
@@ -62,9 +64,9 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	public SQLQuerySelect and()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.AND;
+			currentSeparator = SQLWhereElementSep.AND;
 		return this;
 	}
 
@@ -103,7 +105,7 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	public SQLWhereGroup<SQLQuerySelect, SQLQuerySelect> group()
 	{
 		SQLWhereGroup<SQLQuerySelect, SQLQuerySelect> group = new SQLWhereGroup<SQLQuerySelect, SQLQuerySelect>( this, this );
-		group.seperator( currentSeperator );
+		group.seperator( currentSeparator );
 		elements.add( group );
 		needsUpdate = true;
 		or();
@@ -192,9 +194,9 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	public SQLQuerySelect or()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.OR;
+			currentSeparator = SQLWhereElementSep.OR;
 		return this;
 	}
 
@@ -285,11 +287,11 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 			else if ( fields.size() == 0 )
 				segments.add( "*" );
 			else
-				segments.add( Joiner.on( ", " ).join( StringFunc.wrap( fields, '`' ) ) );
+				segments.add( Joiner.on( ", " ).join( ZStrings.wrap( fields, '`' ) ) );
 
 			segments.add( "FROM" );
 
-			segments.add( StringFunc.wrap( table(), '`' ) );
+			segments.add( ZStrings.wrap( table(), '`' ) );
 
 			sqlValues.clear();
 
@@ -310,10 +312,10 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 			}
 
 			if ( groupBy.size() > 0 )
-				segments.add( "GROUP BY " + Joiner.on( ", " ).join( StringFunc.wrap( groupBy, '`' ) ) );
+				segments.add( "GROUP BY " + Joiner.on( ", " ).join( ZStrings.wrap( groupBy, '`' ) ) );
 
 			if ( orderBy.size() > 0 )
-				segments.add( "ORDER BY " + Joiner.on( ", " ).join( StringFunc.wrap( orderBy, '`' ) ) + ( orderAscending ? " ASC" : " DESC" ) );
+				segments.add( "ORDER BY " + Joiner.on( ", " ).join( ZStrings.wrap( orderBy, '`' ) ) + ( orderAscending ? " ASC" : " DESC" ) );
 
 			if ( limit() > 0 )
 				segments.add( "LIMIT " + limit() );
@@ -386,7 +388,7 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	@Override
 	public SQLQuerySelect where( SQLWhereElement element )
 	{
-		element.seperator( currentSeperator );
+		element.seperator( currentSeparator );
 		elements.add( element );
 		needsUpdate = true;
 		and();
@@ -453,7 +455,7 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 		super.clone( clone );
 
 		clone.elements.addAll( this.elements );
-		clone.currentSeperator = this.currentSeperator;
+		clone.currentSeparator = this.currentSeparator;
 		clone.orderBy.addAll( this.orderBy );
 		clone.orderAscending = this.orderAscending;
 		clone.groupBy.addAll( this.groupBy );

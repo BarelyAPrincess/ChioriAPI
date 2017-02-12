@@ -170,6 +170,7 @@ public class CompactConstructor extends Constructor {
          * MappingNode and ScalarNode end up here only they assumed to be a
          * compact object's representation (@see getConstructor(Node) above)
          */
+        @Override
         public Object construct(Node node) {
             ScalarNode tmpNode = null;
             if (node instanceof MappingNode) {

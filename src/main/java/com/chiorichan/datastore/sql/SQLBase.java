@@ -3,12 +3,14 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql;
 
 import com.chiorichan.datastore.DatastoreManager;
-import com.chiorichan.util.DbFunc;
+import com.chiorichan.zutils.ZDB;
 import com.google.common.base.Joiner;
 import com.mysql.jdbc.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
@@ -123,7 +125,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	@Override
 	public final Map<String, Map<String, Object>> map() throws SQLException
 	{
-		return DbFunc.resultToMap( resultSet() );
+		return ZDB.resultToMap( resultSet() );
 	}
 
 	private PreparedStatement query( String sqlQuery, boolean isUpdate, boolean save, boolean retry, Object... args ) throws SQLException
@@ -154,7 +156,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 					}
 					catch ( ArrayIndexOutOfBoundsException e )
 					{
-						DatastoreManager.getLogger().warning( String.format( "SQL Query '%s' is missing enough replace points (?) to satify the argument '%s', index '%s'", sqlQuery, s, x ) );
+						DatastoreManager.getLogger().warning( String.format( "SQL Query '%s' is missing enough replace points (?) to satisfy the argument '%s', index '%s'", sqlQuery, s, x ) );
 					}
 
 			try
@@ -176,9 +178,9 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 				setStatement( stmt );
 
 			if ( debug && save )
-				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + DbFunc.toString( stmt ) + "\" " + ( isUpdate ? "affected" : "returned" ) + " " + rowCount() + " results" );
+				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + ZDB.toString( stmt ) + "\" " + ( isUpdate ? "affected" : "returned" ) + " " + rowCount() + " results" );
 			else if ( debug )
-				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + DbFunc.toString( stmt ) + "\"" );
+				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + ZDB.toString( stmt ) + "\"" );
 
 			setPass();
 			return stmt;
@@ -250,7 +252,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	{
 		ResultSet result = resultSet();
 		if ( result != null && result.absolute( row ) )
-			return DbFunc.rowToMap( result );
+			return ZDB.rowToMap( result );
 		return null;
 	}
 
@@ -259,7 +261,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	{
 		ResultSet result = resultSet();
 		if ( result != null && result.first() )
-			return DbFunc.rowToMap( result );
+			return ZDB.rowToMap( result );
 		return null;
 	}
 
@@ -268,20 +270,20 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	{
 		ResultSet result = resultSet();
 		if ( result != null && result.last() )
-			return DbFunc.rowToMap( result );
+			return ZDB.rowToMap( result );
 		return null;
 	}
 
 	@Override
 	public final Map<String, Object> row() throws SQLException
 	{
-		return DbFunc.rowToMap( resultSet() );
+		return ZDB.rowToMap( resultSet() );
 	}
 
 	@Override
 	public final Set<Map<String, Object>> set() throws SQLException
 	{
-		return DbFunc.resultToSet( resultSet() );
+		return ZDB.resultToSet( resultSet() );
 	}
 
 	protected void setFail( SQLException lastException )
@@ -330,25 +332,25 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	@Override
 	public final Map<String, Map<String, String>> stringMap() throws SQLException
 	{
-		return DbFunc.resultToStringMap( resultSet() );
+		return ZDB.resultToStringMap( resultSet() );
 	}
 
 	@Override
 	public Map<String, String> stringRow() throws SQLException
 	{
-		return DbFunc.rowToStringMap( resultSet() );
+		return ZDB.rowToStringMap( resultSet() );
 	}
 
 	@Override
 	public Set<Map<String, String>> stringSet() throws SQLException
 	{
-		return DbFunc.resultToStringSet( resultSet() );
+		return ZDB.resultToStringSet( resultSet() );
 	}
 
 	@Override
 	public String toString()
 	{
-		return DbFunc.toString( stmt );
+		return ZDB.toString( stmt );
 	}
 
 	protected void updateExecution()

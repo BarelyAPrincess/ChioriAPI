@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account;
 
@@ -12,7 +14,7 @@ import com.chiorichan.terminal.CommandSender;
 
 public interface AccountAttachment extends Account, MessageReceiver, CommandSender
 {
-	String getIpAddr();
+	String getIpAddress();
 	
 	AccountPermissible getPermissible();
 }

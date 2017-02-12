@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.configuration;
 
@@ -12,28 +14,28 @@ package com.chiorichan.configuration;
  */
 public class MemoryConfigurationOptions extends ConfigurationOptions
 {
-	protected MemoryConfigurationOptions( MemoryConfiguration configuration )
+	protected MemoryConfigurationOptions(MemoryConfiguration configuration)
 	{
-		super( configuration );
+		super(configuration);
 	}
-	
+
 	@Override
 	public MemoryConfiguration configuration()
 	{
-		return ( MemoryConfiguration ) super.configuration();
+		return (MemoryConfiguration) super.configuration();
 	}
-	
+
 	@Override
-	public MemoryConfigurationOptions copyDefaults( boolean value )
+	public MemoryConfigurationOptions copyDefaults(boolean value)
 	{
-		super.copyDefaults( value );
+		super.copyDefaults(value);
 		return this;
 	}
-	
+
 	@Override
-	public MemoryConfigurationOptions pathSeparator( char value )
+	public MemoryConfigurationOptions pathSeparator(char value)
 	{
-		super.pathSeparator( value );
+		super.pathSeparator(value);
 		return this;
 	}
 }

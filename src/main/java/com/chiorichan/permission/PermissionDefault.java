@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
@@ -29,43 +31,43 @@ public enum PermissionDefault
 	public static boolean isDefault( Permission perm )
 	{
 		for ( PermissionDefault pd : PermissionDefault.values() )
-			if ( pd.getNameSpace().equalsIgnoreCase( perm.getNamespace() ) )
+			if ( pd.getNamespace().equalsIgnoreCase( perm.getNamespace() ) )
 				return true;
 
 		return false;
 	}
 
-	private String nameSpace = "";
+	private String namespace = "";
 
-	PermissionDefault( String nameSpace )
+	PermissionDefault( String namespace )
 	{
-		this.nameSpace = nameSpace;
+		this.namespace = namespace;
 	}
 
 	public String getLocalName()
 	{
-		return nameSpace.contains( "." ) ? nameSpace.substring( nameSpace.indexOf( "." ) + 1 ) : nameSpace;
+		return namespace.contains( "." ) ? namespace.substring( namespace.indexOf( "." ) + 1 ) : namespace;
 	}
 
-	public String getNameSpace()
+	public String getNamespace()
 	{
-		return nameSpace;
+		return namespace;
 	}
 
 	public Permission getNode()
 	{
-		Permission result = PermissionManager.instance().getNode( nameSpace );
+		Permission result = PermissionManager.instance().getNode( namespace );
 
 		if ( result == null )
 		{
 			if ( this == EVERYBODY )
 			{
-				result = PermissionManager.instance().createNode( getNameSpace(), PermissionType.BOOL );
+				result = PermissionManager.instance().createNode( getNamespace(), PermissionType.BOOL );
 				result.getModel().setValue( true );
 				result.getModel().setValueDefault( true );
 			}
 			else
-				result = PermissionManager.instance().createNode( getNameSpace() );
+				result = PermissionManager.instance().createNode( getNamespace() );
 
 			switch ( this )
 			{
@@ -101,6 +103,6 @@ public enum PermissionDefault
 	@Override
 	public String toString()
 	{
-		return name() + "(nameSpace=" + nameSpace + ")";
+		return name() + "(namespace=" + namespace + ")";
 	}
 }

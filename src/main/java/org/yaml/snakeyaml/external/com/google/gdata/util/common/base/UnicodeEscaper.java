@@ -149,6 +149,7 @@ public abstract class UnicodeEscaper implements Escaper {
      * @throws IllegalArgumentException
      *             if invalid surrogate characters are encountered
      */
+    @Override
     public String escape(String string) {
         int end = string.length();
         int index = nextEscapeIndex(string, 0, end);
@@ -274,6 +275,7 @@ public abstract class UnicodeEscaper implements Escaper {
      *             if invalid surrogate characters are encountered
      * 
      */
+    @Override
     public Appendable escape(final Appendable out) {
         assert out != null;
 
@@ -281,10 +283,12 @@ public abstract class UnicodeEscaper implements Escaper {
             int pendingHighSurrogate = -1;
             char[] decodedChars = new char[2];
 
+            @Override
             public Appendable append(CharSequence csq) throws IOException {
                 return append(csq, 0, csq.length());
             }
 
+            @Override
             public Appendable append(CharSequence csq, int start, int end) throws IOException {
                 int index = start;
                 if (index < end) {
@@ -361,6 +365,7 @@ public abstract class UnicodeEscaper implements Escaper {
                 return this;
             }
 
+            @Override
             public Appendable append(char c) throws IOException {
                 if (pendingHighSurrogate != -1) {
                     // Our last append operation ended halfway through a

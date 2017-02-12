@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.bases;
 
@@ -63,6 +65,6 @@ public class H2SQLDatastore extends SQLDatastore
 				throw new StartupException( e );
 		}
 
-		DatastoreManager.getLogger().info( "We succesully connected to the H2 database using 'jdbc:h2:" + h2Db.getAbsolutePath() + "'" );
+		DatastoreManager.getLogger().info( "We successfully connected to the H2 database using 'jdbc:h2:" + h2Db.getAbsolutePath() + "'" );
 	}
 }

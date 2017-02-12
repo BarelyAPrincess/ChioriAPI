@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.terminal;
 
@@ -20,12 +22,12 @@ import com.chiorichan.account.LocationService;
 import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
+import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.services.AppManager;
-import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.Versioning;
 
 /**
  * Used to interact with commands and logs
@@ -73,15 +75,15 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 	}
 
 	@Override
-	public String getIpAddr()
+	public String getIpAddress()
 	{
-		return handler.getIpAddr();
+		return handler.getIpAddress();
 	}
 
 	@Override
 	public Collection<String> getIpAddresses()
 	{
-		return Arrays.asList( getIpAddr() );
+		return Arrays.asList( getIpAddress() );
 	}
 
 	@Override
@@ -135,7 +137,7 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 		for ( Object obj : objs )
 			try
 			{
-				handler.println( sender.getDisplayName() + ": " + ObjectFunc.castToStringWithException( obj ) );
+				handler.println( sender.getDisplayName() + ": " + ZObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{
@@ -149,7 +151,7 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 		for ( Object obj : objs )
 			try
 			{
-				handler.println( ObjectFunc.castToStringWithException( obj ) );
+				handler.println( ZObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{
@@ -178,6 +180,6 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 	@Override
 	public String toString()
 	{
-		return String.format( "TerminalEntity{EntityId=%s,ip=%s}", meta().getId(), getIpAddr() );
+		return String.format( "TerminalEntity{EntityId=%s,ip=%s}", meta().getId(), getIpAddress() );
 	}
 }

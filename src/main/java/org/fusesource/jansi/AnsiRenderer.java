@@ -37,7 +37,7 @@ import org.fusesource.jansi.Ansi.Color;
  */
 public class AnsiRenderer
 {
-	public static enum Code
+	public enum Code
 	{
 		//
 		// TODO: Find a better way to keep Code in sync with Color/Attribute/Erase
@@ -99,13 +99,13 @@ public class AnsiRenderer
 		private final boolean background;
 
 		@SuppressWarnings( "unchecked" )
-		private Code( final Enum n )
+		Code( final Enum n )
 		{
 			this( n, false );
 		}
 
 		@SuppressWarnings( "unchecked" )
-		private Code( final Enum n, boolean background )
+		Code( final Enum n, boolean background )
 		{
 			this.n = n;
 			this.background = background;

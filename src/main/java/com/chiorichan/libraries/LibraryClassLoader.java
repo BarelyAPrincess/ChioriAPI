@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.libraries;
 
@@ -43,7 +45,7 @@ public class LibraryClassLoader
 		{
 			Method method = sysclass.getDeclaredMethod( "addURL", parameters );
 			method.setAccessible( true );
-			method.invoke( sysloader, new Object[] {u} );
+			method.invoke( sysloader, u );
 		}
 		catch ( Throwable t )
 		{

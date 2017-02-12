@@ -84,7 +84,7 @@ public final class Emitter implements Emitable {
     // The stream should have the methods `write` and possibly `flush`.
     private final Writer stream;
 
-    // Encoding is defined by Writer (cannot be overriden by STREAM-START.)
+    // Encoding is defined by Writer (cannot be overridden by STREAM-START.)
     // private Charset encoding;
 
     // Emitter is a state machine with a stack of states to handle nested
@@ -203,6 +203,7 @@ public final class Emitter implements Emitable {
         this.style = null;
     }
 
+    @Override
     public void emit(Event event) throws IOException {
         this.events.add(event);
         while (!needMoreEvents()) {
@@ -268,6 +269,7 @@ public final class Emitter implements Emitable {
     // Stream handlers.
 
     private class ExpectStreamStart implements EmitterState {
+        @Override
         public void expect() throws IOException {
             if (event instanceof StreamStartEvent) {
                 writeStreamStart();
@@ -279,6 +281,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectNothing implements EmitterState {
+        @Override
         public void expect() throws IOException {
             throw new EmitterException("expecting nothing, but got " + event);
         }
@@ -287,6 +290,7 @@ public final class Emitter implements Emitable {
     // Document handlers.
 
     private class ExpectFirstDocumentStart implements EmitterState {
+        @Override
         public void expect() throws IOException {
             new ExpectDocumentStart(true).expect();
         }
@@ -299,6 +303,7 @@ public final class Emitter implements Emitable {
             this.first = first;
         }
 
+        @Override
         public void expect() throws IOException {
             if (event instanceof DocumentStartEvent) {
                 DocumentStartEvent ev = (DocumentStartEvent) event;
@@ -348,6 +353,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectDocumentEnd implements EmitterState {
+        @Override
         public void expect() throws IOException {
             if (event instanceof DocumentEndEvent) {
                 writeIndent();
@@ -364,6 +370,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectDocumentRoot implements EmitterState {
+        @Override
         public void expect() throws IOException {
             states.push(new ExpectDocumentEnd());
             expectNode(true, false, false);
@@ -431,6 +438,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFirstFlowSequenceItem implements EmitterState {
+        @Override
         public void expect() throws IOException {
             if (event instanceof SequenceEndEvent) {
                 indent = indents.pop();
@@ -448,6 +456,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFlowSequenceItem implements EmitterState {
+        @Override
         public void expect() throws IOException {
             if (event instanceof SequenceEndEvent) {
                 indent = indents.pop();
@@ -485,6 +494,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFirstFlowMappingKey implements EmitterState {
+        @Override
         public void expect() throws IOException {
             if (event instanceof MappingEndEvent) {
                 indent = indents.pop();
@@ -508,6 +518,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFlowMappingKey implements EmitterState {
+        @Override
         public void expect() throws IOException {
             if (event instanceof MappingEndEvent) {
                 indent = indents.pop();
@@ -539,6 +550,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFlowMappingSimpleValue implements EmitterState {
+        @Override
         public void expect() throws IOException {
             writeIndicator(":", false, false, false);
             states.push(new ExpectFlowMappingKey());
@@ -547,6 +559,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFlowMappingValue implements EmitterState {
+        @Override
         public void expect() throws IOException {
             if (canonical || (column > bestWidth) || prettyFlow) {
                 writeIndent();
@@ -566,6 +579,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFirstBlockSequenceItem implements EmitterState {
+        @Override
         public void expect() throws IOException {
             new ExpectBlockSequenceItem(true).expect();
         }
@@ -578,6 +592,7 @@ public final class Emitter implements Emitable {
             this.first = first;
         }
 
+        @Override
         public void expect() throws IOException {
             if (!this.first && event instanceof SequenceEndEvent) {
                 indent = indents.pop();
@@ -599,6 +614,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectFirstBlockMappingKey implements EmitterState {
+        @Override
         public void expect() throws IOException {
             new ExpectBlockMappingKey(true).expect();
         }
@@ -611,6 +627,7 @@ public final class Emitter implements Emitable {
             this.first = first;
         }
 
+        @Override
         public void expect() throws IOException {
             if (!this.first && event instanceof MappingEndEvent) {
                 indent = indents.pop();
@@ -630,6 +647,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectBlockMappingSimpleValue implements EmitterState {
+        @Override
         public void expect() throws IOException {
             writeIndicator(":", false, false, false);
             states.push(new ExpectBlockMappingKey(false));
@@ -638,6 +656,7 @@ public final class Emitter implements Emitable {
     }
 
     private class ExpectBlockMappingValue implements EmitterState {
+        @Override
         public void expect() throws IOException {
             writeIndent();
             writeIndicator(":", true, false, true);
@@ -918,7 +937,7 @@ public final class Emitter implements Emitable {
             flowIndicators = true;
         }
         // First character or preceded by a whitespace.
-        boolean preceededByWhitespace = true;
+        boolean precededByWhitespace = true;
         boolean followedByWhitespace = scalar.length() == 1 || Constant.NULL_BL_T_LINEBR.has(scalar.charAt(1));
         // The previous character is a space.
         boolean previousSpace = false;
@@ -958,7 +977,7 @@ public final class Emitter implements Emitable {
                         blockIndicators = true;
                     }
                 }
-                if (ch == '#' && preceededByWhitespace) {
+                if (ch == '#' && precededByWhitespace) {
                     flowIndicators = true;
                     blockIndicators = true;
                 }
@@ -1011,7 +1030,7 @@ public final class Emitter implements Emitable {
 
             // Prepare for the next character.
             index++;
-            preceededByWhitespace = Constant.NULL_BL_T.has(ch) || isLineBreak;
+            precededByWhitespace = Constant.NULL_BL_T.has(ch) || isLineBreak;
             followedByWhitespace = index + 1 >= scalar.length()
                     || (Constant.NULL_BL_T.has(scalar.charAt(index + 1))) || isLineBreak;
         }

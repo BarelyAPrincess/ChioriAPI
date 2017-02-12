@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account;
 
@@ -21,81 +23,68 @@ public interface AccountCreator
 	/**
 	 * Attempts to save the supplied {@link AccountMeta}
 	 *
-	 * @param account
-	 *            The {@link AccountMeta} to save
-	 * @throws AccountException
+	 * @param account The {@link AccountMeta} to save
+	 * @throws AccountException If there are issues handling the account
 	 */
 	void save( AccountMeta account ) throws AccountException;
 
 	/**
 	 * Attempt to save the supplied {@link AccountContext}
 	 *
-	 * @param accountContext
-	 *            The {@link AccountContext} to save
-	 * @throws AccountException
+	 * @param accountContext The {@link AccountContext} to save
+	 * @throws AccountException If there are issues handling the account
 	 */
 	void save( AccountContext accountContext ) throws AccountException;
 
 	/**
 	 * Attempts to reload data for the supplied {@link AccountMeta}
 	 *
-	 * @param account
-	 *            The {@link AccountMeta} to reload
-	 * @throws AccountException
+	 * @param account The {@link AccountMeta} to reload
+	 * @throws AccountException If there are issues handling the account
 	 */
 	void reload( AccountMeta account ) throws AccountException;
 
 	/**
 	 * Check if this Account Creator is enabled and functioning
 	 *
-	 * @return
-	 *         True if it is
+	 * @return True if it is
 	 */
 	boolean isEnabled();
 
 	/**
 	 * Called by {@link AccountPermissible#login()} and {@link AccountPermissible#login(com.chiorichan.account.auth.AccountAuthenticator, String, Object...)} when a login failed to be successful
 	 *
-	 * @param meta
-	 *            The {@link AccountMeta} involved in the login
-	 * @param result
-	 *            What was the failed result
+	 * @param meta   The {@link AccountMeta} involved in the login
+	 * @param result What was the failed result
 	 */
 	void failedLogin( AccountMeta meta, AccountResult result );
 
 	/**
 	 * Called by {@link AccountPermissible#login()} and {@link AccountPermissible#login(com.chiorichan.account.auth.AccountAuthenticator, String, Object...)} when a login was successful
 	 *
-	 * @param meta
-	 *            The {@link AccountMeta} involved in the login
-	 * @throws AccountException
+	 * @param meta The {@link AccountMeta} involved in the login
+	 * @throws AccountException If there are issues handling the account
 	 */
 	void successLogin( AccountMeta meta ) throws AccountException;
 
 	/**
 	 * Called by {@link AccountMeta#AccountMeta(AccountContext)} when it finishes constructing it's class and getting reference to it's {@link PermissibleEntity}
 	 *
-	 * @param meta
-	 *            The {@link AccountMeta} involved in the login
-	 * @param entity
-	 *            The new {@link AccountPermissible} instance
+	 * @param meta   The {@link AccountMeta} involved in the login
+	 * @param entity The new {@link AccountPermissible} instance
 	 */
 	void successInit( AccountMeta meta, PermissibleEntity entity );
 
 	/**
 	 * Called by {@link AccountPermissible#login()} and {@link AccountPermissible#login(com.chiorichan.account.auth.AccountAuthenticator, String, Object...)} before the login is validated for an {@link AccountResult}
 	 *
-	 * @param meta
-	 *            The {@link AccountMeta} involved in the login
-	 * @param via
-	 *            What {@link AccountPermissible} is trying to login this Account
-	 * @param acctId
-	 *            The Account Id
-	 * @param creds
-	 *            The credentials that are to be passed to the related credentials
-	 * @throws AccountException
+	 * @param meta        The {@link AccountMeta} involved in the login
+	 * @param via         What {@link AccountPermissible} is trying to login this Account
+	 * @param acctId      The Account Id
+	 * @param credentials The credentials that are to be passed to the related credentials
+	 * @throws AccountException If there are issues handling the account
 	 */
-	void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... creds ) throws AccountException;
+	void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... credentials ) throws AccountException;
 
 	/**
 	 * See {@link AccountMeta#getDisplayName()}
@@ -105,8 +94,7 @@ public interface AccountCreator
 	/**
 	 * Returns what keys can be used to match a login to it's Account, e.g., phone, email
 	 *
-	 * @return
-	 *         List of keys
+	 * @return List of keys
 	 */
 	List<String> getLoginKeys();
 
@@ -114,22 +102,18 @@ public interface AccountCreator
 	 * Checks if any Accounts exist within this creator matching provided acctId.
 	 * This method is called by the {@link AccountManager#generateAcctId(String)} method exclusively to generate a new Account Identifier.
 	 *
-	 * @param acctId
-	 *            The Account Id to check
-	 * @return
-	 *         True is it exists
+	 * @param acctId The Account Id to check
+	 * @return True is it exists
 	 */
 	boolean exists( String acctId );
 
 	/**
-	 * Create specified account within the AccountType datastore
+	 * Create specified account within the {@link AccountType} data
 	 *
-	 * @param acctId
-	 *            The account Id associated with this new Account
-	 * @param siteId
-	 *            The site Id associated with this new Account, e.g., % = All Sites
+	 * @param acctId The account Id associated with this new Account
+	 * @param siteId The site Id associated with this new Account, e.g., % = All Sites
 	 * @return The new AccountContext
-	 * @throws AccountException
+	 * @throws AccountException If there are issues handling the account
 	 */
 	AccountContext createAccount( String acctId, String siteId ) throws AccountException;
 }

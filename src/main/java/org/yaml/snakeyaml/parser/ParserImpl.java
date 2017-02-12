@@ -135,6 +135,7 @@ public class ParserImpl implements Parser {
     /**
      * Check the type of the next event.
      */
+    @Override
     public boolean checkEvent(Event.ID choice) {
         peekEvent();
         return currentEvent != null && currentEvent.is(choice);
@@ -143,6 +144,7 @@ public class ParserImpl implements Parser {
     /**
      * Get the next event.
      */
+    @Override
     public Event peekEvent() {
         if (currentEvent == null) {
             if (state != null) {
@@ -155,6 +157,7 @@ public class ParserImpl implements Parser {
     /**
      * Get the next event and proceed further.
      */
+    @Override
     public Event getEvent() {
         peekEvent();
         Event value = currentEvent;
@@ -170,6 +173,7 @@ public class ParserImpl implements Parser {
      * </pre>
      */
     private class ParseStreamStart implements Production {
+        @Override
         public Event produce() {
             // Parse the stream start.
             StreamStartToken token = (StreamStartToken) scanner.getToken();
@@ -181,6 +185,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseImplicitDocumentStart implements Production {
+        @Override
         public Event produce() {
             // Parse an implicit document.
             if (!scanner.checkToken(Token.ID.Directive, Token.ID.DocumentStart, Token.ID.StreamEnd)) {
@@ -201,6 +206,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseDocumentStart implements Production {
+        @Override
         public Event produce() {
             // Parse any extra document end indicators.
             while (scanner.checkToken(Token.ID.DocumentEnd)) {
@@ -239,6 +245,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseDocumentEnd implements Production {
+        @Override
         public Event produce() {
             // Parse the document end.
             Token token = scanner.peekToken();
@@ -258,6 +265,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseDocumentContent implements Production {
+        @Override
         public Event produce() {
             Event event;
             if (scanner.checkToken(Token.ID.Directive, Token.ID.DocumentStart,
@@ -346,6 +354,7 @@ public class ParserImpl implements Parser {
      */
 
     private class ParseBlockNode implements Production {
+        @Override
         public Event produce() {
             return parseNode(true, false);
         }
@@ -481,6 +490,7 @@ public class ParserImpl implements Parser {
     // BLOCK-END
 
     private class ParseBlockSequenceFirstEntry implements Production {
+        @Override
         public Event produce() {
             Token token = scanner.getToken();
             marks.push(token.getStartMark());
@@ -489,6 +499,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseBlockSequenceEntry implements Production {
+        @Override
         public Event produce() {
             if (scanner.checkToken(Token.ID.BlockEntry)) {
                 BlockEntryToken token = (BlockEntryToken) scanner.getToken();
@@ -517,6 +528,7 @@ public class ParserImpl implements Parser {
     // indentless_sequence ::= (BLOCK-ENTRY block_node?)+
 
     private class ParseIndentlessSequenceEntry implements Production {
+        @Override
         public Event produce() {
             if (scanner.checkToken(Token.ID.BlockEntry)) {
                 Token token = scanner.getToken();
@@ -537,6 +549,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseBlockMappingFirstKey implements Production {
+        @Override
         public Event produce() {
             Token token = scanner.getToken();
             marks.push(token.getStartMark());
@@ -545,6 +558,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseBlockMappingKey implements Production {
+        @Override
         public Event produce() {
             if (scanner.checkToken(Token.ID.Key)) {
                 Token token = scanner.getToken();
@@ -571,6 +585,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseBlockMappingValue implements Production {
+        @Override
         public Event produce() {
             if (scanner.checkToken(Token.ID.Value)) {
                 Token token = scanner.getToken();
@@ -602,6 +617,7 @@ public class ParserImpl implements Parser {
      * </pre>
      */
     private class ParseFlowSequenceFirstEntry implements Production {
+        @Override
         public Event produce() {
             Token token = scanner.getToken();
             marks.push(token.getStartMark());
@@ -616,6 +632,7 @@ public class ParserImpl implements Parser {
             this.first = first;
         }
 
+        @Override
         public Event produce() {
             if (!scanner.checkToken(Token.ID.FlowSequenceEnd)) {
                 if (!first) {
@@ -648,6 +665,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseFlowSequenceEntryMappingKey implements Production {
+        @Override
         public Event produce() {
             Token token = scanner.getToken();
             if (!scanner.checkToken(Token.ID.Value, Token.ID.FlowEntry, Token.ID.FlowSequenceEnd)) {
@@ -661,6 +679,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseFlowSequenceEntryMappingValue implements Production {
+        @Override
         public Event produce() {
             if (scanner.checkToken(Token.ID.Value)) {
                 Token token = scanner.getToken();
@@ -680,6 +699,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseFlowSequenceEntryMappingEnd implements Production {
+        @Override
         public Event produce() {
             state = new ParseFlowSequenceEntry(false);
             Token token = scanner.peekToken();
@@ -697,6 +717,7 @@ public class ParserImpl implements Parser {
      * </pre>
      */
     private class ParseFlowMappingFirstKey implements Production {
+        @Override
         public Event produce() {
             Token token = scanner.getToken();
             marks.push(token.getStartMark());
@@ -711,6 +732,7 @@ public class ParserImpl implements Parser {
             this.first = first;
         }
 
+        @Override
         public Event produce() {
             if (!scanner.checkToken(Token.ID.FlowMappingEnd)) {
                 if (!first) {
@@ -747,6 +769,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseFlowMappingValue implements Production {
+        @Override
         public Event produce() {
             if (scanner.checkToken(Token.ID.Value)) {
                 Token token = scanner.getToken();
@@ -766,6 +789,7 @@ public class ParserImpl implements Parser {
     }
 
     private class ParseFlowMappingEmptyValue implements Production {
+        @Override
         public Event produce() {
             state = new ParseFlowMappingKey(false);
             return processEmptyScalar(scanner.peekToken().getStartMark());

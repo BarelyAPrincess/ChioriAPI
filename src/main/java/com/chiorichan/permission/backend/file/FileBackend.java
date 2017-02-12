@@ -1,28 +1,20 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.permission.backend.file;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.configuration.InvalidConfigurationException;
 import com.chiorichan.configuration.file.FileConfiguration;
-import com.chiorichan.configuration.file.YamlConfiguration;
+import com.chiorichan.configuration.types.yaml.YamlConfiguration;
+import com.chiorichan.logger.Log;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissibleGroup;
 import com.chiorichan.permission.Permission;
@@ -34,10 +26,21 @@ import com.chiorichan.permission.PermissionType;
 import com.chiorichan.permission.References;
 import com.chiorichan.permission.lang.PermissionBackendException;
 import com.chiorichan.permission.lang.PermissionException;
-import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.Namespace;
+import com.chiorichan.helpers.Namespace;
+import com.chiorichan.zutils.ZIO;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Provides the File Permission Backend
@@ -85,7 +88,7 @@ public class FileBackend extends PermissionBackend
 		String defaultGroupProperty = "default";
 		for ( String ref : refs )
 		{
-			defaultGroupProperty = FileFunc.buildPath( "refs", ref, defaultGroupProperty );
+			defaultGroupProperty = ZIO.buildPath( "refs", ref, defaultGroupProperty );
 
 			for ( Map.Entry<String, Object> entry : groups.getValues( false ).entrySet() )
 				if ( entry.getValue() instanceof ConfigurationSection )
@@ -149,16 +152,13 @@ public class FileBackend extends PermissionBackend
 			AppConfig.get().set( "permissions.file", "permissions.yaml" );
 		}
 
-		permissionsFile = FileFunc.isAbsolute( permissionFilename ) ? new File( permissionFilename ) : new File( AppConfig.get().getDirectory().getAbsolutePath(), permissionFilename );
+		permissionsFile = ZIO.isAbsolute( permissionFilename ) ? new File( permissionFilename ) : new File( AppConfig.get().getDirectory(), permissionFilename );
 
 		FileConfiguration newPermissions = new YamlConfiguration();
 		try
 		{
-
 			newPermissions.load( permissionsFile );
-
 			PermissionManager.getLogger().info( "Permissions file successfully loaded" );
-
 			permissions = newPermissions;
 		}
 		catch ( FileNotFoundException e )
@@ -235,7 +235,7 @@ public class FileBackend extends PermissionBackend
 			for ( String s : keys )
 			{
 				ConfigurationSection node = section.getConfigurationSection( s );
-				Namespace ns = new Namespace( s.replaceAll( "/", "." ) );
+				Namespace ns = Namespace.parseString( s.replaceAll( "/", "." ) );
 
 				if ( !ns.containsOnlyValidChars() )
 				{
@@ -330,7 +330,7 @@ public class FileBackend extends PermissionBackend
 
 		String defaultGroupProperty = "default";
 		if ( refs != null )
-			defaultGroupProperty = FileFunc.buildPath( "refs", refs, defaultGroupProperty );
+			defaultGroupProperty = ZIO.buildPath( "refs", refs, defaultGroupProperty );
 
 		boolean success = false;
 

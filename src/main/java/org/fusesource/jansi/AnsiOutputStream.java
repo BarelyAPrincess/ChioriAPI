@@ -327,7 +327,6 @@ public class AnsiOutputStream extends FilterOutputStream
 	}
 
 	/**
-	 *
 	 * @param options
 	 * @return true if the operating system command was processed.
 	 */

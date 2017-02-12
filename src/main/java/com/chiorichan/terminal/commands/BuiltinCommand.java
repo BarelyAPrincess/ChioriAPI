@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.terminal.commands;
 
@@ -28,9 +30,10 @@ import com.chiorichan.permission.References;
 import com.chiorichan.terminal.Command;
 import com.chiorichan.terminal.CommandDispatch;
 import com.chiorichan.terminal.TerminalEntity;
-import com.chiorichan.util.StringFunc;
-import com.chiorichan.util.Utils;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.Versioning;
+import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.zutils.ZSystem;
 import com.google.common.base.Joiner;
 
 /**
@@ -55,7 +58,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				sender.sendMessage( "Uptime: " + Utils.uptime() );
+				sender.sendMessage( "Uptime: " + ZSystem.uptime() );
 				return true;
 			}
 		} );
@@ -96,9 +99,9 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				String color = "" + ( args.length < 1 ? !StringFunc.isTrue( sender.getVariable( "color", "true" ) ) : StringFunc.isTrue( args[0] ) );
+				String color = "" + ( args.length < 1 ? !ZObjects.isTrue( sender.getVariable( "color", "true" ) ) : ZObjects.isTrue( args[0] ) );
 				sender.setVariable( "color", color );
-				sender.sendMessage( EnumColor.AQUA + "Console color has been " + ( StringFunc.isTrue( color ) ? "enabled" : "disabled" ) + "." );
+				sender.sendMessage( EnumColor.AQUA + "Console color has been " + ( ZObjects.isTrue( color ) ? "enabled" : "disabled" ) + "." );
 				return true;
 			}
 		} );
@@ -125,7 +128,7 @@ public abstract class BuiltinCommand extends Command
 						String reason = "Kicked by an operator.";
 
 						if ( args.length > 1 )
-							reason = StringFunc.join( args, 1 );
+							reason = ZStrings.join( args, 1 );
 
 						if ( user instanceof Kickable )
 						{
@@ -161,7 +164,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				sender.sendMessage( "&l&d&oTo use any of these just type & (amperstamp) folowed by the color/format code." );
+				sender.sendMessage( "&l&d&oTo use any of these just type & (ampersand) followed by the color/format code." );
 				sender.sendMessage( "" );
 				sender.sendMessage( "&00 - Black &11 - Dark Blue &22 - Dark Green &33 - Dark Aqua &44 - Dark Red &55 - Dark Purple &66 - Gold &77 - Gray &88 - Dark Gray &99 - Indigo" );
 				sender.sendMessage( "&aa - Green &bb - Aqua &cc - Red &dd - Pink &ee - Yellow &ff - White &r&mm - Strike Through&r &nn - Underlined&r &ll - Bold&r &kk - Random&r &oo - Italic" );

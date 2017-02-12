@@ -213,6 +213,7 @@ public final class ScannerImpl implements Scanner {
     /**
      * Check whether the next token is one of the given types.
      */
+    @Override
     public boolean checkToken(Token.ID... choices) {
         while (needMoreTokens()) {
             fetchMoreTokens();
@@ -236,6 +237,7 @@ public final class ScannerImpl implements Scanner {
     /**
      * Return the next token, but do not delete it from the queue.
      */
+    @Override
     public Token peekToken() {
         while (needMoreTokens()) {
             fetchMoreTokens();
@@ -246,6 +248,7 @@ public final class ScannerImpl implements Scanner {
     /**
      * Return the next token, removing it from the queue.
      */
+    @Override
     public Token getToken() {
         if (!this.tokens.isEmpty()) {
             this.tokensTaken++;
@@ -1552,11 +1555,7 @@ public final class ScannerImpl implements Scanner {
         boolean folded;
         // Depending on the given style, we determine whether the scalar is
         // folded ('>') or literal ('|')
-        if (style == '>') {
-            folded = true;
-        } else {
-            folded = false;
-        }
+	    folded = style == '>';
         StringBuilder chunks = new StringBuilder();
         Mark startMark = reader.getMark();
         // Scan the header.
@@ -1823,11 +1822,7 @@ public final class ScannerImpl implements Scanner {
         boolean _double;
         // The style will be either single- or double-quoted; we determine this
         // by the first character in the entry (supplied)
-        if (style == '"') {
-            _double = true;
-        } else {
-            _double = false;
-        }
+	    _double = style == '"';
         StringBuilder chunks = new StringBuilder();
         Mark startMark = reader.getMark();
         char quote = reader.peek();

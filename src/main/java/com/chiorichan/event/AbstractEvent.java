@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.event;
 
@@ -27,7 +29,7 @@ public abstract class AbstractEvent
 		 * Allow / Force the event. The action indicated by the event will take place if possible, even if the server
 		 * would not normally allow the action. Some actions may not be allowed.
 		 */
-		ALLOW;
+		ALLOW
 	}
 	private String name;
 	

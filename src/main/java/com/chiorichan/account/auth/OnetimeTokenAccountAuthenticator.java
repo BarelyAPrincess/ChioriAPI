@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.auth;
 
@@ -27,7 +29,7 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.Ticks;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.SecureFunc;
+import com.chiorichan.zutils.ZEncryption;
 
 /**
  * Used to authenticate an account using an Account Id and Token combination
@@ -102,19 +104,19 @@ public class OnetimeTokenAccountAuthenticator extends AccountAuthenticator imple
 	}
 
 	@Override
-	public AccountCredentials authorize( AccountMeta acct, Object... creds ) throws AccountException
+	public AccountCredentials authorize( AccountMeta acct, Object... credentials ) throws AccountException
 	{
 		if ( acct == null )
 			throw new AccountException( AccountDescriptiveReason.INCORRECT_LOGIN, acct );
 
-		if ( creds[0] instanceof AccountPermissible )
-			return authorize( acct, ( AccountPermissible ) creds[0] );
+		if ( credentials[0] instanceof AccountPermissible )
+			return authorize( acct, ( AccountPermissible ) credentials[0] );
 
-		if ( creds.length == 0 || ! ( creds[0] instanceof String ) )
+		if ( credentials.length == 0 || ! ( credentials[0] instanceof String ) )
 			throw new AccountException( AccountDescriptiveReason.INTERNAL_ERROR, acct );
 
 		String acctId = acct.getId();
-		String token = ( String ) creds[0];
+		String token = ( String ) credentials[0];
 
 		try
 		{
@@ -199,7 +201,7 @@ public class OnetimeTokenAccountAuthenticator extends AccountAuthenticator imple
 	{
 		Validate.notNull( acct );
 
-		String token = SecureFunc.randomize( acct.getId() ) + Timings.epoch();
+		String token = ZEncryption.randomize( acct.getId() ) + Timings.epoch();
 		try
 		{
 			// if ( db.queryUpdate( "INSERT INTO `accounts_token` (`acctId`,`token`,`expires`) VALUES (?,?,?);", acct.getId(), token, ( Timings.epoch() + ( 60 * 60 * 24 * 7 ) ) ) < 1 )

@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.libraries;
 
@@ -15,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.chiorichan.zutils.ZHttp;
+import com.chiorichan.zutils.ZIO;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppConfig;
@@ -24,8 +28,6 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.logger.Log;
 import com.chiorichan.logger.LogSource;
-import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.NetworkFunc;
 
 /**
  * Used as a helper class for retrieving files from the central maven repository
@@ -45,11 +47,11 @@ public class Libraries implements LibrarySource, LogSource
 		LIBRARY_DIR = DeployWrapper.isDeployment() ? new File( "libraries" ) : AppConfig.get().getDirectory( "lib", "libraries" );
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 
-		if ( !FileFunc.setDirectoryAccess( LIBRARY_DIR ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( LIBRARY_DIR ) + "\"!" );
+		if ( !ZIO.setDirectoryAccess( LIBRARY_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( LIBRARY_DIR ) + "\"!" );
 
-		if ( !FileFunc.setDirectoryAccess( INCLUDES_DIR ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( INCLUDES_DIR ) + "\"!" );
+		if ( !ZIO.setDirectoryAccess( INCLUDES_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( INCLUDES_DIR ) + "\"!" );
 
 		addLoaded( "org.fusesource.jansi:jansi:1.11" );
 		addLoaded( "net.sf.jopt-simple:jopt-simple:4.7" );
@@ -159,7 +161,7 @@ public class Libraries implements LibrarySource, LogSource
 
 		try
 		{
-			FileFunc.extractNatives( lib, lib.getParentFile() );
+			ZIO.extractNatives( lib, lib.getParentFile() );
 		}
 		catch ( IOException e )
 		{
@@ -187,9 +189,9 @@ public class Libraries implements LibrarySource, LogSource
 				Log.get( SELF ).info( ( Log.useColor() ? EnumColor.GOLD : "" ) + "Downloading the library `" + lib.toString() + "` from url `" + urlJar + "`... Please Wait!" );
 
 				// Try download from JCenter Bintray Maven Repository
-				if ( NetworkFunc.downloadFile( urlPom, mavenLocalPom ) )
+				if ( ZHttp.downloadFile( urlPom, mavenLocalPom ) )
 				{
-					if ( !NetworkFunc.downloadFile( urlJar, mavenLocalJar ) )
+					if ( !ZHttp.downloadFile( urlJar, mavenLocalJar ) )
 						return false;
 				}
 				else
@@ -204,9 +206,9 @@ public class Libraries implements LibrarySource, LogSource
 
 					Log.get( SELF ).warning( ( Log.useColor() ? EnumColor.GOLD : "" ) + "Primary download location failed, trying alternative url `" + urlJarAlt + "`... Please Wait!" );
 
-					if ( !NetworkFunc.downloadFile( urlPomAlt, mavenLocalPom ) )
+					if ( !ZHttp.downloadFile( urlPomAlt, mavenLocalPom ) )
 						return false;
-					if ( !NetworkFunc.downloadFile( urlJarAlt, mavenLocalJar ) )
+					if ( !ZHttp.downloadFile( urlJarAlt, mavenLocalJar ) )
 						return false;
 				}
 			}
@@ -224,7 +226,7 @@ public class Libraries implements LibrarySource, LogSource
 		loadedLibraries.put( lib.getKey(), lib );
 		try
 		{
-			FileFunc.extractNatives( lib.jarFile(), lib.baseDir() );
+			ZIO.extractNatives( lib.jarFile(), lib.baseDir() );
 		}
 		catch ( IOException e )
 		{

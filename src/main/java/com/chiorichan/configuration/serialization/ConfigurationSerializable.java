@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.configuration.serialization;
 
@@ -19,7 +21,7 @@ import java.util.Map;
  * <li>A constructor that accepts a single {@link Map}&lt;{@link String}, {@link Object}>.</li>
  * </ul>
  * In addition to implementing this interface, you must register the class with {@link ConfigurationSerialization#registerClass(Class)}.
- * 
+ *
  * @see DelegateDeserialization
  * @see SerializableAs
  */

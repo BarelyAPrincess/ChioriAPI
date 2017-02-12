@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.logger.experimental;
 
@@ -28,9 +30,9 @@ public class LogEvent implements ILogEvent
 	}
 
 	@Override
-	public void exceptions( Throwable... exceptions )
+	public void exceptions( Throwable... throwables )
 	{
-		record.exceptions( exceptions );
+		record.exceptions( throwables );
 	}
 
 	@Override

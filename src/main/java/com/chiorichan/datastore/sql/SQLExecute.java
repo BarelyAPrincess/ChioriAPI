@@ -3,11 +3,13 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql;
 
-import com.chiorichan.util.DbFunc;
+import com.chiorichan.zutils.ZDB;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,7 +34,7 @@ public class SQLExecute<P extends SQLBase> extends SQLResultSet implements SQLRe
 	@Override
 	public Map<String, Map<String, Object>> map() throws SQLException
 	{
-		return DbFunc.resultToMap( result );
+		return ZDB.resultToMap( result );
 	}
 
 	public P parent()
@@ -44,7 +46,7 @@ public class SQLExecute<P extends SQLBase> extends SQLResultSet implements SQLRe
 	public Map<String, Object> rowAbsolute( int row ) throws SQLException
 	{
 		if ( result.absolute( row ) )
-			return DbFunc.rowToMap( result );
+			return ZDB.rowToMap( result );
 		return null;
 	}
 
@@ -52,7 +54,7 @@ public class SQLExecute<P extends SQLBase> extends SQLResultSet implements SQLRe
 	public Map<String, Object> rowFirst() throws SQLException
 	{
 		if ( result.first() )
-			return DbFunc.rowToMap( result );
+			return ZDB.rowToMap( result );
 		return null;
 	}
 
@@ -60,14 +62,14 @@ public class SQLExecute<P extends SQLBase> extends SQLResultSet implements SQLRe
 	public Map<String, Object> rowLast() throws SQLException
 	{
 		if ( result.last() )
-			return DbFunc.rowToMap( result );
+			return ZDB.rowToMap( result );
 		return null;
 	}
 
 	@Override
 	public Map<String, Object> row() throws SQLException
 	{
-		return DbFunc.rowToMap( result );
+		return ZDB.rowToMap( result );
 	}
 
 	@Override
@@ -79,32 +81,32 @@ public class SQLExecute<P extends SQLBase> extends SQLResultSet implements SQLRe
 	@Override
 	public Set<Map<String, Object>> set() throws SQLException
 	{
-		return DbFunc.resultToSet( result );
+		return ZDB.resultToSet( result );
 	}
 
 	@Override
 	public Map<String, Map<String, String>> stringMap() throws SQLException
 	{
-		return DbFunc.resultToStringMap( result );
+		return ZDB.resultToStringMap( result );
 	}
 
 	@Override
 	public Map<String, String> stringRow() throws SQLException
 	{
-		return DbFunc.rowToStringMap( result );
+		return ZDB.rowToStringMap( result );
 	}
 
 	@Override
 	public Set<Map<String, String>> stringSet() throws SQLException
 	{
-		return DbFunc.resultToStringSet( result );
+		return ZDB.resultToStringSet( result );
 	}
 
 	@Override
 	public String toSqlQuery() throws SQLException
 	{
 		if ( result.getStatement() instanceof PreparedStatement )
-			return DbFunc.toString( ( PreparedStatement ) result.getStatement() );
+			return ZDB.toString( ( PreparedStatement ) result.getStatement() );
 		return null;
 	}
 }

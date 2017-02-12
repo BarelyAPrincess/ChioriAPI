@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account;
 
@@ -11,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import com.chiorichan.zutils.ZStrings;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppConfig;
@@ -20,9 +23,8 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.event.account.KickEvent;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
-import com.chiorichan.util.SecureFunc;
-import com.chiorichan.util.StringFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.zutils.ZEncryption;
+import com.chiorichan.Versioning;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
@@ -93,10 +95,10 @@ public final class AccountManager extends AccountEvents
 		{
 			seed = seed.replaceAll( "[\\W\\d]", "" );
 
-			acctId = StringFunc.randomChars( seed, 2 ).toLowerCase();
-			String sum = StringFunc.removeLetters( SecureFunc.md5( seed ) );
-			acctId += sum.length() < 3 ? SecureFunc.randomize( "123" ) : sum.substring( 0, 3 );
-			acctId += StringFunc.randomChars( seed, 1 ).toUpperCase();
+			acctId = ZStrings.randomChars( seed, 2 ).toLowerCase();
+			String sum = ZStrings.removeLetters( ZEncryption.md5( seed ) );
+			acctId += sum.length() < 3 ? ZEncryption.randomize( "123" ) : sum.substring( 0, 3 );
+			acctId += ZStrings.randomChars( seed, 1 ).toUpperCase();
 		}
 
 		if ( acctId == null || acctId.isEmpty() )
@@ -111,9 +113,9 @@ public final class AccountManager extends AccountEvents
 
 			// When our tries are divisible by 25 we attempt to randomize the last letter for more chances.
 			if ( tries % 25 == 0 )
-				acctId = acctId.substring( 0, 4 ) + SecureFunc.randomize( acctId.substring( 5 ) );
+				acctId = acctId.substring( 0, 4 ) + ZEncryption.randomize( acctId.substring( 5 ) );
 
-			acctId = acctId.substring( 0, 2 ) + SecureFunc.randomize( "123" ) + acctId.substring( 5 );
+			acctId = acctId.substring( 0, 2 ) + ZEncryption.randomize( "123" ) + acctId.substring( 5 );
 
 			tries++;
 		}

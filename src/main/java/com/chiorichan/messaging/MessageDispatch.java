@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.messaging;
 
@@ -30,7 +32,7 @@ public class MessageDispatch
 {
 	private static final Map<MessageChannel, List<MessageReceiver>> channels = Maps.newConcurrentMap();
 
-	public static Collection<MessageReceiver> channelRecipents( MessageChannel channel )
+	public static Collection<MessageReceiver> channelRecipients( MessageChannel channel )
 	{
 		return Collections.unmodifiableList( channels.get( channel ) );
 	}
@@ -58,7 +60,7 @@ public class MessageDispatch
 		}
 		catch ( EventException e )
 		{
-			throw new MessageException( "Encountered an exception while tring to deliver a message", builder.getSender(), builder.getMessages().toArray( new MessageReceiver[0] ), e );
+			throw new MessageException( "Encountered an exception while trying to deliver a message", builder.getSender(), builder.getMessages().toArray( new MessageReceiver[0] ), e );
 		}
 		if ( !event.isCancelled() && !event.getRecipients().isEmpty() && !event.getMessages().isEmpty() )
 			for ( MessageReceiver dest : event.getRecipients() )

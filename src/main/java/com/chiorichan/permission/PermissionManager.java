@@ -1,20 +1,13 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimerTask;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountInstance;
@@ -25,6 +18,7 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.EventPriority;
 import com.chiorichan.event.EventRegistrar;
+import com.chiorichan.helpers.PermissionNamespace;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.logger.Log;
 import com.chiorichan.permission.backend.file.FileBackend;
@@ -41,10 +35,20 @@ import com.chiorichan.services.ServicePriority;
 import com.chiorichan.services.ServiceProvider;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
-import com.chiorichan.util.PermissionNamespace;
+import com.chiorichan.zutils.ZObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 public class PermissionManager implements EventRegistrar, TaskRegistrar, ServiceManager, ServiceProvider
 {
@@ -89,30 +93,29 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Attempts to parse if a permission string is actually a reference to the EVERYBODY (-1, everybody, everyone), OP (0, op, root) or ADMIN (admin) permission nodes;
 	 *
-	 * @param perm
-	 *             The permission string to parse
+	 * @param perm The permission string to parse
 	 * @return A string for the permission node, will return the original string if no match was found.
 	 */
 	public static String parseNode( String perm )
 	{
 		// Everyone
 		if ( perm == null || perm.isEmpty() || perm.equals( "-1" ) || perm.equals( "everybody" ) || perm.equals( "everyone" ) )
-			perm = PermissionDefault.EVERYBODY.getNameSpace();
+			perm = PermissionDefault.EVERYBODY.getNamespace();
 
 		// OP Only
 		if ( perm.equals( "0" ) || perm.equalsIgnoreCase( "op" ) || perm.equalsIgnoreCase( "root" ) )
-			perm = PermissionDefault.OP.getNameSpace();
+			perm = PermissionDefault.OP.getNamespace();
 
 		if ( perm.equalsIgnoreCase( "admin" ) )
-			perm = PermissionDefault.ADMIN.getNameSpace();
+			perm = PermissionDefault.ADMIN.getNamespace();
+
 		return perm;
 	}
 
 	/**
 	 * Set debug mode
 	 *
-	 * @param debug
-	 *             true enables debug mode, false disables
+	 * @param debug true enables debug mode, false disables
 	 */
 	public static void setDebug( boolean debug )
 	{
@@ -149,12 +152,9 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Check if entity has specified permission in ref
 	 *
-	 * @param entity
-	 *             entity object
-	 * @param perm
-	 *             permission as string to check against
-	 * @param ref
-	 *             ref used for this perm
+	 * @param entity entity object
+	 * @param perm   permission as string to check against
+	 * @param ref    ref used for this perm
 	 * @return true on success false otherwise
 	 */
 	public PermissionResult checkPermission( AccountInstance entity, String perm, String ref )
@@ -165,10 +165,8 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Check if specified entity has specified permission
 	 *
-	 * @param entity
-	 *             entity object
-	 * @param perm
-	 *             permission string to check against
+	 * @param entity entity object
+	 * @param perm   permission string to check against
 	 * @return true on success false otherwise
 	 */
 	public PermissionResult checkPermission( Permissible entity, String perm )
@@ -180,12 +178,9 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Check if entity with name has permission in ref
 	 *
-	 * @param entityId
-	 *             entity name
-	 * @param permission
-	 *             permission as string to check against
-	 * @param refs
-	 *             References
+	 * @param entityId   entity name
+	 * @param permission permission as string to check against
+	 * @param refs       References
 	 * @return true on success false otherwise
 	 */
 	public PermissionResult checkPermission( String entityId, String permission, String... refs )
@@ -206,10 +201,8 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Finds a registered permission node in the stack by crawling.
 	 *
-	 * @param namespace
-	 *             The full name space we need to crawl for.
-	 * @param type
-	 *             What PermisisonType should the final node be
+	 * @param namespace The full name space we need to crawl for.
+	 * @param type      What PermissionType should the final node be
 	 * @return The child node based on the namespace. Will return NULL if non-existent and createChildren is false.
 	 */
 	public Permission createNode( String namespace, PermissionType type )
@@ -334,26 +327,18 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Finds entities assigned provided permission. WARNING: Will not return a complete list if permissions.preloadEntities config is false.
 	 *
-	 * @param perm
-	 *             The permission to check for.
+	 * @param perm The permission to check for.
 	 * @return a list of permissibles that have that permission assigned to them.
 	 */
 	public List<PermissibleEntity> getEntitiesWithPermission( Permission perm )
 	{
-		List<PermissibleEntity> result = Lists.newArrayList();
-
-		for ( PermissibleEntity entity : entities.values() )
-			if ( entity.checkPermission( perm ).isAssigned() )
-				result.add( entity );
-
-		return result;
+		return entities.values().stream().filter( p -> p.checkPermission( perm ).isAssigned() ).collect( Collectors.toList() );
 	}
 
 	/**
 	 * Finds entities assigned provided permission.
 	 *
-	 * @param perm
-	 *             The permission to check for.
+	 * @param perm The permission to check for.
 	 * @return a list of permissibles that have that permission assigned to them.
 	 * @see PermissionManager#getEntitiesWithPermission(Permission)
 	 */
@@ -365,8 +350,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Return entity's object
 	 *
-	 * @param permissible
-	 *             get PermissibleEntity with given name
+	 * @param permissible get PermissibleEntity with given name
 	 * @return PermissibleEntity instance
 	 */
 	public PermissibleEntity getEntity( Permissible permissible )
@@ -415,8 +399,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Return object for specified group
 	 *
-	 * @param id
-	 *             the group id
+	 * @param id the group id
 	 * @return PermissibleGroup object
 	 */
 	public PermissibleGroup getGroup( String id )
@@ -484,8 +467,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Attempts to find a Permission Node. Will not create the node if non-existent.
 	 *
-	 * @param namespace
-	 *             The namespace to find, e.g., com.chiorichan.user
+	 * @param namespace The namespace to find, e.g., com.chiorichan.user
 	 * @return The found permission, null if non-existent
 	 */
 	public Permission getNode( String namespace )
@@ -526,8 +508,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Finds registered permission nodes.
 	 *
-	 * @param ns
-	 *             The full name space we need to crawl for.
+	 * @param ns The full name space we need to crawl for.
 	 * @return A list of permissions that matched the namespace. Will return more then one if namespace contained asterisk.
 	 */
 	public List<Permission> getNodes( PermissionNamespace ns )
@@ -613,7 +594,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 		String backendName = AppConfig.get().getString( "permissions.backend" );
 
-		if ( backendName == null || backendName.isEmpty() )
+		if ( ZObjects.isEmpty( backendName ) )
 		{
 			backendName = PermissionBackend.defaultBackend; // Default backend
 			AppConfig.get().set( "permissions.backend", backendName );
@@ -655,14 +636,13 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 			getLogger().info( EnumColor.YELLOW + "Loading entities from backend!" );
 		backend.loadEntities();
 
-		/*
-		 * if ( isDebug() )
-		 * {
-		 * getLogger().info( ConsoleColor.YELLOW + "Dumping loaded permissions:" );
-		 * for ( Permission root : getRootNodes( false ) )
-		 * root.debugPermissionStack( 0 );
-		 * }
-		 */
+		/*if ( isDebug() )
+		{
+			getLogger().info( EnumColor.YELLOW + "Dumping loaded permissions:" );
+			for ( Permission root : getRootNodes( false ) )
+				root.debugPermissionStack( 0 );
+		}*/
+
 	}
 
 	// TODO Make more checks
@@ -687,10 +667,8 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Attempts to move a permission from one namespace to another. e.g., com.chiorichan.oldspace1.same.oldname -> com.chiorichan.newspace2.same.newname.
 	 *
-	 * @param newNamespace
-	 *             The new namespace you wish to use.
-	 * @param appendLocalName
-	 *             Pass true if you wish the method to append the LocalName to the new namespace. If the local name of the new namespace is different then this permission will be renamed.
+	 * @param newNamespace    The new namespace you wish to use.
+	 * @param appendLocalName Pass true if you wish the method to append the LocalName to the new namespace. If the local name of the new namespace is different then this permission will be renamed.
 	 * @return true if move/rename was successful.
 	 */
 	public boolean refactorNamespace( String newNamespace, boolean appendLocalName )
@@ -703,10 +681,8 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Register new timer task
 	 *
-	 * @param task
-	 *             TimerTask object
-	 * @param delay
-	 *             delay in seconds
+	 * @param task  TimerTask object
+	 * @param delay delay in seconds
 	 */
 	protected void registerTask( TimerTask task, int delay )
 	{
@@ -739,8 +715,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Reset in-memory object of specified entity
 	 *
-	 * @param entity
-	 *             the entity
+	 * @param entity the entity
 	 */
 	public void resetEntity( Permissible entity )
 	{
@@ -750,8 +725,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Reset in-memory object for groupName
 	 *
-	 * @param groupName
-	 *             group's name
+	 * @param groupName group's name
 	 */
 	public void resetGroup( String groupName )
 	{
@@ -776,8 +750,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Set backend to specified backend. This would also cause backend resetting.
 	 *
-	 * @param backendName
-	 *             name of backend to set to
+	 * @param backendName name of backend to set to
 	 */
 	public void setBackend( String backendName ) throws PermissionBackendException
 	{
@@ -801,8 +774,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	/**
 	 * Set default group to specified group
 	 *
-	 * @param group
-	 *             PermissibleGroup group object
+	 * @param group PermissibleGroup group object
 	 */
 	public void setDefaultGroup( PermissibleGroup group, References refs )
 	{

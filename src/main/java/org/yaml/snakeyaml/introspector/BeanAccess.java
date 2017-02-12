@@ -18,5 +18,5 @@ public enum BeanAccess {
     FIELD,
 
     /** reserved */
-    PROPERTY;
+    PROPERTY
 }

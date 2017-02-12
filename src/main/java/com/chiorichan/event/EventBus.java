@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.event;
 
@@ -65,8 +67,7 @@ public class EventBus implements ServiceManager, LogSource
 	 * Calls an event with the given details.<br>
 	 * This method only synchronizes when the event is not asynchronous.
 	 *
-	 * @param event
-	 *             Event details
+	 * @param event Event details
 	 */
 	public <T extends AbstractEvent> T callEvent( T event )
 	{
@@ -88,7 +89,7 @@ public class EventBus implements ServiceManager, LogSource
 		}
 		catch ( EventException ex )
 		{
-
+			// Ignore
 		}
 
 		return event;
@@ -98,9 +99,8 @@ public class EventBus implements ServiceManager, LogSource
 	 * Calls an event with the given details.<br>
 	 * This method only synchronizes when the event is not asynchronous.
 	 *
-	 * @param event
-	 *             Event details
-	 * @throws EventException
+	 * @param event Event details
+	 * @throws EventException Thrown if you try to call an async event on a sync thread
 	 */
 	public <T extends AbstractEvent> T callEventWithException( T event ) throws EventException
 	{
@@ -291,18 +291,12 @@ public class EventBus implements ServiceManager, LogSource
 	/**
 	 * Registers the given event to the specified listener using a directly passed EventExecutor
 	 *
-	 * @param event
-	 *             Event class to register
-	 * @param listener
-	 *             Listener to register
-	 * @param priority
-	 *             Priority of this event
-	 * @param executor
-	 *             EventExecutor to register
-	 * @param object
-	 *             Source of event registration
-	 * @param ignoreCancelled
-	 *             Do not call executor if event was already cancelled
+	 * @param event           Event class to register
+	 * @param listener        Listener to register
+	 * @param priority        Priority of this event
+	 * @param executor        EventExecutor to register
+	 * @param object          Source of event registration
+	 * @param ignoreCancelled Do not call executor if event was already cancelled
 	 */
 	public void registerEvent( Class<? extends AbstractEvent> event, Listener listener, EventPriority priority, EventExecutor executor, Object object, boolean ignoreCancelled )
 	{
@@ -317,18 +311,12 @@ public class EventBus implements ServiceManager, LogSource
 	/**
 	 * Registers the given event to the specified listener using a directly passed EventExecutor
 	 *
-	 * @param event
-	 *             Event class to register
-	 * @param listener
-	 *             Listener to register
-	 * @param priority
-	 *             Priority of this event
-	 * @param executor
-	 *             EventExecutor to register
-	 * @param context
-	 *             The Object Context
-	 * @param ignoreCancelled
-	 *             Do not call executor if event was already cancelled
+	 * @param event           Event class to register
+	 * @param listener        Listener to register
+	 * @param priority        Priority of this event
+	 * @param executor        EventExecutor to register
+	 * @param context         The Object Context
+	 * @param ignoreCancelled Do not call executor if event was already cancelled
 	 */
 	public void registerEvent( Class<? extends AbstractEvent> event, Listener listener, EventPriority priority, EventExecutor executor, ObjectContext context, boolean ignoreCancelled )
 	{
@@ -372,8 +360,7 @@ public class EventBus implements ServiceManager, LogSource
 	/**
 	 * Sets whether or not per event timing code should be used
 	 *
-	 * @param use
-	 *             True if per event timing code should be used
+	 * @param use True if per event timing code should be used
 	 */
 	public void useTimings( boolean use )
 	{

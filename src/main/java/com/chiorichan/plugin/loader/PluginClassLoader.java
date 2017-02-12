@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.plugin.loader;
 
@@ -36,7 +38,7 @@ public final class PluginClassLoader extends URLClassLoader
 	private final File dataFolder;
 	private final File file;
 	final Plugin plugin;
-	private boolean initalized = false;
+	private boolean initialized = false;
 	
 	PluginClassLoader( final JavaPluginLoader loader, final ClassLoader parent, final PluginInformation description, final File dataFolder, final File file ) throws PluginInvalidException, MalformedURLException
 	{
@@ -87,20 +89,20 @@ public final class PluginClassLoader extends URLClassLoader
 		}
 	}
 	
-	static synchronized void initalize( Plugin javaPlugin )
+	static synchronized void initialize( Plugin javaPlugin )
 	{
 		Validate.notNull( javaPlugin, "Initializing plugin cannot be null" );
 		
 		PluginClassLoader loader = loaders.get( javaPlugin.getClass() );
 		
 		if ( loader == null )
-			throw new IllegalStateException( "Plugin was not properly initalized: '" + javaPlugin.getClass().getName() + "'." );
+			throw new IllegalStateException( "Plugin was not properly initialized: '" + javaPlugin.getClass().getName() + "'." );
 		
-		if ( loader.initalized )
+		if ( loader.initialized )
 			throw new IllegalArgumentException( "Plugin already initialized: '" + javaPlugin.getClass().getName() + "'." );
 		
 		javaPlugin.init( loader.loader, loader.description, loader.dataFolder, loader.file, loader );
-		loader.initalized = true;
+		loader.initialized = true;
 	}
 	
 	@Override

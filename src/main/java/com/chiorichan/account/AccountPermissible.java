@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account;
 
@@ -179,10 +181,10 @@ public abstract class AccountPermissible extends Permissible implements Account
 					return result;
 				}
 
-				AccountCredentials creds = auth.authorize( meta, credObjs );
-				meta.context().credentials = creds;
+				AccountCredentials credentials = auth.authorize( meta, credObjs );
+				meta.context().credentials = credentials;
 
-				if ( creds.getDescriptiveReason().getReportingLevel().isSuccess() )
+				if ( credentials.getDescriptiveReason().getReportingLevel().isSuccess() )
 				{
 					result.setReason( AccountDescriptiveReason.LOGIN_SUCCESS );
 
@@ -217,7 +219,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 					EventBus.instance().callEvent( new AccountSuccessfulLoginEvent( meta, this, result ) );
 				}
 				else
-					result.setReason( creds.getDescriptiveReason() );
+					result.setReason( credentials.getDescriptiveReason() );
 			}
 			else
 				result.setReason( new AccountDescriptiveReason( "The Authenticator was null!", ReportingLevel.L_ERROR ) );
@@ -278,7 +280,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 
 		if ( account != null )
 		{
-			AccountManager.getLogger().info( EnumColor.GREEN + "Successful Logout: [id='" + account.getId() + "',locId='" + ( account.getLocation() == null ? "null" : account.getLocation().getId() ) + "',displayName='" + account.getDisplayName() + "',ipAddrs='" + account.getIpAddresses() + "']" );
+			AccountManager.getLogger().info( EnumColor.GREEN + "Successful Logout: [id='" + account.getId() + "',locId='" + ( account.getLocation() == null ? "null" : account.getLocation().getId() ) + "',displayName='" + account.getDisplayName() + "',ipAddresses='" + account.getIpAddresses() + "']" );
 			account = null;
 		}
 

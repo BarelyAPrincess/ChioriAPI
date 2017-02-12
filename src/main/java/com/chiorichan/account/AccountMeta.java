@@ -3,9 +3,22 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account;
+
+import com.chiorichan.account.lang.AccountException;
+import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.lang.UncaughtException;
+import com.chiorichan.permission.PermissibleEntity;
+import com.chiorichan.permission.PermissionManager;
+import com.chiorichan.services.AppManager;
+import com.chiorichan.zutils.ZEncryption;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.Validate;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -16,21 +29,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang3.Validate;
-
-import com.chiorichan.account.lang.AccountException;
-import com.chiorichan.lang.UncaughtException;
-import com.chiorichan.permission.PermissibleEntity;
-import com.chiorichan.permission.PermissionManager;
-import com.chiorichan.services.AppManager;
-import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.SecureFunc;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Maps;
-
 public final class AccountMeta implements Account, Iterable<Entry<String, Object>>
 {
-	public static final List<String> IGNORED_KEYS = Arrays.asList( new String[] {"locId", "acctId"} );
+	public static final List<String> IGNORED_KEYS = Arrays.asList( "locId", "acctId" );
 
 	/**
 	 * Used to store our Account Metadata besides the required builtin key names.
@@ -115,7 +116,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	{
 		try
 		{
-			return ObjectFunc.castToBoolWithException( metadata.get( key ) );
+			return ZObjects.castToBoolWithException( metadata.get( key ) );
 		}
 		catch ( ClassCastException e )
 		{
@@ -135,7 +136,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	{
 		if ( permissibleEntity == null || permissibleEntity.get() == null )
 		{
-			PermissionManager mgr = ( PermissionManager ) AppManager.getService( PermissibleEntity.class );
+			PermissionManager mgr = AppManager.getService( PermissibleEntity.class );
 			if ( mgr == null )
 				throw new UncaughtException( "PermissibleEntity provider is not available, check load order!" );
 			permissibleEntity = new WeakReference<PermissibleEntity>( mgr.getEntity( getId() ) );
@@ -158,7 +159,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	public Integer getInteger( String key, int def )
 	{
 		Object obj = metadata.get( key );
-		Integer val = ObjectFunc.castToInt( obj );
+		Integer val = ZObjects.castToInt( obj );
 
 		return val == null ? def : val;
 	}
@@ -205,7 +206,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 
 	public String getString( String key, String def )
 	{
-		String val = ObjectFunc.castToString( metadata.get( key ) );
+		String val = ZObjects.castToString( metadata.get( key ) );
 		return val == null ? def : val;
 	}
 
@@ -252,7 +253,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	 */
 	public boolean keepInMemory()
 	{
-		return isInitialized() ? keepInMemory : false;
+		return isInitialized() && keepInMemory;
 	}
 
 	/**
@@ -276,7 +277,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	 */
 	public boolean keptInMemory()
 	{
-		return isInitialized() ? keepInMemory : false;
+		return isInitialized() && keepInMemory;
 	}
 
 	public Set<String> keySet()
@@ -297,7 +298,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 
 	public void requireActivation()
 	{
-		metadata.put( "actnum", SecureFunc.randomize( "z154f98wfjascvc" ) );
+		metadata.put( "actnum", ZEncryption.randomize( "z154f98wfjascvc" ) );
 	}
 
 	public void save() throws AccountException

@@ -1,21 +1,37 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.configuration;
 
+import com.chiorichan.logger.Log;
+import com.chiorichan.zutils.ZLists;
+import com.chiorichan.zutils.ZMaps;
+import com.chiorichan.zutils.ZObjects;
+
 import java.awt.Color;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.chiorichan.util.ObjectFunc;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // TODO Fix the number type casting issues
 
@@ -26,13 +42,11 @@ public class MemorySection implements ConfigurationSection
 {
 	/**
 	 * Creates a full path to the given {@link ConfigurationSection} from its root {@link Configuration}.
-	 * <p />
+	 * <p/>
 	 * You may use this method for any given {@link ConfigurationSection}, not only {@link MemorySection}.
 	 *
-	 * @param section
-	 *             Section to create a path for.
-	 * @param key
-	 *             Name of the specified section.
+	 * @param section Section to create a path for.
+	 * @param key     Name of the specified section.
 	 * @return Full path of the section from its root.
 	 */
 	public static String createPath( ConfigurationSection section, String key )
@@ -42,20 +56,19 @@ public class MemorySection implements ConfigurationSection
 
 	/**
 	 * Creates a relative path to the given {@link ConfigurationSection} from the given relative section.
-	 * <p />
+	 * <p/>
 	 * You may use this method for any given {@link ConfigurationSection}, not only {@link MemorySection}.
 	 *
-	 * @param section
-	 *             Section to create a path for.
-	 * @param key
-	 *             Name of the specified section.
-	 * @param relativeTo
-	 *             Section to create the path relative to.
+	 * @param section    Section to create a path for.
+	 * @param key        Name of the specified section.
+	 * @param relativeTo Section to create the path relative to.
 	 * @return Full path of the section from its root.
 	 */
 	public static String createPath( ConfigurationSection section, String key, ConfigurationSection relativeTo )
 	{
-		ObjectFunc.notNull( section, "Cannot create path without a section" );
+		if ( section == null )
+			throw new IllegalArgumentException( "Cannot create path without a section" );
+
 		Configuration root = section.getRoot();
 		if ( root == null )
 			throw new IllegalStateException( "Cannot create path without a root" );
@@ -82,26 +95,56 @@ public class MemorySection implements ConfigurationSection
 		return builder.toString();
 	}
 
-	private final String fullPath;
-	protected final Map<String, Object> map = new LinkedHashMap<String, Object>();
 	private final ConfigurationSection parent;
-
+	private final Configuration root;
+	private final String fullPath;
 	private final String path;
 
-	private final Configuration root;
+	protected final Map<String, Object> map = new ConcurrentHashMap<>();
+	protected final Set<String> changes = new HashSet<>();
+
+	protected final List<OnConfigurationListener> listeners = new ArrayList<>();
+	protected final OnConfigurationListener forwardingListener = new OnConfigurationListener()
+	{
+		@Override
+		public void onSectionAdd( ConfigurationSection section )
+		{
+			for ( OnConfigurationListener listener : listeners )
+				listener.onSectionAdd( section );
+			if ( parent != null )
+				parent.getForwardingListener().onSectionAdd( section );
+		}
+
+		@Override
+		public void onSectionRemove( ConfigurationSection section, ConfigurationSection orphanedChild )
+		{
+			for ( OnConfigurationListener listener : listeners )
+				listener.onSectionRemove( section, orphanedChild );
+			if ( parent != null )
+				parent.getForwardingListener().onSectionRemove( section, orphanedChild );
+		}
+
+		@Override
+		public void onSectionChange( ConfigurationSection section, String affectedKey )
+		{
+			for ( OnConfigurationListener listener : listeners )
+				listener.onSectionChange( section, affectedKey );
+			if ( parent != null )
+				parent.getForwardingListener().onSectionChange( section, affectedKey );
+		}
+	};
 
 	/**
 	 * Creates an empty MemorySection for use as a root {@link Configuration} section.
-	 * <p />
+	 * <p/>
 	 * Note that calling this without being yourself a {@link Configuration} will throw an exception!
 	 *
-	 * @throws IllegalStateException
-	 *              Thrown if this is not a {@link Configuration} root.
+	 * @throws IllegalStateException Thrown if this is not a {@link Configuration} root.
 	 */
 	protected MemorySection()
 	{
-		if ( ! ( this instanceof Configuration ) )
-			throw new IllegalStateException( "Cannot construct a root MemorySection when not a Configuration" );
+		if ( !( this instanceof Configuration ) )
+			throw new IllegalStateException( "You must implement Configuration when using MemorySection as a root node" );
 
 		path = "";
 		fullPath = "";
@@ -112,23 +155,23 @@ public class MemorySection implements ConfigurationSection
 	/**
 	 * Creates an empty MemorySection with the specified parent and path.
 	 *
-	 * @param parent
-	 *             Parent section that contains this own section.
-	 * @param path
-	 *             Path that you may access this section from via the root {@link Configuration}.
-	 * @throws IllegalArgumentException
-	 *              Thrown is parent or path is null, or if parent contains no root Configuration.
+	 * @param parent Parent section that contains this own section.
+	 * @param path   Path that you may access this section from via the root {@link Configuration}.
+	 * @throws IllegalArgumentException Thrown is parent or path is null, or if parent contains no root Configuration.
 	 */
 	protected MemorySection( ConfigurationSection parent, String path )
 	{
-		ObjectFunc.notNull( parent, "Parent cannot be null" );
-		ObjectFunc.notNull( path, "Path cannot be null" );
+		if ( parent == null )
+			throw new IllegalArgumentException( "Parent cannot be null" );
+		if ( path == null )
+			throw new IllegalArgumentException( "Path cannot be null" );
 
 		this.path = path;
 		this.parent = parent;
 		root = parent.getRoot();
 
-		ObjectFunc.notNull( root, "Path cannot be orphaned" );
+		if ( root == null )
+			throw new IllegalArgumentException( "Path cannot be orphaned" );
 
 		fullPath = createPath( parent, path );
 	}
@@ -136,7 +179,8 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public void addDefault( String path, Object value )
 	{
-		ObjectFunc.notNull( path, "Path cannot be null" );
+		if ( path == null )
+			throw new IllegalArgumentException( "Path cannot be null" );
 
 		Configuration root = getRoot();
 		if ( root == null )
@@ -155,7 +199,9 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public ConfigurationSection createSection( String path )
 	{
-		ObjectFunc.notEmpty( path, "Cannot create section at empty path" );
+		if ( path == null )
+			throw new IllegalArgumentException( "Cannot create section at empty path" );
+
 		Configuration root = getRoot();
 		if ( root == null )
 			throw new IllegalStateException( "Cannot create section without a root" );
@@ -168,7 +214,7 @@ public class MemorySection implements ConfigurationSection
 		while ( ( i1 = path.indexOf( separator, i2 = i1 + 1 ) ) != -1 )
 		{
 			String node = path.substring( i2, i1 );
-			ConfigurationSection subSection = section.getConfigurationSection( node );
+			ConfigurationSection subSection = section.getConfigurationSection( node, true );
 			if ( subSection == null )
 				section = section.createSection( node );
 			else
@@ -179,10 +225,29 @@ public class MemorySection implements ConfigurationSection
 		if ( section == this )
 		{
 			ConfigurationSection result = new MemorySection( this, key );
-			map.put( key, result );
+			synchronized ( map )
+			{
+				// Log.get().i("Creating ConfigurationSection: " + getCurrentPath() + "/" + key);
+				map.put( key, result );
+				changes.add( key );
+				forwardingListener.onSectionAdd( result );
+			}
 			return result;
 		}
 		return section.createSection( key );
+	}
+
+	@Override
+	public ConfigurationSection createSection( String path, final Collection<?> list )
+	{
+		return createSection( path, new HashMap<Object, Object>()
+		{
+			{
+				Object[] a = list.toArray();
+				for ( int i = 0; i < a.length; i++ )
+					put( Integer.toString( i ), a[i] );
+			}
+		} );
 	}
 
 	@Override
@@ -193,10 +258,158 @@ public class MemorySection implements ConfigurationSection
 		for ( Map.Entry<?, ?> entry : map.entrySet() )
 			if ( entry.getValue() instanceof Map )
 				section.createSection( entry.getKey().toString(), ( Map<?, ?> ) entry.getValue() );
+			else if ( entry.getValue() instanceof Collection )
+				section.createSection( entry.getKey().toString(), ( Collection<?> ) entry.getValue() );
 			else
-				section.set( entry.getKey().toString(), entry.getValue() );
+				section.set( entry.getKey().toString(), entry.getValue(), false );
 
 		return section;
+	}
+
+	@Override
+	public <T> List<T> getObjectList( String path, final Class<T> cls )
+	{
+		Object obj = get( path, null );
+
+		if ( obj == null || !( obj instanceof ConfigurationSection ) && !( obj instanceof Map ) )
+			return null;
+
+		final ConfigurationSection values;
+		if ( obj instanceof Map )
+		{
+			values = new MemorySection( this, path );
+			values.set( ( Map<String, Object> ) obj );
+		}
+		else
+			values = ( ConfigurationSection ) obj;
+
+		return values.asObjectList( cls );
+	}
+
+	@Override
+	public <T> T getObject( String path, final Class<T> cls )
+	{
+		Object obj = get( path, null );
+
+		if ( obj == null || !( obj instanceof ConfigurationSection ) && !( obj instanceof Map ) )
+			return null;
+
+		final ConfigurationSection values;
+		if ( obj instanceof Map )
+		{
+			values = new MemorySection( this, path );
+			values.set( ( Map<String, Object> ) obj );
+		}
+		else
+			values = ( ConfigurationSection ) obj;
+
+		return values.asObject( cls );
+	}
+
+	@Override
+	public <T> List<T> asObjectList( final Class<T> cls )
+	{
+		return new ArrayList<T>()
+		{{
+			if ( ZLists.incremented( map.keySet() ) )
+			{
+				for ( Map.Entry<Integer, Object> section : ZMaps.asNumericallySortedMap( map ).entrySet() )
+					if ( section.getValue() instanceof ConfigurationSection )
+						add( ( ( ConfigurationSection ) section.getValue() ).asObject( cls ) );
+			}
+			else
+				for ( Map.Entry<String, Object> section : map.entrySet() )
+					if ( section.getValue() instanceof ConfigurationSection )
+						add( ( ( ConfigurationSection ) section.getValue() ).asObject( cls ) );
+		}};
+	}
+
+	@Override
+	public <T> T asObject( final Class<T> cls )
+	{
+		try
+		{
+			Constructor<?> constructor = cls.getConstructor( ConfigurationSection.class );
+			return ( T ) constructor.newInstance( this );
+		}
+		catch ( Exception ignore )
+		{
+		}
+
+		try
+		{
+			Constructor<?> constructor = cls.getConstructor( Map.class );
+			return ( T ) constructor.newInstance( map );
+		}
+		catch ( Exception ignore )
+		{
+		}
+
+		try
+		{
+			Constructor<?> constructor = cls.getConstructor();
+			Object obj = constructor.newInstance();
+
+			final Map<String, Field> fields = new HashMap<String, Field>()
+			{{
+				for ( Field field : cls.getFields() )
+					put( field.getName(), field );
+			}};
+
+			for ( Map.Entry<String, Object> entry : map.entrySet() )
+			{
+				if ( !fields.containsKey( entry.getKey() ) )
+					Log.get().warning( "The key " + entry.getKey() + " does not exist in class " + cls );
+				else
+				{
+					Object value = entry.getValue();
+					Field field = fields.remove( entry.getKey() );
+					field.setAccessible( true );
+
+					if ( value.getClass().isAssignableFrom( field.getType() ) )
+					{
+						field.set( obj, value );
+					}
+					else if ( value instanceof ConfigurationSection )
+					{
+						Object newValue = ZLists.incremented( ( ( ConfigurationSection ) value ).getKeys() ) ? ( ( ConfigurationSection ) value ).asObjectList( field.getType() ) : ( ( ConfigurationSection ) value ).asObject( field.getType() );
+						if ( newValue == null )
+							Log.get().severe( "Failed to cast ConfigurationSection " + entry.getKey() + " to object " + field.getType() + ". [" + value.getClass() + " // " + field.getType() + "]" );
+						else
+							field.set( obj, newValue );
+					}
+					else if ( String.class.isAssignableFrom( field.getType() ) )
+						field.set( obj, ZObjects.castToString( value ) );
+					else if ( Double.class.isAssignableFrom( field.getType() ) )
+						field.set( obj, ZObjects.castToDouble( value ) );
+					else if ( Integer.class.isAssignableFrom( field.getType() ) )
+						field.set( obj, ZObjects.castToInt( value ) );
+					else if ( Long.class.isAssignableFrom( field.getType() ) )
+						field.set( obj, ZObjects.castToLong( value ) );
+					else if ( Boolean.class.isAssignableFrom( field.getType() ) )
+						field.set( obj, ZObjects.castToBool( value ) );
+					else if ( field.get( obj ) == null )
+						Log.get().severe( "Failed to find a casting for field \"" + entry.getKey() + "\" with type \"" + field.getType() + "\" in object \"" + value.getClass() + "\"." );
+				}
+			}
+
+			for ( Field field : fields.values() )
+				if ( field.get( obj ) == null && !field.isSynthetic() )
+					Log.get().warning( "The field " + field.getName() + " is unassigned for object " + cls );
+
+			return ( T ) obj;
+		}
+		catch ( Exception ignore )
+		{
+		}
+
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> getChildren()
+	{
+		return Collections.unmodifiableMap( map );
 	}
 
 	@Override
@@ -208,7 +421,13 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public Object get( String path, Object def )
 	{
-		ObjectFunc.notNull( path, "Path cannot be null" );
+		return get( path, false, def );
+	}
+
+	public Object get( String path, boolean makeParents, Object def )
+	{
+		if ( path == null )
+			throw new IllegalArgumentException( "Path cannot be null" );
 
 		if ( path.length() == 0 )
 			return this;
@@ -224,7 +443,7 @@ public class MemorySection implements ConfigurationSection
 		ConfigurationSection section = this;
 		while ( ( i1 = path.indexOf( separator, i2 = i1 + 1 ) ) != -1 )
 		{
-			section = section.getConfigurationSection( path.substring( i2, i1 ) );
+			section = section.getConfigurationSection( path.substring( i2, i1 ), makeParents );
 			if ( section == null )
 				return def;
 		}
@@ -236,6 +455,11 @@ public class MemorySection implements ConfigurationSection
 			return result == null ? def : result;
 		}
 		return section.get( key, def );
+	}
+
+	public Stream<Map.Entry<String, Object>> asStream()
+	{
+		return map.entrySet().stream();
 	}
 
 	@Override
@@ -258,20 +482,30 @@ public class MemorySection implements ConfigurationSection
 	@SuppressWarnings( "unchecked" )
 	public <T> List<T> getAsList( String path, List<T> def )
 	{
-		Object val = get( path, def );
+		final Object val = get( path, def );
 		try
 		{
 			if ( val == null )
 				return def;
-			else if ( ! ( val instanceof List ) )
-				return new ArrayList<T>()
-				{
-					{
-						add( ( T ) val );
-					}
-				};
+			else if ( val instanceof MemorySection )
+				return new ArrayList<T>( ( Collection<? extends T> ) ( ( MemorySection ) val ).getValues( false ).values() );
+			else if ( val instanceof Map )
+				return new ArrayList<>( ( ( Map ) val ).values() );
+			else if ( val instanceof Collection )
+				return new ArrayList<>( ( Collection ) val );
 			else
-				return ( List<T> ) val;
+			{
+				try
+				{
+					Method method = val.getClass().getMethod( "stream" );
+					Stream<T> stream = ( Stream<T> ) method.invoke( val );
+					return stream.collect( Collectors.toList() );
+				}
+				catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException | ClassCastException e )
+				{
+					return ( List<T> ) Stream.of( val ).collect( Collectors.toList() );
+				}
+			}
 		}
 		catch ( ClassCastException e )
 		{
@@ -335,7 +569,7 @@ public class MemorySection implements ConfigurationSection
 				}
 				catch ( Exception ex )
 				{
-
+					// Ignore
 				}
 			else if ( object instanceof Character )
 				result.add( ( byte ) ( ( Character ) object ).charValue() );
@@ -394,11 +628,46 @@ public class MemorySection implements ConfigurationSection
 	public ConfigurationSection getConfigurationSection( String path, boolean create )
 	{
 		Object val = get( path, null );
-		if ( val != null )
-			return val instanceof ConfigurationSection ? ( ConfigurationSection ) val : null;
 
-		val = get( path, getDefault( path ) );
-		return val instanceof ConfigurationSection || create ? createSection( path ) : null;
+		// Log.get().info("Section Debug: " + path + " // " + (val == null ? "unknown-type" : val.getClass()) + " // " + val + " // " + create);
+
+		if ( val != null )
+		{
+			if ( val instanceof ConfigurationSection )
+				return ( ConfigurationSection ) val;
+			else if ( val instanceof Map )
+			{
+				ConfigurationSection section = new MemorySection( this, path );
+				section.set( ( Map ) val );
+				return section;
+			}
+			else if ( create )
+				return createSection( path );
+			else
+			{
+				Log.get().warning( "Asked for ConfigurationSection [" + path + "] but got " + val.getClass() + " [" + val + "]" );
+				return null;
+			}
+		}
+
+		val = getDefault( path );
+		if ( val != null )
+		{
+			if ( val instanceof ConfigurationSection )
+				return ( ConfigurationSection ) val;
+			else if ( val instanceof Map )
+			{
+				ConfigurationSection section = new MemorySection( this, path );
+				section.set( ( Map ) val );
+				return section;
+			}
+			else
+				return null;
+		}
+		else if ( create )
+			return createSection( path );
+		else
+			return null;
 	}
 
 	@Override
@@ -409,7 +678,8 @@ public class MemorySection implements ConfigurationSection
 
 	protected Object getDefault( String path )
 	{
-		ObjectFunc.notNull( path, "Path cannot be null" );
+		if ( path == null )
+			throw new IllegalArgumentException( "Path cannot be null" );
 
 		Configuration root = getRoot();
 		Configuration defaults = root == null ? null : root.getDefaults();
@@ -463,7 +733,7 @@ public class MemorySection implements ConfigurationSection
 				}
 				catch ( Exception ex )
 				{
-
+					// Ignore
 				}
 			else if ( object instanceof Character )
 				result.add( ( double ) ( ( Character ) object ).charValue() );
@@ -493,7 +763,7 @@ public class MemorySection implements ConfigurationSection
 				}
 				catch ( Exception ex )
 				{
-
+					// Ignore
 				}
 			else if ( object instanceof Character )
 				result.add( ( float ) ( ( Character ) object ).charValue() );
@@ -537,7 +807,7 @@ public class MemorySection implements ConfigurationSection
 				}
 				catch ( Exception ex )
 				{
-
+					// Ignore
 				}
 			else if ( object instanceof Character )
 				result.add( ( int ) ( ( Character ) object ).charValue() );
@@ -556,7 +826,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public Set<String> getKeys( boolean deep )
 	{
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new TreeSet<>();
 
 		Configuration root = getRoot();
 		if ( root != null && root.options().copyDefaults() )
@@ -567,7 +837,12 @@ public class MemorySection implements ConfigurationSection
 				result.addAll( defaults.getKeys( deep ) );
 		}
 
-		mapChildrenKeys( result, this, deep );
+		// mapChildrenKeys(result, this, deep);
+
+		if ( deep )
+			result.addAll( getValues( true ).keySet() );
+		else
+			result.addAll( map.keySet() );
 
 		return result;
 	}
@@ -637,7 +912,7 @@ public class MemorySection implements ConfigurationSection
 				}
 				catch ( Exception ex )
 				{
-
+					// Ignore
 				}
 			else if ( object instanceof Character )
 				result.add( ( long ) ( ( Character ) object ).charValue() );
@@ -701,7 +976,7 @@ public class MemorySection implements ConfigurationSection
 				}
 				catch ( Exception ex )
 				{
-
+					// Ignore
 				}
 			else if ( object instanceof Character )
 				result.add( ( short ) ( ( Character ) object ).charValue() );
@@ -732,9 +1007,9 @@ public class MemorySection implements ConfigurationSection
 		List<?> list = getList( path );
 
 		if ( list == null )
-			return new ArrayList<String>( 0 );
+			return new ArrayList<>( 0 );
 
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 
 		for ( Object object : list )
 			if ( object instanceof String || isPrimitiveWrapper( object ) )
@@ -763,7 +1038,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public Map<String, Object> getValues( boolean deep )
 	{
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
+		Map<String, Object> result = new LinkedHashMap<>();
 
 		Configuration root = getRoot();
 		if ( root != null && root.options().copyDefaults() )
@@ -774,15 +1049,71 @@ public class MemorySection implements ConfigurationSection
 				result.putAll( defaults.getValues( deep ) );
 		}
 
-		mapChildrenValues( result, this, deep );
+		for ( String key : new ArrayList<>( map.keySet() ) )
+		{
+			Object obj = map.get( key );
+
+			// Log.get().i("Putting: " + getCurrentPath() + "/" + key + " --> (" + obj.getClass() + ") " + obj);
+
+			if ( obj instanceof ConfigurationSection )
+			{
+				ConfigurationSection section = ( ConfigurationSection ) obj;
+				Map<String, Object> values = section.getValues( false );
+
+				if ( ZLists.incremented( values.keySet() ) )
+					result.put( key, new ArrayList<>( values.values() ) );
+				else
+					result.put( key, values );
+			}
+			else
+			{
+				result.put( key, obj );
+			}
+		}
+
+		if ( deep )
+			result.putAll( ZMaps.flattenMap( result ) );
 
 		return result;
 	}
 
+	/*protected void mapChildrenValues(Map<String, Object> output, ConfigurationSection section, boolean deep)
+	{
+		if (section instanceof MemorySection)
+		{
+			MemorySection sec = (MemorySection) section;
+
+			for (Map.Entry<String, Object> entry : sec.map.entrySet())
+			{
+				if (entry.getValue() instanceof ConfigurationSection)
+				{
+					Map<String, Object> result = ((ConfigurationSection) entry.getValue()).getValues(false);
+					if (Lists.incremented(result.keySet()))
+						output.put(createPath(section, entry.getKey(), this), result.values());
+					else
+						output.put(createPath(section, entry.getKey(), this), result);
+				}
+				else
+					output.put(createPath(section, entry.getKey(), this), entry.getValue());
+
+				if (entry.getValue() instanceof ConfigurationSection && deep)
+					mapChildrenValues(output, (ConfigurationSection) entry.getValue(), deep);
+			}
+		}
+		else
+		{
+			Map<String, Object> values = section.getValues(deep);
+
+			for (Map.Entry<String, Object> entry : values.entrySet())
+				output.put(createPath(section, entry.getKey(), this), entry.getValue());
+		}
+	}*/
+
 	@Override
 	public boolean has( String path )
 	{
-		ObjectFunc.notNull( path, "Path cannot be null" );
+		if ( path == null )
+			throw new IllegalArgumentException( "Path cannot be null" );
 
 		if ( path.length() == 0 )
 			return true;
@@ -884,60 +1215,42 @@ public class MemorySection implements ConfigurationSection
 		return val instanceof String;
 	}
 
-	protected void mapChildrenKeys( Set<String> output, ConfigurationSection section, boolean deep )
+	/* protected void mapChildrenKeys(Set<String> output, ConfigurationSection section, boolean deep)
 	{
-		if ( section instanceof MemorySection )
+		if (section instanceof MemorySection)
 		{
-			MemorySection sec = ( MemorySection ) section;
+			MemorySection sec = (MemorySection) section;
 
-			for ( Map.Entry<String, Object> entry : sec.map.entrySet() )
+			for (Map.Entry<String, Object> entry : sec.map.entrySet())
 			{
-				output.add( createPath( section, entry.getKey(), this ) );
+				output.add(createPath(section, entry.getKey(), this));
 
-				if ( deep && entry.getValue() instanceof ConfigurationSection )
+				if (deep && entry.getValue() instanceof ConfigurationSection)
 				{
-					ConfigurationSection subsection = ( ConfigurationSection ) entry.getValue();
-					mapChildrenKeys( output, subsection, deep );
+					ConfigurationSection subsection = (ConfigurationSection) entry.getValue();
+					mapChildrenKeys(output, subsection, deep);
 				}
 			}
 		}
 		else
 		{
-			Set<String> keys = section.getKeys( deep );
+			Set<String> keys = section.getKeys(deep);
 
-			for ( String key : keys )
-				output.add( createPath( section, key, this ) );
+			for (String key : keys)
+				output.add(createPath(section, key, this));
 		}
-	}
-
-	protected void mapChildrenValues( Map<String, Object> output, ConfigurationSection section, boolean deep )
-	{
-		if ( section instanceof MemorySection )
-		{
-			MemorySection sec = ( MemorySection ) section;
-
-			for ( Map.Entry<String, Object> entry : sec.map.entrySet() )
-			{
-				output.put( createPath( section, entry.getKey(), this ), entry.getValue() );
-
-				if ( entry.getValue() instanceof ConfigurationSection )
-					if ( deep )
-						mapChildrenValues( output, ( ConfigurationSection ) entry.getValue(), deep );
-			}
-		}
-		else
-		{
-			Map<String, Object> values = section.getValues( deep );
-
-			for ( Map.Entry<String, Object> entry : values.entrySet() )
-				output.put( createPath( section, entry.getKey(), this ), entry.getValue() );
-		}
-	}
+	}*/
 
 	@Override
 	public void set( String path, Object value )
 	{
-		ObjectFunc.notEmpty( path, "Cannot set to an empty path" );
+		set( path, value, true );
+	}
+
+	@Override
+	public void set( String path, Object value, boolean convert )
+	{
+		ZObjects.notEmpty( path, "Path cannot be empty" );
 
 		Configuration root = getRoot();
 		if ( root == null )
@@ -962,12 +1275,51 @@ public class MemorySection implements ConfigurationSection
 		if ( section == this )
 		{
 			if ( value == null )
-				map.remove( key );
+			{
+				Object removed = map.remove( key );
+				if ( removed instanceof ConfigurationSection )
+					forwardingListener.onSectionRemove( this, ( ConfigurationSection ) removed );
+			}
+			else if ( convert )
+			{
+				if ( value instanceof Map )
+					createSection( key, ( Map<?, ?> ) value );
+				else if ( value instanceof List )
+					createSection( key, ( List<?> ) value );
+				// else if ( map.containsKey( key ) && map.get( key ) instanceof ConfigurationSection && value instanceof ConfigurationSection )
+					// ( ( ConfigurationSection ) map.get( key ) ).set( ( ConfigurationSection ) value );
+				else
+					map.put( key, value );
+			}
 			else
 				map.put( key, value );
+
+			forwardingListener.onSectionChange( this, key );
+			changes.add( key );
 		}
 		else
-			section.set( key, value );
+			section.set( key, value, false );
+	}
+
+	@Override
+	public void merge( ConfigurationSection section )
+	{
+		for ( Map.Entry<String, Object> entry : ( section instanceof MemorySection ? ( ( MemorySection ) section ).map : section.getValues( false ) ).entrySet() )
+			if ( !has( entry.getKey() ) )
+				set( entry.getKey(), entry.getValue(), false );
+	}
+
+	@Override
+	public void set( ConfigurationSection section )
+	{
+		set( section.getValues( false ) );
+	}
+
+	@Override
+	public void set( Map<String, Object> values )
+	{
+		for ( String key : new ArrayList<>( values.keySet() ) )
+			set( key, values.get( key ), false );
 	}
 
 	private double toDouble( Object def )
@@ -1012,6 +1364,101 @@ public class MemorySection implements ConfigurationSection
 		{
 			return 0;
 		}
+	}
+
+	@Override
+	public List<String> getChanges()
+	{
+		return getChanges( true );
+	}
+
+	@Override
+	public List<String> getChanges( boolean deep )
+	{
+		return new ArrayList<String>()
+		{{
+			addAll( changes );
+			// TODO DEEP
+		}};
+	}
+
+	@Override
+	public boolean hasChanges()
+	{
+		return hasChanges( true );
+	}
+
+	@Override
+	public boolean hasChanges( boolean deep )
+	{
+		if ( changes.size() > 0 )
+			return true;
+
+		boolean changes = false;
+
+		if ( deep )
+			synchronized ( map )
+			{
+				for ( Object obj : map.values() )
+					if ( obj instanceof ConfigurationSection && ( ( ConfigurationSection ) obj ).hasChanges( true ) )
+						changes = true;
+			}
+
+		return changes;
+	}
+
+	@Override
+	public void resolveChanges()
+	{
+		resolveChanges( true );
+	}
+
+	@Override
+	public void resolveChanges( boolean deep )
+	{
+		changes.clear();
+		if ( deep )
+			synchronized ( map )
+			{
+				for ( Object obj : map.values() )
+					if ( obj instanceof ConfigurationSection )
+						( ( ConfigurationSection ) obj ).resolveChanges( true );
+			}
+	}
+
+	@Override
+	public void addListener( OnConfigurationListener listener )
+	{
+		synchronized ( listeners )
+		{
+			listeners.add( listener );
+		}
+	}
+
+	@Override
+	public void removeListener( OnConfigurationListener listener )
+	{
+		synchronized ( listeners )
+		{
+			listeners.remove( listener );
+		}
+	}
+
+	@Override
+	public OnConfigurationListener getForwardingListener()
+	{
+		return forwardingListener;
+	}
+
+	@Override
+	public List<ConfigurationSection> getConfigurationSections()
+	{
+		return new ArrayList<ConfigurationSection>()
+		{{
+			for ( Object obj : map.values() )
+				if ( obj instanceof ConfigurationSection )
+					add( ( ConfigurationSection ) obj );
+		}};
 	}
 
 	@Override

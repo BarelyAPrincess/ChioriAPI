@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.skel;
 
@@ -23,7 +25,7 @@ import com.google.common.collect.Lists;
 public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElement implements SQLSkelWhere<SQLWhereGroup<B, P>, P>
 {
 	private List<SQLWhereElement> elements = Lists.newLinkedList();
-	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;
+	private SQLWhereElementSep currentSeparator = SQLWhereElementSep.NONE;
 
 	/*
 	 * key = val
@@ -51,9 +53,9 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 	public SQLWhereGroup<B, P> and()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.AND;
+			currentSeparator = SQLWhereElementSep.AND;
 		return this;
 	}
 
@@ -67,7 +69,7 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 	public SQLWhereGroup<SQLWhereGroup<B, P>, P> group()
 	{
 		SQLWhereGroup<SQLWhereGroup<B, P>, P> group = new SQLWhereGroup<SQLWhereGroup<B, P>, P>( this, parent );
-		group.seperator( currentSeperator );
+		group.seperator( currentSeparator );
 		elements.add( group );
 		or();
 		return group;
@@ -77,9 +79,9 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 	public SQLWhereGroup<B, P> or()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.OR;
+			currentSeparator = SQLWhereElementSep.OR;
 		return this;
 	}
 
@@ -171,7 +173,7 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 	@Override
 	public SQLWhereGroup<B, P> where( SQLWhereElement element )
 	{
-		element.seperator( currentSeperator );
+		element.seperator( currentSeparator );
 		elements.add( element );
 		and();
 

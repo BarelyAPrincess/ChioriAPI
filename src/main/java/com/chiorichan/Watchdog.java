@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan;
 
@@ -24,6 +26,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.chiorichan.zutils.ZSystem;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import sun.misc.Signal;
@@ -35,8 +38,6 @@ import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Ticks;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.Application;
-import com.chiorichan.util.Versioning;
 import com.google.common.collect.Lists;
 
 /**
@@ -96,7 +97,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 			@Override
 			public void run()
 			{
-				Log.get().info( "Watchdog: keepalive" );
+				Log.get().info( "Watchdog: keepAlive" );
 			}
 		} );
 	}
@@ -110,7 +111,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 
 		List<String> commands = Lists.newArrayList();
 
-		if ( Application.isWindows() )
+		if ( ZSystem.isWindows() )
 			commands.add( "javaw" );
 		else
 			commands.add( "java" );
@@ -148,7 +149,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 		watchdogThread.setPriority( Thread.MAX_PRIORITY );
 		watchdogThread.start();
 
-		if ( Application.isUnixLikeOS() )
+		if ( ZSystem.isUnixLikeOS() )
 		{
 			Signal.handle( new Signal( "TERM" ), new SignalHandler()
 			{
@@ -247,15 +248,15 @@ public class Watchdog implements Runnable, TaskRegistrar
 
 							System.out.println( line );
 
-							if ( line.contains( "Watchdog: keepalive" ) )
-								log( "Watchdog: stillalive" );
+							if ( line.contains( "Watchdog: keepAlive" ) )
+								log( "Watchdog: stillAlive" );
 						}
 						else
 							state = TERMINATE;
 					}
 					catch ( CancellationException e )
 					{
-						if ( Application.isUnixLikeOS() && getPid( process ) > 0 )
+						if ( ZSystem.isUnixLikeOS() && getPid( process ) > 0 )
 							Runtime.getRuntime().exec( "kill -SIGTERM " + getPid( process ) );
 						else
 							process.destroy();

@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.database;
 
@@ -43,16 +45,16 @@ public class SqlTableColumns implements Iterable<String>
 					return false;
 				default:
 					// Loader.getLogger().debug( "Column Class: " + className );
-					throw new IllegalArgumentException( "We could not instigate the proper column type " + className + " for column " + name + ", this might need to be inplemented." );
+					throw new IllegalArgumentException( "We could not instigate the proper column type " + className + " for column " + name + ", this might need to be implemented." );
 			}
 		}
 	}
 	
 	private final List<SqlColumn> columns = Lists.newArrayList();
 	
-	void add( ResultSetMetaData rsmd, int index ) throws SQLException
+	void add( ResultSetMetaData metaData, int index ) throws SQLException
 	{
-		columns.add( new SqlColumn( rsmd.getColumnName( index ), rsmd.getColumnType( index ), rsmd.getColumnLabel( index ), rsmd.getColumnClassName( index ) ) );
+		columns.add( new SqlColumn( metaData.getColumnName( index ), metaData.getColumnType( index ), metaData.getColumnLabel( index ), metaData.getColumnClassName( index ) ) );
 	}
 	
 	public int count()

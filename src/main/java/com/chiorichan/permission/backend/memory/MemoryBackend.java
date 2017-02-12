@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission.backend.memory;
 
@@ -106,7 +108,7 @@ public class MemoryBackend extends PermissionBackend
 	@Override
 	public void nodeCommit( Permission perm )
 	{
-		PermissionManager.getLogger().fine( "MemoryPermission nodes can not be saved. Sorry for the inconvinence. Might you consider changing permission backends. :(" );
+		PermissionManager.getLogger().fine( "MemoryPermission nodes can not be saved. Sorry for the inconvenience. Might you consider changing permission backends. :(" );
 	}
 
 	@Override

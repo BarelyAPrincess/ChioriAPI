@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
@@ -28,7 +30,7 @@ public abstract class PermissionBackend
 	/**
 	 * Array of backend aliases
 	 */
-	protected static Map<String, Class<? extends PermissionBackend>> registedAliases = new HashMap<String, Class<? extends PermissionBackend>>();
+	protected static Map<String, Class<? extends PermissionBackend>> registeredAliases = new HashMap<String, Class<? extends PermissionBackend>>();
 
 	// TODO Make it so node can be changed from one backend to another with ease and without restarting.
 
@@ -79,17 +81,17 @@ public abstract class PermissionBackend
 
 	/**
 	 * Return alias for specified backend class
-	 * If there is no such class registered the fullname of this class would
+	 * If there is no such class registered the name of this class would
 	 * be returned using backendClass.getName();
 	 *
 	 * @param backendClass
-	 * @return alias or class fullname when not found using backendClass.getName()
+	 * @return alias or class name when not found using backendClass.getName()
 	 */
 	public static String getBackendAlias( Class<? extends PermissionBackend> backendClass )
 	{
-		if ( registedAliases.containsValue( backendClass ) )
-			for ( String alias : registedAliases.keySet() )
-				if ( registedAliases.get( alias ).equals( backendClass ) )
+		if ( registeredAliases.containsValue( backendClass ) )
+			for ( String alias : registeredAliases.keySet() )
+				if ( registeredAliases.get( alias ).equals( backendClass ) )
 					return alias;
 
 		return backendClass.getName();
@@ -106,10 +108,10 @@ public abstract class PermissionBackend
 	@SuppressWarnings( "unchecked" )
 	public static Class<? extends PermissionBackend> getBackendClass( String alias ) throws ClassNotFoundException
 	{
-		if ( !registedAliases.containsKey( alias ) )
+		if ( !registeredAliases.containsKey( alias ) )
 			return ( Class<? extends PermissionBackend> ) Class.forName( alias );
 
-		return registedAliases.get( alias );
+		return registeredAliases.get( alias );
 	}
 
 	/**
@@ -121,8 +123,8 @@ public abstract class PermissionBackend
 	public static String getBackendClassName( String alias )
 	{
 
-		if ( registedAliases.containsKey( alias ) )
-			return registedAliases.get( alias ).getName();
+		if ( registeredAliases.containsKey( alias ) )
+			return registeredAliases.get( alias ).getName();
 
 		return alias;
 	}
@@ -179,7 +181,7 @@ public abstract class PermissionBackend
 		if ( !PermissionBackend.class.isAssignableFrom( backendClass ) )
 			throw new RuntimeException( "Provided class should be subclass of PermissionBackend" );
 
-		registedAliases.put( alias, backendClass );
+		registeredAliases.put( alias, backendClass );
 
 		PermissionManager.getLogger().fine( alias + " backend registered!" );
 	}

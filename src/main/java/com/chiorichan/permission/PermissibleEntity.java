@@ -3,17 +3,20 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
+import com.chiorichan.account.AccountType;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.event.PermissibleEntityEvent;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.services.ProviderChild;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.Validation;
+import com.chiorichan.zutils.ZObjects;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -70,7 +73,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	protected final void addPermission( ChildPermission perm, References refs )
 	{
-		Validation.notNull( perm );
+		ZObjects.notNull( perm );
 
 		if ( checkPermission( perm.getPermission() ).isAssigned() )
 		{
@@ -100,7 +103,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void addPermission( String node, Object val, References refs )
 	{
-		Permission perm = PermissionManager.instance().getNode( node );
+		Permission perm = PermissionManager.instance().createNode( node );
 		if ( perm == null )
 			throw new PermissionException( String.format( "The permission node %s is non-existent, you must create it first.", node ) );
 		addPermission( perm, val, refs );
@@ -146,16 +149,16 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public PermissionResult checkPermission( Permission perm, References refs )
 	{
-		Validation.notNull( perm );
-		Validation.notNull( refs );
+		ZObjects.notNull( perm );
+		ZObjects.notNull( refs );
 
-		/**
+		/*
 		 * We cache the results to reduce lag when a permission is checked multiple times over.
 		 */
 		PermissionResult result = cachedResults.get( perm.getNamespace() + "-" + refs.hash() );
 
 		if ( result != null )
-			if ( result.timecode > Timings.epoch() - 600 ) // 600 Seconds = 10 Minutes
+			if ( result.epoch > Timings.epoch() - 600 ) // 600 Seconds = 10 Minutes
 				return result;
 			else
 				cachedResults.remove( perm.getNamespace() + "-" + refs.hash() );
@@ -164,7 +167,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 		cachedResults.put( perm.getNamespace() + "-" + refs.hash(), result );
 
-		if ( isDebug() && !perm.getNamespace().equalsIgnoreCase( PermissionDefault.OP.getNameSpace() ) )
+		if ( isDebug() && !perm.getNamespace().equalsIgnoreCase( PermissionDefault.OP.getNamespace() ) )
 			PermissionManager.getLogger().info( EnumColor.YELLOW + "Entity `" + getId() + "` checked for permission `" + perm.getNamespace() + "`" + ( refs.isEmpty() ? "" : " with reference `" + refs.toString() + "`" ) + " with result `" + result + "`" );
 
 		return result;
@@ -208,7 +211,7 @@ public abstract class PermissibleEntity implements ProviderChild
 		recalculatePermissions();
 	}
 
-	public PermissibleGroup demote( PermissibleEntity demoter, String string )
+	public PermissibleGroup demote( PermissibleEntity demoter, String str )
 	{
 		return null;// TODO Auto-generated method stub
 	}
@@ -516,6 +519,11 @@ public abstract class PermissibleEntity implements ProviderChild
 		return timedGroups.containsKey( group );
 	}
 
+	public boolean isNoneAccount()
+	{
+		return AccountType.isNoneAccount( this );
+	}
+
 	public boolean isAdmin()
 	{
 		PermissionResult result = checkPermission( PermissionDefault.ADMIN.getNode() );
@@ -658,7 +666,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void removePermission( String permission, References refs )
 	{
-		removePermission( PermissionManager.instance().getNode( permission ), refs );
+		removePermission( PermissionManager.instance().createNode( permission ), refs );
 	}
 
 	/**
@@ -688,7 +696,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public void removeTimedPermission( String perm, References refs )
 	{
-		removeTimedPermission( PermissionManager.instance().getNode( perm ), refs );
+		removeTimedPermission( PermissionManager.instance().createNode( perm ), refs );
 	}
 
 	/**

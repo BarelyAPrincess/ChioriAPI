@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.configuration.serialization;
 
@@ -20,7 +22,7 @@ import java.lang.annotation.Target;
  * This value will be stored in the configuration so that the configuration deserialization can determine what type it is.
  * <p />
  * Using this annotation on any other class than a {@link ConfigurationSerializable} will have no effect.
- * 
+ *
  * @see ConfigurationSerialization#registerClass(Class, String)
  */
 @Retention( RetentionPolicy.RUNTIME )
@@ -30,7 +32,7 @@ public @interface SerializableAs
 	/**
 	 * This is the name your class will be stored and retrieved as.
 	 * <p />
-	 * This name MUST be unique. We recommend using names such as "MyPluginThing" instead of "Thing".
+	 * This name MUST be unique. We recommend using names such as "MyClassThing" instead of "Thing".
 	 *
 	 * @return Name to serialize the class as.
 	 */

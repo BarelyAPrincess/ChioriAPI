@@ -3,14 +3,16 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
 import java.util.Arrays;
 import java.util.List;
 
-import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.zutils.ZObjects;
 import com.google.common.collect.Lists;
 
 /**
@@ -27,7 +29,7 @@ public abstract class PermissionType
 		{
 			try
 			{
-				return ObjectFunc.castToBoolWithException( obj );
+				return ZObjects.castToBoolWithException( obj );
 			}
 			catch ( ClassCastException e )
 			{
@@ -84,7 +86,7 @@ public abstract class PermissionType
 		{
 			try
 			{
-				return ObjectFunc.castToBoolWithException( obj );
+				return ZObjects.castToBoolWithException( obj );
 			}
 			catch ( ClassCastException e )
 			{
@@ -139,7 +141,7 @@ public abstract class PermissionType
 		@Override
 		Double cast( Object obj ) throws ClassCastException
 		{
-			return ObjectFunc.castToDoubleWithException( obj );
+			return ZObjects.castToDoubleWithException( obj );
 		}
 		
 		@Override
@@ -189,7 +191,7 @@ public abstract class PermissionType
 		@Override
 		String cast( Object obj ) throws ClassCastException
 		{
-			return ObjectFunc.castToStringWithException( obj );
+			return ZObjects.castToStringWithException( obj );
 		}
 		
 		@Override
@@ -239,7 +241,7 @@ public abstract class PermissionType
 		@Override
 		Integer cast( Object obj )
 		{
-			return ObjectFunc.castToIntWithException( obj );
+			return ZObjects.castToIntWithException( obj );
 		}
 		
 		@Override
@@ -289,7 +291,7 @@ public abstract class PermissionType
 		@Override
 		String cast( Object obj ) throws ClassCastException
 		{
-			return ObjectFunc.castToStringWithException( obj );
+			return ZObjects.castToStringWithException( obj );
 		}
 		
 		@Override

@@ -3,9 +3,23 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.database;
+
+import com.chiorichan.datastore.DatastoreManager;
+import com.chiorichan.datastore.sql.SQLWrapper;
+import com.chiorichan.lang.EnumColor;
+import com.chiorichan.zutils.ZDB;
+import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.zutils.ZStrings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -22,18 +36,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.MissingFormatArgumentException;
 import java.util.UnknownFormatConversionException;
-
-import com.chiorichan.datastore.DatastoreManager;
-import com.chiorichan.datastore.sql.SQLWrapper;
-import com.chiorichan.lang.EnumColor;
-import com.chiorichan.util.DbFunc;
-import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.StringFunc;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 /**
  *
@@ -185,7 +187,7 @@ public class DatabaseEngineLegacy
 
 		for ( Entry<String, Object> e : source.entrySet() )
 		{
-			String val = ObjectFunc.castToString( e.getValue() );
+			String val = ZObjects.castToString( e.getValue() );
 			if ( val != null )
 				result.put( e.getKey(), val );
 		}
@@ -418,16 +420,16 @@ public class DatabaseEngineLegacy
 
 		for ( Entry<String, Object> e : where.entrySet() )
 		{
-			String key = DbFunc.escape( e.getKey() );
+			String key = ZDB.escape( e.getKey() );
 
 			String value;
 			try
 			{
-				value = DbFunc.escape( ( String ) e.getValue() );
+				value = ZDB.escape( ( String ) e.getValue() );
 			}
 			catch ( Exception ee )
 			{
-				value = ObjectFunc.castToString( e.getValue() );
+				value = ZObjects.castToString( e.getValue() );
 			}
 
 			if ( keys.isEmpty() )
@@ -651,7 +653,7 @@ public class DatabaseEngineLegacy
 				stmt.close();
 		}
 
-		log( "SQL Query: \"%s\" which affected %s row(s).", StringFunc.limitLength( query, 512 ), cnt );
+		log( "SQL Query: \"%s\" which affected %s row(s).", ZStrings.limitLength( query, 512 ), cnt );
 		return cnt;
 	}
 
@@ -685,7 +687,7 @@ public class DatabaseEngineLegacy
 			stmt.execute();
 			updated = stmt.getUpdateCount();
 
-			log( "SQL Query: \"%s\" which affected %s row(s).", StringFunc.limitLength( stmt.toString().substring( stmt.toString().indexOf( ": " ) + 2 ), 512 ), updated );
+			log( "SQL Query: \"%s\" which affected %s row(s).", ZStrings.limitLength( stmt.toString().substring( stmt.toString().indexOf( ": " ) + 2 ), 512 ), updated );
 		}
 		catch ( MySQLNonTransientConnectionException e )
 		{
@@ -714,7 +716,7 @@ public class DatabaseEngineLegacy
 	{
 		boolean state = wrapper.reconnect();
 		sql = wrapper.direct();
-		return wrapper.isConnected() ? state : false;
+		return wrapper.isConnected() && state;
 	}
 
 	public LinkedHashMap<String, Object> select( String table ) throws SQLException
@@ -786,15 +788,15 @@ public class DatabaseEngineLegacy
 		else
 			whr = "";
 
-		Map<String, String> options = new LinkedHashMap<String, String>();
+		Map<String, String> options = new LinkedHashMap<>();
 
 		if ( options0 != null )
 			for ( Entry<String, Object> o : options0.entrySet() )
-				options.put( o.getKey().toLowerCase(), ObjectFunc.castToString( o.getValue() ) );
+				options.put( o.getKey().toLowerCase(), ZObjects.castToString( o.getValue() ) );
 
-		if ( !options.containsKey( "limit" ) || ! ( options.get( "limit" ) instanceof String ) )
+		if ( !options.containsKey( "limit" ) || !( options.get( "limit" ) instanceof String ) )
 			options.put( "limit", "0" );
-		if ( !options.containsKey( "offset" ) || ! ( options.get( "offset" ) instanceof String ) )
+		if ( !options.containsKey( "offset" ) || !( options.get( "offset" ) instanceof String ) )
 			options.put( "offset", "0" );
 		if ( !options.containsKey( "orderby" ) )
 			options.put( "orderby", "" );
@@ -818,23 +820,24 @@ public class DatabaseEngineLegacy
 
 		try
 		{
+			boolean debug = ZObjects.isTrue( options.get( "debug" ) );
 			ResultSet rs = query( query );
 
 			if ( rs == null )
 			{
-				log( StringFunc.isTrue( options.get( "debug" ) ), "SELECT query \"%s\" which returned an error.", query );
+				log( debug, "SELECT query \"%s\" which returned an error.", query );
 				return null;
 			}
 
 			if ( getRowCount( rs ) < 1 )
 			{
-				log( StringFunc.isTrue( options.get( "debug" ) ), "SELECT query \"%s\" which returned no results.", query );
-				return new LinkedHashMap<String, Object>();
+				log( debug, "SELECT query \"%s\" which returned no results.", query );
+				return new LinkedHashMap<>();
 			}
 
 			LinkedHashMap<String, Object> result = convert( rs );
 
-			if ( StringFunc.isTrue( options.get( "debug" ) ) )
+			if ( debug )
 				DatastoreManager.getLogger().info( "Making SELECT query \"" + query + "\" which returned " + getRowCount( rs ) + " row(s)." );
 			else
 				log( "Making SELECT query \"" + query + "\" which returned " + getRowCount( rs ) + " row(s)." );
@@ -858,7 +861,7 @@ public class DatabaseEngineLegacy
 		if ( sql == null )
 			throw new SQLException( "The SQL connection is closed or was never opened." );
 
-		if ( ObjectFunc.isNull( keys ) || ObjectFunc.isNull( values ) )
+		if ( ZObjects.isNull( keys ) || ZObjects.isNull( values ) )
 		{
 			DatastoreManager.getLogger().warning( "[DB ERROR] Either keys array or values array equals null!\n" );
 			return null;
@@ -984,7 +987,7 @@ public class DatabaseEngineLegacy
 
 	public boolean update( String table, List<? extends Object> keys, List<? extends Object> list, List<? extends Object> keysW, List<? extends Object> valuesW )
 	{
-		if ( ObjectFunc.isNull( keys ) || ObjectFunc.isNull( list ) )
+		if ( ZObjects.isNull( keys ) || ZObjects.isNull( list ) )
 		{
 			System.err.print( "[DB ERROR] Either keys array or values array equals null!\n" );
 			return false;
@@ -1021,7 +1024,7 @@ public class DatabaseEngineLegacy
 			prefix = ", ";
 		}
 
-		if ( !ObjectFunc.isNull( keysW ) && !ObjectFunc.isNull( valuesW ) && keysW.size() > 0 && valuesW.size() > 0 )
+		if ( !ZObjects.isNull( keysW ) && !ZObjects.isNull( valuesW ) && keysW.size() > 0 && valuesW.size() > 0 )
 		{
 			x = 0;
 			prefix = "";

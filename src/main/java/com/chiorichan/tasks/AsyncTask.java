@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.tasks;
 
@@ -42,16 +44,19 @@ class AsyncTask extends Task
 			}
 			workers.add( new Worker()
 			{
+				@Override
 				public Thread getThread()
 				{
 					return thread;
 				}
 				
+				@Override
 				public int getTaskId()
 				{
 					return AsyncTask.this.getTaskId();
 				}
 				
+				@Override
 				public TaskRegistrar getOwner()
 				{
 					return AsyncTask.this.getOwner();
@@ -89,15 +94,7 @@ class AsyncTask extends Task
 					if ( !removed )
 					{
 						throw new IllegalStateException( String.format( "Unable to remove worker %s on task %s for %s", thread.getName(), getTaskId(), getOwner().getName() ), thrown ); // We
-						// don't
-						// want
-						// to
-						// lose
-						// the
-						// original
-						// exception,
-						// if
-						// any
+						// don't want to lose the original exception, if any
 					}
 				}
 				finally
@@ -118,6 +115,7 @@ class AsyncTask extends Task
 		return workers;
 	}
 	
+	@Override
 	boolean cancel0()
 	{
 		synchronized ( workers )

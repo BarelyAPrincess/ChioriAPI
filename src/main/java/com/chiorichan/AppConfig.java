@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan;
 
@@ -11,7 +13,8 @@ import com.chiorichan.configuration.Configuration;
 import com.chiorichan.configuration.ConfigurationOptions;
 import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.configuration.InvalidConfigurationException;
-import com.chiorichan.configuration.file.YamlConfiguration;
+import com.chiorichan.configuration.OnConfigurationListener;
+import com.chiorichan.configuration.types.yaml.YamlConfiguration;
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.datastore.sql.bases.H2SQLDatastore;
 import com.chiorichan.datastore.sql.bases.MySQLDatastore;
@@ -24,20 +27,25 @@ import com.chiorichan.logger.Log;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Ticks;
-import com.chiorichan.util.Application;
-import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Validation;
+import com.chiorichan.zutils.ZIO;
+import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.zutils.ZSystem;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class AppConfig implements Configuration, TaskRegistrar
 {
@@ -49,12 +57,13 @@ public class AppConfig implements Configuration, TaskRegistrar
 	{
 		try
 		{
-			lockFile = AppLoader.getLockFile();
+			lockFile = getLockFile();
+			// lockFile = AppLoader.getLockFile();
 
 			// TODO check that the enclosed lock PID number is currently running
 			if ( lockFile.exists() )
 			{
-				String pidraw = FileFunc.readFileToString( lockFile );
+				String pidraw = ZIO.readFileToString( lockFile );
 
 				if ( pidraw != null && pidraw.length() > 0 )
 				{
@@ -62,7 +71,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 					try
 					{
-						if ( pid != Integer.parseInt( Application.getProcessID() ) && Application.isPIDRunning( pid ) )
+						if ( pid != Integer.parseInt( ZSystem.getProcessID() ) && ZSystem.isPIDRunning( pid ) )
 							throw new StartupException( "We have detected the server jar is already running. Please terminate PID " + pid + " or disregard this notice and try again." );
 					}
 					catch ( IOException e )
@@ -72,7 +81,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 				}
 			}
 
-			FileFunc.writeStringToFile( lockFile, Application.getProcessID() );
+			ZIO.writeStringToFile( lockFile, ZSystem.getProcessID() );
 			lockFile.deleteOnExit();
 		}
 		catch ( IOException e )
@@ -85,10 +94,43 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public static AppConfig get()
 	{
-		if ( ObjectFunc.noLoopDetected( AppConfig.class, "loadConfig" ) && !instance.isConfigLoaded() )
+		if ( ZObjects.stackTraceAntiLoop( AppConfig.class, "loadConfig" ) && !instance.isConfigLoaded() )
 			instance.loadConfig();
 		return instance;
 	}
+
+	public static File getLockFile()
+	{
+		if ( getApplicationJar() == null )
+			return new File( "pid" );
+		return new File( getApplicationJar().getParentFile(), getApplicationJar().getName() + ".pid" );
+	}
+
+		/*
+	protected static File getLockFile()
+	{
+		File lockFile;
+		if ( Application.isUnixLikeOS() )
+		{
+			lockFile = options != null && options.has( "pid" ) ? ( File ) options.valueOf( "pid" ) : new File( "/var/run/chiori/chiori.pid" );
+			File runDir = lockFile.getParentFile();
+
+			if ( !runDir.exists() )
+			{
+				if ( runDir.getParentFile().canWrite() && !runDir.mkdirs() )
+					throw new StartupException( String.format( "Failed to create the lock file parent directory at [%s].", runDir.getAbsolutePath() ) );
+				else
+					throw new StartupException( String.format( "The lock directory [%s] was non-existent.", lockFile.getAbsolutePath() ) );
+			}
+		}
+		else
+		{
+			lockFile = new File( "chiori.pid" );
+		}
+
+		return lockFile;
+	}
+	*/
 
 	/**
 	 * @return The server jar file
@@ -143,8 +185,8 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public void clearCache( File path, long keepHistory )
 	{
-		Validation.notNull( path );
-		Validation.notNull( keepHistory );
+		ZObjects.notNull( path );
+		ZObjects.notNull( keepHistory );
 
 		if ( !path.exists() || !path.isDirectory() )
 			throw new IllegalArgumentException( "Path must exist and be a directory." );
@@ -181,6 +223,12 @@ public class AppConfig implements Configuration, TaskRegistrar
 	{
 		yamlCheck();
 		return yaml.createSection( path );
+	}
+
+	@Override
+	public ConfigurationSection createSection( String path, Collection<?> list )
+	{
+		return null;
 	}
 
 	@Override
@@ -325,7 +373,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 			return appDirectory;
 		if ( getApplicationJar() != null ) // Are we running from java jar file
 			return getApplicationJar().getParentFile();
-		return new File( "" ); // Return current working directory
+		return new File( "" ).getAbsoluteFile(); // Return current working directory
 	}
 
 	public File getDirectory( String configKey, String defPath )
@@ -354,21 +402,21 @@ public class AppConfig implements Configuration, TaskRegistrar
 					dir = defPath;
 				}
 
-				File file = FileFunc.isAbsolute( dir ) ? new File( dir ) : new File( getDirectory().getAbsolutePath(), dir );
+				File file = ZIO.isAbsolute( dir ) ? new File( dir ) : new File( getDirectory().getAbsolutePath(), dir );
 
 				if ( directoryCheck )
-					if ( !FileFunc.setDirectoryAccess( file ) )
-						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
+					if ( !ZIO.setDirectoryAccess( file ) )
+						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
 
 				directories.put( configKey, file );
 			}
 			catch ( NoClassDefFoundError e )
 			{
-				File file = FileFunc.isAbsolute( defPath ) ? new File( defPath ) : new File( getDirectory(), defPath );
+				File file = ZIO.isAbsolute( defPath ) ? new File( defPath ) : new File( getDirectory(), defPath );
 
 				if ( directoryCheck )
-					if ( !FileFunc.setDirectoryAccess( file ) )
-						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
+					if ( !ZIO.setDirectoryAccess( file ) )
+						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
 
 				return file;
 
@@ -386,8 +434,8 @@ public class AppConfig implements Configuration, TaskRegistrar
 	public File getDirectoryCache( String subdir )
 	{
 		File file = new File( getDirectoryCache(), subdir );
-		if ( !FileFunc.setDirectoryAccess( file ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( file ) + "\"!" );
+		if ( !ZIO.setDirectoryAccess( file ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( file ) + "\"!" );
 		return file;
 	}
 
@@ -584,6 +632,96 @@ public class AppConfig implements Configuration, TaskRegistrar
 		return yaml.has( path );
 	}
 
+	@Override
+	public List<String> getChanges()
+	{
+		return yaml.getChanges();
+	}
+
+	@Override
+	public List<String> getChanges( boolean deep )
+	{
+		return yaml.getChanges( deep );
+	}
+
+	@Override
+	public boolean hasChanges()
+	{
+		return yaml.hasChanges();
+	}
+
+	@Override
+	public boolean hasChanges( boolean deep )
+	{
+		return yaml.hasChanges( deep );
+	}
+
+	@Override
+	public void resolveChanges()
+	{
+		yaml.resolveChanges();
+	}
+
+	@Override
+	public void resolveChanges( boolean deep )
+	{
+		yaml.resolveChanges( deep );
+	}
+
+	@Override
+	public OnConfigurationListener getForwardingListener()
+	{
+		return yaml.getForwardingListener();
+	}
+
+	@Override
+	public void addListener( OnConfigurationListener onConfigurationListener )
+	{
+		yaml.addListener( onConfigurationListener );
+	}
+
+	@Override
+	public void removeListener( OnConfigurationListener onConfigurationListener )
+	{
+		yaml.removeListener( onConfigurationListener );
+	}
+
+	@Override
+	public List<ConfigurationSection> getConfigurationSections()
+	{
+		return yaml.getConfigurationSections();
+	}
+
+	@Override
+	public <T> List<T> getObjectList( String path, Class<T> cls )
+	{
+		return yaml.getObjectList( path, cls );
+	}
+
+	@Override
+	public <T> T getObject( String path, Class<T> cls )
+	{
+		return yaml.getObject( path, cls );
+	}
+
+	@Override
+	public Map<String, Object> getChildren()
+	{
+		return yaml.getChildren();
+	}
+
+	@Override
+	public <T> List<T> asObjectList( Class<T> cls )
+	{
+		return yaml.asObjectList( cls );
+	}
+
+	@Override
+	public <T> T asObject( Class<T> cls )
+	{
+		return yaml.asObject( cls );
+	}
+
 	public void initDatabase()
 	{
 		switch ( getString( "server.database.type", "sqlite" ).toLowerCase() )
@@ -706,7 +844,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 			yaml.setDefaults( YamlConfiguration.loadConfiguration( getClass().getClassLoader().getResourceAsStream( "com/chiorichan/config.yaml" ) ) );
 			directories.clear();
 
-			Log.get().info( String.format( "Loaded application configuration from %s", FileFunc.relPath( configFile ) ) );
+			Log.get().info( String.format( "Loaded application configuration from %s", ZIO.relPath( configFile ) ) );
 		}
 		catch ( NoClassDefFoundError e )
 		{
@@ -769,6 +907,31 @@ public class AppConfig implements Configuration, TaskRegistrar
 	}
 
 	@Override
+	public void set( String path, Object value, boolean convert )
+	{
+		yamlCheck();
+		yaml.set( path, value, convert );
+	}
+
+	@Override
+	public void merge( ConfigurationSection values )
+	{
+		yaml.merge( values );
+	}
+
+	@Override
+	public void set( ConfigurationSection values )
+	{
+		yaml.set( values );
+	}
+
+	@Override
+	public void set( Map<String, Object> values )
+	{
+		yaml.set( values );
+	}
+
+	@Override
 	public void setDefaults( Configuration defaults )
 	{
 		yamlCheck();
@@ -795,5 +958,42 @@ public class AppConfig implements Configuration, TaskRegistrar
 	{
 		if ( yaml == null )
 			throw new IllegalStateException( "The YAML configuration is not loaded." );
+	}
+
+	/**
+	 * Loads a resource file (and an optional localFile) to a stream.
+	 * The localFile can override resource lines with the presence of "-" (no spaces) before the line.
+	 * Lines that start with hash "#" will be ignored.
+	 *
+	 * @param resourcePath The ResourcePath
+	 * @param localFile    The Local Filename
+	 * @return Stream<String>
+	 */
+	public Stream<String> initializeResourceStream( String resourcePath, String localFile ) throws IOException
+	{
+		Stream<String> lines = new BufferedReader( new InputStreamReader( getClass().getClassLoader().getResourceAsStream( resourcePath ) ) ).lines();
+
+		if ( !ZObjects.isEmpty( localFile ) )
+		{
+			File local = new File( getDirectory(), localFile );
+			if ( local.exists() && local.isFile() )
+				lines = Stream.concat( lines, Files.lines( local.toPath() ) );
+		}
+
+		List<String> validated = new ArrayList<>();
+
+		lines.forEach( s ->
+		{
+			if ( s.startsWith( "-" ) )
+				validated.remove( s.substring( 1 ) );
+			else if ( s.startsWith( "#" ) )
+			{
+				// Ignore Line
+			}
+			else
+				validated.add( s );
+		} );
+
+		return validated.stream();
 	}
 }

@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.tasks;
 
@@ -318,7 +320,7 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Returns a list of all active workers.
 	 * <p>
-	 * This list contains asynch tasks that are being executed by separate threads.
+	 * This list contains async tasks that are being executed by separate threads.
 	 *
 	 * @return Active workers
 	 */

@@ -46,11 +46,11 @@ public final class Strings
 	{
 		StringBuilder buffer = new StringBuilder();
 
-		for ( Iterator<String> iter = pieces.iterator(); iter.hasNext(); )
+		for ( Iterator<String> iterator = pieces.iterator(); iterator.hasNext(); )
 		{
-			buffer.append( iter.next() );
+			buffer.append( iterator.next() );
 
-			if ( iter.hasNext() )
+			if ( iterator.hasNext() )
 				buffer.append( separator );
 		}
 

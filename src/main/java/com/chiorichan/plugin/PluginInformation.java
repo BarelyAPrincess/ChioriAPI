@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.plugin;
 
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.chiorichan.configuration.ConfigurationSection;
-import com.chiorichan.configuration.file.YamlConfiguration;
+import com.chiorichan.configuration.types.yaml.YamlConfiguration;
 import com.chiorichan.lang.PluginInformationException;
 import com.chiorichan.lang.RunLevel;
 import com.chiorichan.libraries.MavenReference;
@@ -179,7 +181,7 @@ public class PluginInformation
 	 * <ul>
 	 * <li>Gives credit to the developer.
 	 * <li>Used in some server error messages to provide helpful feedback on who to contact when an error occurs.
-	 * <li>A bukkit.org forum handle or email address is recommended.
+	 * <li>A email address is recommended.
 	 * <li>Is displayed when a user types <code>/version PluginName</code>
 	 * <li><code>authors</code> must be in <a href="http://en.wikipedia.org/wiki/YAML#Lists">YAML list format</a>.
 	 * </ul>

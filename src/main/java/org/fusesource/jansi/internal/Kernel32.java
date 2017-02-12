@@ -1,7 +1,7 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Rights Reserved
  */
@@ -61,6 +61,7 @@ public class Kernel32
 		@JniField( accessor = "Char.UnicodeChar" )
 		public char unicodeChar;
 	}
+
 	/**
 	 * http://msdn.microsoft.com/en-us/library/ms682093%28VS.85%29.aspx
 	 */
@@ -186,6 +187,7 @@ public class Kernel32
 		public static final native void memmove( @JniArg( cast = "void *", flags = {NO_IN, CRITICAL} ) INPUT_RECORD dest, @JniArg( cast = "const void *", flags = {NO_OUT, CRITICAL} ) long src, @JniArg( cast = "size_t" ) long size );
 
 	}
+
 	/**
 	 * see: http://msdn.microsoft.com/en-us/library/ms684166(v=VS.85).aspx
 	 */
@@ -220,6 +222,7 @@ public class Kernel32
 		public static int RIGHT_CTRL_PRESSED;
 		@JniField( flags = {CONSTANT}, accessor = "SHIFT_PRESSED" )
 		public static int SHIFT_PRESSED;
+
 		@JniMethod( flags = {CONSTANT_INITIALIZER} )
 		private static final native void init();
 
@@ -242,6 +245,7 @@ public class Kernel32
 			return "KEY_EVENT_RECORD{" + "keyDown=" + keyDown + ", repeatCount=" + repeatCount + ", keyCode=" + keyCode + ", scanCode=" + scanCode + ", uchar=" + uchar + ", controlKeyState=" + controlKeyState + '}';
 		}
 	}
+
 	/**
 	 * http://msdn.microsoft.com/en-us/library/ms686311%28VS.85%29.aspx
 	 */
@@ -279,12 +283,15 @@ public class Kernel32
 			return ( short ) ( right - left );
 		}
 	}
+
 	private static final Library LIBRARY = new Library( "jansi", Kernel32.class );
+
 	static
 	{
 		LIBRARY.load();
 		init();
 	}
+
 	@JniField( flags = {CONSTANT} )
 	public static short FOREGROUND_BLUE;
 	@JniField( flags = {CONSTANT} )
@@ -650,9 +657,7 @@ public class Kernel32
 		}
 	}
 
-	/**
-	 * see: http://msdn.microsoft.com/en-us/library/ms684239(v=VS.85).aspx
-	 */
+	/* see: http://msdn.microsoft.com/en-us/library/ms684239(v=VS.85).aspx */
 	/*
 	 * @JniClass(flags={ClassFlag.STRUCT,TYPEDEF}, conditional="defined(_WIN32) || defined(_WIN64)")
 	 * public static class MOUSE_EVENT_RECORD {
@@ -745,9 +750,7 @@ public class Kernel32
 	 * }
 	 */
 
-	/**
-	 * see: http://msdn.microsoft.com/en-us/library/ms687093(v=VS.85).aspx
-	 */
+	/* see: http://msdn.microsoft.com/en-us/library/ms687093(v=VS.85).aspx */
 	/*
 	 * @JniClass(flags={ClassFlag.STRUCT,TYPEDEF}, conditional="defined(_WIN32) || defined(_WIN64)")
 	 * public static class WINDOW_BUFFER_SIZE_RECORD {
@@ -772,9 +775,7 @@ public class Kernel32
 	 * }
 	 */
 
-	/**
-	 * see: http://msdn.microsoft.com/en-us/library/ms683149(v=VS.85).aspx
-	 */
+	/* see: http://msdn.microsoft.com/en-us/library/ms683149(v=VS.85).aspx */
 	/*
 	 * @JniClass(flags={ClassFlag.STRUCT,TYPEDEF}, conditional="defined(_WIN32) || defined(_WIN64)")
 	 * public static class FOCUS_EVENT_RECORD {
@@ -794,9 +795,7 @@ public class Kernel32
 	 * }
 	 */
 
-	/**
-	 * see: http://msdn.microsoft.com/en-us/library/ms684213(v=VS.85).aspx
-	 */
+	/* see: http://msdn.microsoft.com/en-us/library/ms684213(v=VS.85).aspx */
 	/*
 	 * @JniClass(flags={ClassFlag.STRUCT,TYPEDEF}, conditional="defined(_WIN32) || defined(_WIN64)")
 	 * public static class MENU_EVENT_RECORD {

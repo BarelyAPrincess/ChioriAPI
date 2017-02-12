@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.bases;
 
@@ -16,7 +18,7 @@ import com.chiorichan.AppConfig;
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.datastore.sql.SQLWrapper;
 import com.chiorichan.lang.StartupException;
-import com.chiorichan.util.FileFunc;
+import com.chiorichan.zutils.ZIO;
 
 /**
  *
@@ -36,7 +38,7 @@ public class SQLiteDatastore extends SQLDatastore
 			throw new StartupException( "We could not locate the 'org.sqlite.JDBC' library, be sure to have this library in your build path." );
 		}
 
-		File sqliteDb = FileFunc.isAbsolute( filename ) ? new File( filename ) : new File( AppConfig.get().getDirectory().getAbsolutePath(), filename );
+		File sqliteDb = ZIO.isAbsolute( filename ) ? new File( filename ) : new File( AppConfig.get().getDirectory().getAbsolutePath(), filename );
 
 		if ( !sqliteDb.exists() )
 		{
@@ -65,6 +67,6 @@ public class SQLiteDatastore extends SQLDatastore
 				throw new StartupException( e );
 		}
 
-		DatastoreManager.getLogger().info( "We succesully connected to the sqLite database with connection string '" + connection + "'" );
+		DatastoreManager.getLogger().info( "We successfully connected to the sqLite database with connection string '" + connection + "'" );
 	}
 }

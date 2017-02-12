@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.plugin;
 
@@ -32,7 +34,7 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ServiceManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
-import com.chiorichan.util.FileFunc;
+import com.chiorichan.zutils.ZIO;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.Validate;
 
@@ -92,7 +94,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 			return;
 
 		File updateFile = new File( AppConfig.get().getDirectoryUpdates(), file.getName() );
-		if ( updateFile.isFile() && FileFunc.copy( updateFile, file ) )
+		if ( updateFile.isFile() && ZIO.copy( updateFile, file ) )
 			updateFile.delete();
 	}
 
@@ -323,7 +325,6 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 * File must be valid according to the current enabled Plugin interfaces
 	 * <p>
 	 *
-	 * @param file File containing the plugin to load
 	 * @param file File containing the plugin to load
 	 * @return The Plugin instance
 	 * @throws PluginInvalidException     Thrown when the specified file is not a valid plugin
@@ -640,7 +641,6 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 * Registers the specified plugin loader
 	 * <p>
 	 *
-	 * @param loader Class name of the PluginLoader to register
 	 * @param loader Class name of the PluginLoader to register
 	 * @throws IllegalArgumentException Thrown when the given Class is not a valid PluginLoader
 	 */

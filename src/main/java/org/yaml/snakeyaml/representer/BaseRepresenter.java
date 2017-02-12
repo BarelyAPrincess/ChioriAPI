@@ -43,6 +43,7 @@ public abstract class BaseRepresenter {
     protected final Map<Object, Node> representedObjects = new IdentityHashMap<Object, Node>() {
         private static final long serialVersionUID = -5576159264232131854L;
 
+        @Override
         public Node put(Object key, Node value) {
             return super.put(key, new AnchorNode(value));
         }

@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.bases;
 
@@ -34,7 +36,7 @@ public class SQLDatastore extends Datastore
 	public SQLQueryDelete delete( String table ) throws SQLException
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 
 		return new SQLTable( sql, table ).delete();
 	}
@@ -58,11 +60,11 @@ public class SQLDatastore extends Datastore
 	public DatabaseEngineLegacy getLegacy()
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 		return new DatabaseEngineLegacy( sql );
 	}
 
-	public boolean initalized()
+	public boolean initialized()
 	{
 		return sql != null;
 	}
@@ -70,7 +72,7 @@ public class SQLDatastore extends Datastore
 	public SQLQueryInsert insert( String table ) throws SQLException
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 
 		return new SQLTable( sql, table ).insert();
 	}
@@ -83,7 +85,7 @@ public class SQLDatastore extends Datastore
 	public SQLRawQuery query( String query )
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 
 		return new SQLRawQuery( sql, query );
 	}
@@ -91,7 +93,7 @@ public class SQLDatastore extends Datastore
 	public SQLRawQuery query( String query, Collection<Object> objs )
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 
 		return new SQLRawQuery( sql, query, objs );
 	}
@@ -107,7 +109,7 @@ public class SQLDatastore extends Datastore
 	public SQLQuerySelect select( String table ) throws SQLException
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 
 		return new SQLTable( sql, table ).select();
 	}
@@ -157,7 +159,7 @@ public class SQLDatastore extends Datastore
 	public SQLTable table( String table ) throws SQLException
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 
 		return new SQLTable( sql, table );
 	}
@@ -165,7 +167,7 @@ public class SQLDatastore extends Datastore
 	public SQLQueryUpdate update( String table ) throws SQLException
 	{
 		if ( sql == null )
-			throw new IllegalStateException( "The SQL instance is not initalized!" );
+			throw new IllegalStateException( "The SQL instance is not initialized!" );
 
 		return new SQLTable( sql, table ).update();
 	}

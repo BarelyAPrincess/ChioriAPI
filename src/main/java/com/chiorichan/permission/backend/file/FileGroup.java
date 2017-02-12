@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission.backend.file;
 
@@ -20,7 +22,7 @@ import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.permission.PermissionType;
 import com.chiorichan.permission.PermissionValue;
 import com.chiorichan.permission.References;
-import com.chiorichan.util.PermissionNamespace;
+import com.chiorichan.helpers.PermissionNamespace;
 
 public class FileGroup extends PermissibleGroup
 {
@@ -66,7 +68,7 @@ public class FileGroup extends PermissibleGroup
 					continue;
 				}
 
-				Collection<Permission> perms = ns.containsRegex() ? PermissionManager.instance().getNodes( ns ) : Arrays.asList( new Permission[] {ns.createPermission()} );
+				Collection<Permission> perms = ns.containsRegex() ? PermissionManager.instance().getNodes( ns ) : Arrays.asList( ns.createPermission() );
 
 				for ( Permission perm : perms )
 				{

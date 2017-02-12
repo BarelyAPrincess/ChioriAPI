@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.types;
 
@@ -34,8 +36,8 @@ import com.chiorichan.event.EventHandler;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.DbFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.zutils.ZDB;
+import com.chiorichan.Versioning;
 
 /**
  * Handles Accounts that are loaded from SQL
@@ -176,7 +178,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 	}
 
 	@Override
-	public void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... creds ) throws AccountException
+	public void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... credentials ) throws AccountException
 	{
 		if ( meta.getInteger( "numloginfail" ) > 5 )
 			if ( meta.getInteger( "lastloginfail" ) > Timings.epoch() - 1800 )
@@ -189,7 +191,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 	public AccountContext readAccount( String acctId ) throws AccountException, SQLException
 	{
 		if ( acctId == null || acctId.isEmpty() )
-			throw new AccountException( AccountDescriptiveReason.EMPTY_ACCTID, acctId );
+			throw new AccountException( AccountDescriptiveReason.EMPTY_ID, acctId );
 
 		Set<String> accountFieldSet = new HashSet<String>( accountFields );
 		Set<String> accountColumnSet = new HashSet<String>( sql.table( table ).columnNames() );
@@ -267,7 +269,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 			{
 				String key = e.getKey();
 
-				String type = DbFunc.objectToSqlType( e.getValue() );
+				String type = ZDB.objectToSqlType( e.getValue() );
 				if ( !columns.contains( key ) )
 					try
 					{
@@ -283,7 +285,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 
 			for ( SQLTableColumns.SQLColumn col : columns.columnsRequired() )
 				if ( !metaData.containsKey( col.name() ) )
-					metaData.put( col.name(), DbFunc.sqlTypeToObject( col.type() ) );
+					metaData.put( col.name(), ZDB.sqlTypeToObject( col.type() ) );
 
 
 			SQLQuerySelect select = table.select().where( "acctId" ).matches( context.getAcctId() ).limit( 1 ).execute();

@@ -131,13 +131,9 @@ public abstract class Node {
             if (!tag.isSecondary() && isResolved() && !Object.class.equals(type)
                     && !tag.equals(Tag.NULL)) {
                 return true;
-            } else if (tag.isCompatible(getType())) {
-                // the tag is compatible with the runtime class
-                // the tag will be ignored
-                return true;
-            } else {
-                return false;
-            }
+            } else // the tag is compatible with the runtime class
+	            // the tag will be ignored
+	            return tag.isCompatible( getType() );
         }
         return useClassConstructor.booleanValue();
     }

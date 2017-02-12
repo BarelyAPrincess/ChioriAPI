@@ -3,19 +3,20 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import com.chiorichan.configuration.file.YamlConfiguration;
+import com.chiorichan.configuration.types.yaml.YamlConfiguration;
+import com.chiorichan.zutils.ZIO;
 import com.chiorichan.libraries.Libraries;
 import com.chiorichan.libraries.MavenReference;
 import com.chiorichan.logger.Log;
-import com.chiorichan.util.Versioning;
+
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * Provides a wrapper that downloads and maintains application version and libraries.
@@ -73,14 +74,7 @@ public class DeployWrapper
 		}
 		finally
 		{
-			try
-			{
-				if ( is != null )
-					is.close();
-			}
-			catch ( IOException e )
-			{
-			}
+			ZIO.closeQuietly( is );
 		}
 	}
 

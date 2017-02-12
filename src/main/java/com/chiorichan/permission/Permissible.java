@@ -3,11 +3,14 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
 import com.chiorichan.account.AccountType;
+import com.chiorichan.logger.Log;
 import com.chiorichan.permission.lang.PermissionDeniedException;
 import com.chiorichan.permission.lang.PermissionDeniedException.PermissionDeniedReason;
 
@@ -80,13 +83,13 @@ public abstract class Permissible
 	public final PermissionResult checkPermission( String perm )
 	{
 		perm = PermissionManager.parseNode( perm );
-		return checkPermission( PermissionManager.instance().getNode( perm ) );
+		return checkPermission( PermissionManager.instance().createNode( perm ) );
 	}
 
 	public final PermissionResult checkPermission( String perm, References refs )
 	{
 		perm = PermissionManager.parseNode( perm );
-		return checkPermission( PermissionManager.instance().getNode( perm ), refs );
+		return checkPermission( PermissionManager.instance().createNode( perm ), refs );
 	}
 
 	public final PermissionResult checkPermission( Permission perm, References refs )
@@ -139,7 +142,7 @@ public abstract class Permissible
 		if ( result.getPermission() != PermissionDefault.EVERYBODY.getNode() )
 		{
 			if ( result.getEntity() == null || AccountType.isNoneAccount( result.getEntity() ) )
-				throw new PermissionDeniedException( PermissionDeniedReason.LOGIN_PAGE.setPermission( req ) );
+				throw new PermissionDeniedException( PermissionDeniedReason.LOGIN_PAGE );
 
 			if ( !result.isTrue() )
 			{
@@ -155,6 +158,11 @@ public abstract class Permissible
 		}
 
 		return result;
+	}
+
+	public boolean hasLogin()
+	{
+		return !getPermissibleEntity().isNoneAccount();
 	}
 
 	/**

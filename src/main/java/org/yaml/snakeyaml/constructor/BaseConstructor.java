@@ -348,7 +348,7 @@ public abstract class BaseConstructor {
     }
 
     protected void constructMapping2ndStep(MappingNode node, Map<Object, Object> mapping) {
-        List<NodeTuple> nodeValue = (List<NodeTuple>) node.getValue();
+        List<NodeTuple> nodeValue = node.getValue();
         for (NodeTuple tuple : nodeValue) {
             Node keyNode = tuple.getKeyNode();
             Node valueNode = tuple.getValueNode();
@@ -380,7 +380,7 @@ public abstract class BaseConstructor {
     }
 
     protected void constructSet2ndStep(MappingNode node, Set<Object> set) {
-        List<NodeTuple> nodeValue = (List<NodeTuple>) node.getValue();
+        List<NodeTuple> nodeValue = node.getValue();
         for (NodeTuple tuple : nodeValue) {
             Node keyNode = tuple.getKeyNode();
             Object key = constructObject(keyNode);

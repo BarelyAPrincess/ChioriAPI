@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
@@ -11,7 +13,7 @@ import com.chiorichan.account.AccountType;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.permission.lang.PermissionValueException;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.zutils.ZObjects;
 
 /**
  * Holds the union between {@link Permission} and {@link PermissibleEntity}<br>
@@ -26,7 +28,7 @@ public class PermissionResult
 	private final Permission perm;
 	private References refs;
 
-	protected int timecode = Timings.epoch();
+	protected int epoch = Timings.epoch();
 
 	PermissionResult( PermissibleEntity entity, Permission perm )
 	{
@@ -35,8 +37,8 @@ public class PermissionResult
 
 	PermissionResult( PermissibleEntity entity, Permission perm, References refs )
 	{
-		assert entity != null;
-		assert perm != null;
+		ZObjects.notNull( entity );
+		ZObjects.notNull( perm );
 
 		this.entity = entity;
 		this.perm = perm;
@@ -85,7 +87,7 @@ public class PermissionResult
 
 	public int getInt()
 	{
-		return ObjectFunc.castToInt( getValue().getValue() );
+		return ZObjects.castToInt( getValue().getValue() );
 	}
 
 	public Permission getPermission()
@@ -100,7 +102,7 @@ public class PermissionResult
 
 	public String getString()
 	{
-		return ObjectFunc.castToString( getValue().getValue() );
+		return ZObjects.castToString( getValue().getValue() );
 	}
 
 	public PermissionValue getValue()
@@ -238,13 +240,13 @@ public class PermissionResult
 			throw new PermissionValueException( String.format( "The permission %s is not of type boolean.", perm.getNamespace() ) );
 
 		// We can check and allow OPs but ONLY if we are not checking a PermissionDefault node, for one 'sys.op' is the node we check for OPs.
-		if ( allowOps && PermissionManager.allowOps && !perm.getNamespace().equals( PermissionDefault.OP.getNameSpace() ) && entity.isOp() )
+		if ( allowOps && PermissionManager.allowOps && !perm.getNamespace().equals( PermissionDefault.OP.getNamespace() ) && entity.isOp() )
 			return ( boolean ) ( perm.getType() == PermissionType.BOOL ? perm.getModel().getValue() : true );
 
 		if ( perm.getType() == PermissionType.DEFAULT )
 			return isAssigned();
 
-		return getValueObject() == null ? false : ObjectFunc.castToBool( getValueObject() );
+		return getValueObject() == null ? false : ZObjects.castToBool( getValueObject() );
 	}
 
 	public PermissionResult recalculatePermissions()

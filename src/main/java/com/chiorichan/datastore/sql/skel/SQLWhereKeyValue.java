@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.skel;
 
@@ -16,7 +18,7 @@ public final class SQLWhereKeyValue<T extends SQLSkelWhere<?, ?>> extends SQLWhe
 {
 	enum Operands
 	{
-		EQUAL( "=" ), NOTEQUAL( "!=" ), LIKE( "LIKE" ), NOTLIKE( "NOT LIKE" ), GREATER( ">" ), LESSER( "<" ), REGEXP( "REGEXP" );
+		EQUAL( "=" ), NOT_EQUAL( "!=" ), LIKE( "LIKE" ), NOT_LIKE( "NOT LIKE" ), GREATER( ">" ), LESSER( "<" ), REGEXP( "REGEXP" );
 		
 		private String operator;
 		
@@ -108,7 +110,7 @@ public final class SQLWhereKeyValue<T extends SQLSkelWhere<?, ?>> extends SQLWhe
 	
 	public T not( Object value )
 	{
-		operator = Operands.NOTEQUAL;
+		operator = Operands.NOT_EQUAL;
 		this.value = value;
 		parent.where( this );
 		return parent;
@@ -116,7 +118,7 @@ public final class SQLWhereKeyValue<T extends SQLSkelWhere<?, ?>> extends SQLWhe
 	
 	public T notLike( String value )
 	{
-		operator = Operands.NOTLIKE;
+		operator = Operands.NOT_LIKE;
 		this.value = value;
 		parent.where( this );
 		return parent;

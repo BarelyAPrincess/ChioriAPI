@@ -190,7 +190,7 @@ public class Yaml {
      * Serialize a sequence of Java objects into a YAML String.
      * 
      * @param data
-     *            Iterator with Objects
+     *            Iterator with ZObjects
      * @return YAML String with all the objects in proper sequence
      */
     public String dumpAll(Iterator<? extends Object> data) {
@@ -217,7 +217,7 @@ public class Yaml {
      * Serialize a sequence of Java objects into a YAML stream.
      * 
      * @param data
-     *            Iterator with Objects
+     *            Iterator with ZObjects
      * @param output
      *            stream to write to
      */
@@ -344,6 +344,7 @@ public class Yaml {
             return events;
         }
 
+        @Override
         public void emit(Event event) throws IOException {
             events.add(event);
         }
@@ -455,14 +456,17 @@ public class Yaml {
         Composer composer = new Composer(new ParserImpl(new StreamReader(yaml)), resolver);
         constructor.setComposer(composer);
         Iterator<Object> result = new Iterator<Object>() {
+            @Override
             public boolean hasNext() {
                 return constructor.checkData();
             }
 
+            @Override
             public Object next() {
                 return constructor.getData();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -477,6 +481,7 @@ public class Yaml {
             this.iterator = iterator;
         }
 
+        @Override
         public Iterator<Object> iterator() {
             return iterator;
         }
@@ -538,14 +543,17 @@ public class Yaml {
         final Composer composer = new Composer(new ParserImpl(new StreamReader(yaml)), resolver);
         constructor.setComposer(composer);
         Iterator<Node> result = new Iterator<Node>() {
+            @Override
             public boolean hasNext() {
                 return composer.checkNode();
             }
 
+            @Override
             public Node next() {
                 return composer.getNode();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -560,6 +568,7 @@ public class Yaml {
             this.iterator = iterator;
         }
 
+        @Override
         public Iterator<Node> iterator() {
             return iterator;
         }
@@ -618,14 +627,17 @@ public class Yaml {
     public Iterable<Event> parse(Reader yaml) {
         final Parser parser = new ParserImpl(new StreamReader(yaml));
         Iterator<Event> result = new Iterator<Event>() {
+            @Override
             public boolean hasNext() {
                 return parser.peekEvent() != null;
             }
 
+            @Override
             public Event next() {
                 return parser.getEvent();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -640,6 +652,7 @@ public class Yaml {
             this.iterator = iterator;
         }
 
+        @Override
         public Iterator<Event> iterator() {
             return iterator;
         }

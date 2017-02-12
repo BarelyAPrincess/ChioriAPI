@@ -37,6 +37,7 @@ public class Representer extends SafeRepresenter {
     }
 
     protected class RepresentJavaBean implements Represent {
+        @Override
         public Node representData(Object data) {
             try {
                 return representJavaBean(getProperties(data.getClass()), data);

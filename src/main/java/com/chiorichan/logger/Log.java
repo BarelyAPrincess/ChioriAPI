@@ -3,16 +3,18 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.logger;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
+import com.chiorichan.zutils.ZIO;
+import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Versioning;
+import com.chiorichan.Versioning;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -59,7 +61,7 @@ public class Log implements LogAPI
 			if ( log.exists() )
 			{
 				if ( archiveLimit > 0 )
-					FileFunc.gzFile( log, new File( AppConfig.get().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
+					ZIO.gzFile( log, new File( AppConfig.get().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
 				log.delete();
 			}
 
@@ -104,10 +106,10 @@ public class Log implements LogAPI
 			return;
 		}
 
-		FileFunc.SortableFile[] sfiles = new FileFunc.SortableFile[files.length];
+		ZIO.SortableFile[] sfiles = new ZIO.SortableFile[files.length];
 
 		for ( int i = 0; i < files.length; i++ )
-			sfiles[i] = new FileFunc.SortableFile( files[i] );
+			sfiles[i] = new ZIO.SortableFile( files[i] );
 
 		Arrays.sort( sfiles );
 
@@ -287,7 +289,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( !ObjectFunc.noLoopDetected( Logger.class, "log" ) || hasErrored )
+			if ( !ZObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg );
@@ -305,7 +307,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( !ObjectFunc.noLoopDetected( Logger.class, "log" ) || hasErrored )
+			if ( !ZObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, params );
@@ -323,8 +325,11 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( !ObjectFunc.noLoopDetected( Logger.class, "log" ) || hasErrored )
+			if ( !ZObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
+			{
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
+				t.printStackTrace( altOutputStream );
+			}
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, t );
 		}
@@ -341,9 +346,9 @@ public class Log implements LogAPI
 		hasErrored = true;
 
 		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "The child logger \"" + getId() + "\" has thrown an unrecoverable exception!" );
-		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Please report the following stacktrace to the application developer." );
+		altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Please report the following stacktrace/log to the application developer." );
 		if ( Versioning.isDevelopment() )
-			altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "ATTENTION DEVELOPER: Calling the method \"Log.get( [log name] ).unmarkError()\" will reset the errored state." );
+			altOutputStream.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Developer Node: Calling the method \"Log.get( [log name] ).unmarkError()\" will reset the errored log state." );
 		t.printStackTrace( altOutputStream );
 	}
 
@@ -363,7 +368,7 @@ public class Log implements LogAPI
 		}
 		catch ( NoClassDefFoundError e )
 		{
-
+			// Ignore
 		}
 
 		return var1;
@@ -425,7 +430,7 @@ public class Log implements LogAPI
 	@Override
 	public void severe( Throwable t )
 	{
-		log( Level.SEVERE, "Unexcepted Exception", t );
+		log( Level.SEVERE, "Unexpected Exception", t );
 	}
 
 	public void unmarkError()

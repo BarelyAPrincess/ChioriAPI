@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.types;
 
@@ -82,7 +84,7 @@ public class MemoryTypeCreator extends AccountTypeCreator
 		return true; // Always
 	}
 
-	@EventHandler( )
+	@EventHandler()
 	public void onAccountLoadEvent( AccountLoadEvent event )
 	{
 		// Do Nothing
@@ -108,7 +110,7 @@ public class MemoryTypeCreator extends AccountTypeCreator
 	}
 
 	@Override
-	public void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... creds )
+	public void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... credentials )
 	{
 		// Called before the NONE and ROOT Account logs in
 	}

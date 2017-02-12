@@ -157,6 +157,7 @@ public final class Tag implements Comparable<Tag> {
         return value.equals(Tag.PREFIX + clazz.getName());
     }
 
+    @Override
     public int compareTo(Tag o) {
         return value.compareTo(o.getValue());
     }

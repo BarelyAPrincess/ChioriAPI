@@ -32,7 +32,7 @@ public interface Parser {
      * @throws ParserException
      *             Thrown in case of malformed input.
      */
-    public boolean checkEvent(Event.ID choice);
+    boolean checkEvent( Event.ID choice );
 
     /**
      * Return the next event, but do not delete it from the stream.
@@ -42,7 +42,7 @@ public interface Parser {
      * @throws ParserException
      *             Thrown in case of malformed input.
      */
-    public Event peekEvent();
+    Event peekEvent();
 
     /**
      * Returns the next event.
@@ -53,5 +53,5 @@ public interface Parser {
      * @throws ParserException
      *             Thrown in case of malformed input.
      */
-    public Event getEvent();
+    Event getEvent();
 }

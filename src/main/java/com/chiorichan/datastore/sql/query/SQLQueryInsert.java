@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.query;
 
@@ -13,7 +15,7 @@ import com.chiorichan.datastore.sql.SQLTable;
 import com.chiorichan.datastore.sql.SQLTableColumns;
 import com.chiorichan.datastore.sql.SQLWrapper;
 import com.chiorichan.datastore.sql.skel.SQLSkelValues;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.zutils.ZStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -108,9 +110,9 @@ public final class SQLQueryInsert extends SQLBase<SQLQueryInsert> implements SQL
 
 			segments.add( "INSERT INTO" );
 
-			segments.add( StringFunc.wrap( table(), '`' ) );
+			segments.add( ZStrings.wrap( table(), '`' ) );
 
-			segments.add( String.format( "(%s) VALUES (%s)", Joiner.on( ", " ).join( StringFunc.wrap( values.keySet(), '`' ) ), Joiner.on( ", " ).join( StringFunc.repeatToList( "?", values.values().size() ) ) ) );
+			segments.add( String.format( "(%s) VALUES (%s)", Joiner.on( ", " ).join( ZStrings.wrap( values.keySet(), '`' ) ), Joiner.on( ", " ).join( ZStrings.repeatToList( "?", values.values().size() ) ) ) );
 
 			return Joiner.on( " " ).join( segments ) + ";";
 		}
@@ -137,7 +139,7 @@ public final class SQLQueryInsert extends SQLBase<SQLQueryInsert> implements SQL
 			values.put( keys[i], valuesArray[i] );
 
 		if ( keys.length != valuesArray.length )
-			DatastoreManager.getLogger().warning( "SQLQueryInsert omited values/keys because the two lengths did not match, so we used the minimum of the two. Keys: (" + Joiner.on( ", " ).join( keys ) + ") Values: (" + Joiner.on( ", " ).join( valuesArray ) + ")" );
+			DatastoreManager.getLogger().warning( "SQLQueryInsert omitted values/keys because the two lengths did not match, so we used the minimum of the two. Keys: (" + Joiner.on( ", " ).join( keys ) + ") Values: (" + Joiner.on( ", " ).join( valuesArray ) + ")" );
 
 		return this;
 	}

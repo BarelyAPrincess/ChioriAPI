@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.auth;
 
@@ -41,7 +43,7 @@ public final class NullAccountAuthenticator extends AccountAuthenticator
 	}
 	
 	@Override
-	public AccountCredentials authorize( AccountMeta acct, Object... creds ) throws AccountException
+	public AccountCredentials authorize( AccountMeta acct, Object... credentials ) throws AccountException
 	{
 		if ( acct != AccountType.ACCOUNT_NONE )
 			throw new AccountException( AccountDescriptiveReason.INCORRECT_LOGIN, acct );

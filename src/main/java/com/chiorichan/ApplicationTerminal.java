@@ -3,14 +3,11 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Scanner;
 
 import com.chiorichan.account.AccountAttachment;
 import com.chiorichan.account.AccountInstance;
@@ -22,6 +19,8 @@ import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
+import com.chiorichan.zutils.ZIO;
+import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.logger.Log;
@@ -30,11 +29,14 @@ import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ServiceManager;
-import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.ObjectFunc;
-import com.chiorichan.util.Versioning;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Provides the console output of the server. We also attach the Root Account here
@@ -88,7 +90,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	}
 
 	@Override
-	public String getIpAddr()
+	public String getIpAddress()
 	{
 		return null;
 	}
@@ -212,7 +214,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 					return s;
 				}
 
-			Log.get().warning( key + " is not an available option, please press " + Joiner.on( "," ).join( keys ) + " to continue." );
+			Log.get().warning( String.format( "%s is not an available option, please press %s to continue.", key, Arrays.stream( keys ).collect( Collectors.joining( "," ) ) ) );
 		}
 	}
 
@@ -222,7 +224,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 		for ( Object obj : objs )
 			try
 			{
-				Log.get( this ).info( sender.getDisplayName() + ": " + ObjectFunc.castToStringWithException( obj ) );
+				Log.get( this ).info( sender.getDisplayName() + ": " + ZObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{
@@ -236,7 +238,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 		for ( Object obj : objs )
 			try
 			{
-				Log.get( this ).info( ObjectFunc.castToStringWithException( obj ) );
+				Log.get( this ).info( ZObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{
@@ -259,7 +261,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 			{
 				is = getClass().getClassLoader().getResourceAsStream( "com/chiorichan/banner.txt" );
 
-				String[] banner = new String( FileFunc.inputStream2Bytes( is ) ).split( "\\n" );
+				String[] banner = new String( ZIO.inputStream2Bytes( is ) ).split( "\\n" );
 
 				for ( String l : banner )
 					Log.get().info( EnumColor.GOLD + l );
@@ -275,7 +277,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 		}
 		catch ( IOException e )
 		{
-
+			// Ignore
 		}
 	}
 

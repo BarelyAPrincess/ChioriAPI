@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
@@ -11,8 +13,8 @@ import com.chiorichan.ApplicationTerminal;
 import com.chiorichan.account.AccountAttachment;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.lang.PermissionException;
-import com.chiorichan.util.Namespace;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.helpers.Namespace;
+import com.chiorichan.zutils.ZStrings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,20 +96,20 @@ public final class Permission implements Comparable<Permission>
 		return ns1.getNodeCount() > ns2.getNodeCount() ? -1 : 1;
 	}
 
-	public void debugPermissionStack( AccountAttachment sender, int deepth )
+	public void debugPermissionStack( AccountAttachment sender, int depth )
 	{
-		String spacing = deepth > 0 ? StringFunc.repeat( "      ", deepth - 1 ) + "|---> " : "";
+		String spacing = depth > 0 ? ZStrings.repeat( "      ", depth - 1 ) + "|---> " : "";
 
 		sender.sendMessage( String.format( "%s%s%s=%s", EnumColor.YELLOW, spacing, getLocalName(), model ) );
 
-		deepth++;
+		depth++;
 		for ( Permission p : children )
-			p.debugPermissionStack( sender, deepth );
+			p.debugPermissionStack( sender, depth );
 	}
 
-	public void debugPermissionStack( int deepth )
+	public void debugPermissionStack( int depth )
 	{
-		debugPermissionStack( ApplicationTerminal.terminal(), deepth );
+		debugPermissionStack( ApplicationTerminal.terminal(), depth );
 	}
 
 	public Permission getChild( String name )
@@ -215,7 +217,7 @@ public final class Permission implements Comparable<Permission>
 	 */
 	public Namespace getPermissionNamespace()
 	{
-		return new Namespace( getNamespace() );
+		return Namespace.parseString( getNamespace() );
 	}
 
 	public PermissionType getType()

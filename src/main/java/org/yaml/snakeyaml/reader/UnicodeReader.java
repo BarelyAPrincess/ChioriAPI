@@ -7,7 +7,7 @@
  */
 package org.yaml.snakeyaml.reader;
 
-/**
+/*
  version: 1.1 / 2007-01-25
  - changed BOM recognition ordering (longer boms first)
 
@@ -105,11 +105,13 @@ public class UnicodeReader extends Reader {
         internalIn2 = new InputStreamReader(internalIn, decoder);
     }
 
+    @Override
     public void close() throws IOException {
         init();
         internalIn2.close();
     }
 
+    @Override
     public int read(char[] cbuf, int off, int len) throws IOException {
         init();
         return internalIn2.read(cbuf, off, len);

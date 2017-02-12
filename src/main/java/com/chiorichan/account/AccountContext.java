@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account;
 
@@ -28,7 +30,7 @@ public class AccountContext
 	protected final List<String> loginKeys;
 
 	/**
-	 * Used to remember the last instance of AccountCredentuals used
+	 * Used to remember the last instance of {@link AccountCredentials} used
 	 */
 	AccountCredentials credentials = null;
 
@@ -83,7 +85,7 @@ public class AccountContext
 	public String getAcctIdWithException() throws AccountException
 	{
 		if ( acctId == null || acctId.isEmpty() )
-			throw new AccountException( AccountDescriptiveReason.EMPTY_ACCTID, AccountType.ACCOUNT_NONE );
+			throw new AccountException( AccountDescriptiveReason.EMPTY_ID, AccountType.ACCOUNT_NONE );
 
 		return acctId;
 	}

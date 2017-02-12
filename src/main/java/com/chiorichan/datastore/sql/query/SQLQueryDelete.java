@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.query;
 
@@ -16,7 +18,7 @@ import com.chiorichan.datastore.sql.skel.SQLWhereElement;
 import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
 import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
 import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.zutils.ZStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -33,7 +35,7 @@ import java.util.Map.Entry;
  */
 public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQLSkelWhere<SQLQueryDelete, SQLQueryDelete>, SQLSkelLimit<SQLQueryDelete>
 {
-	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;
+	private SQLWhereElementSep currentSeparator = SQLWhereElementSep.NONE;
 	private final List<SQLWhereElement> elements = new LinkedList<>();
 	private final List<Object> sqlValues = new LinkedList<>();
 	private boolean needsUpdate = true;
@@ -57,9 +59,9 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 	public SQLQueryDelete and()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.AND;
+			currentSeparator = SQLWhereElementSep.AND;
 		return this;
 	}
 
@@ -74,7 +76,7 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 	public SQLWhereGroup<SQLQueryDelete, SQLQueryDelete> group()
 	{
 		SQLWhereGroup<SQLQueryDelete, SQLQueryDelete> group = new SQLWhereGroup<SQLQueryDelete, SQLQueryDelete>( this, this );
-		group.seperator( currentSeperator );
+		group.seperator( currentSeparator );
 		elements.add( group );
 		needsUpdate = true;
 		or();
@@ -134,9 +136,9 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 	public SQLQueryDelete or()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.OR;
+			currentSeparator = SQLWhereElementSep.OR;
 		return this;
 	}
 
@@ -176,7 +178,7 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 
 			segments.add( "DELETE FROM" );
 
-			segments.add( StringFunc.wrap( table(), '`' ) );
+			segments.add( ZStrings.wrap( table(), '`' ) );
 
 			sqlValues.clear();
 
@@ -267,7 +269,7 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 	@Override
 	public SQLQueryDelete where( SQLWhereElement element )
 	{
-		element.seperator( currentSeperator );
+		element.seperator( currentSeparator );
 		elements.add( element );
 		needsUpdate = true;
 		and();
@@ -331,7 +333,7 @@ public final class SQLQueryDelete extends SQLBase<SQLQueryDelete> implements SQL
 
 		super.clone( clone );
 
-		clone.currentSeperator = this.currentSeperator;
+		clone.currentSeparator = this.currentSeparator;
 		clone.elements.addAll( this.elements );
 		clone.sqlValues.addAll( this.sqlValues );
 		clone.needsUpdate = this.needsUpdate;

@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.tasks;
 
@@ -16,7 +18,7 @@ import org.joda.time.Duration;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.zutils.ZObjects;
 
 /**
  * Provides timing, date, and time utilities.
@@ -184,7 +186,7 @@ public class Timings
 	 */
 	public static String readoutDuration( String seconds )
 	{
-		return readoutDuration( ObjectFunc.castToInt( seconds ) );
+		return readoutDuration( ZObjects.castToInt( seconds ) );
 	}
 	
 	/**

@@ -96,7 +96,7 @@ public class Constructor extends SafeConstructor {
         this(Class.forName(check(theRoot)));
     }
 
-    private static final String check(String s) {
+    private static String check(String s) {
         if (s == null) {
             throw new NullPointerException("Root type must be provided.");
         }
@@ -140,6 +140,7 @@ public class Constructor extends SafeConstructor {
          *            <code>String</code>s) and values are objects to be created
          * @return constructed JavaBean
          */
+        @Override
         public Object construct(Node node) {
             MappingNode mnode = (MappingNode) node;
             if (Properties.class.isAssignableFrom(node.getType())) {
@@ -184,6 +185,7 @@ public class Constructor extends SafeConstructor {
             }
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public void construct2ndStep(Node node, Object object) {
             if (Map.class.isAssignableFrom(node.getType())) {
@@ -226,7 +228,7 @@ public class Constructor extends SafeConstructor {
                     throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
                 }
                 Node valueNode = tuple.getValueNode();
-                // keys can only be Strings
+                // keys can only be ZStrings
                 keyNode.setType(String.class);
                 String key = (String) constructObject(keyNode);
                 try {
@@ -332,6 +334,7 @@ public class Constructor extends SafeConstructor {
             return constructor;
         }
 
+        @Override
         public Object construct(Node node) {
             Object result = null;
             try {
@@ -345,6 +348,7 @@ public class Constructor extends SafeConstructor {
             return result;
         }
 
+        @Override
         public void construct2ndStep(Node node, Object object) {
             try {
                 getConstructor(node).construct2ndStep(node, object);
@@ -361,6 +365,7 @@ public class Constructor extends SafeConstructor {
      * structures are not supported.
      */
     protected class ConstructScalar extends AbstractConstruct {
+        @Override
         public Object construct(Node nnode) {
             ScalarNode node = (ScalarNode) nnode;
             Class<?> type = node.getType();
@@ -515,6 +520,7 @@ public class Constructor extends SafeConstructor {
      * class is known.
      */
     protected class ConstructSequence implements Construct {
+        @Override
         @SuppressWarnings("unchecked")
         public Object construct(Node node) {
             SequenceNode snode = (SequenceNode) node;
@@ -633,6 +639,7 @@ public class Constructor extends SafeConstructor {
             throw new YAMLException("Unexpected primitive " + clazz);
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public void construct2ndStep(Node node, Object object) {
             SequenceNode snode = (SequenceNode) node;

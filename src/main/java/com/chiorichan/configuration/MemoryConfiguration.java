@@ -1,15 +1,15 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.configuration;
 
 import java.util.Map;
-
-import com.chiorichan.util.ObjectFunc;
 
 /**
  * This is a {@link Configuration} implementation that does not save or load from any source, and stores all values in
@@ -44,18 +44,20 @@ public class MemoryConfiguration extends MemorySection implements Configuration
 	@Override
 	public void addDefault( String path, Object value )
 	{
-		ObjectFunc.notNull( path, "Path may not be null" );
+		if ( path == null )
+			throw new IllegalArgumentException( "Path cannot be null" );
 
 		if ( defaults == null )
 			defaults = new MemoryConfiguration();
 
-		defaults.set( path, value );
+		defaults.set( path, value, false );
 	}
 
 	@Override
 	public void addDefaults( Configuration defaults )
 	{
-		ObjectFunc.notNull( defaults, "Defaults may not be null" );
+		if ( defaults == null )
+			throw new IllegalArgumentException( "Defaults cannot be null" );
 
 		addDefaults( defaults.getValues( true ) );
 	}
@@ -63,7 +65,8 @@ public class MemoryConfiguration extends MemorySection implements Configuration
 	@Override
 	public void addDefaults( Map<String, Object> defaults )
 	{
-		ObjectFunc.notNull( defaults, "Defaults may not be null" );
+		if ( defaults == null )
+			throw new IllegalArgumentException( "Defaults cannot be null" );
 
 		for ( Map.Entry<String, Object> entry : defaults.entrySet() )
 			addDefault( entry.getKey(), entry.getValue() );
@@ -93,7 +96,8 @@ public class MemoryConfiguration extends MemorySection implements Configuration
 	@Override
 	public void setDefaults( Configuration defaults )
 	{
-		ObjectFunc.notNull( defaults, "Defaults may not be null" );
+		if ( defaults == null )
+			throw new IllegalArgumentException( "Defaults cannot be null" );
 
 		this.defaults = defaults;
 	}

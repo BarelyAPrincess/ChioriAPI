@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission.commands;
 
@@ -16,7 +18,7 @@ import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.permission.PermissionType;
 import com.chiorichan.terminal.commands.advanced.CommandHandler;
-import com.chiorichan.util.PermissionNamespace;
+import com.chiorichan.helpers.PermissionNamespace;
 
 /**
  * Manages permissions
@@ -44,7 +46,7 @@ public class PermissionCommands extends PermissionBaseCommand
 
 		ns.createPermission( type );
 
-		sender.sendMessage( EnumColor.AQUA + "Good news everybody, we successfully created permission node '" + ns.getNamespace() + "' with type '" + type.name() + "'!" );
+		sender.sendMessage( EnumColor.AQUA + "Good news everybody, we successfully created permission node '" + ns.getString() + "' with type '" + type.name() + "'!" );
 	}
 
 	@CommandHandler( name = "pex", syntax = "perm list [parent]", permission = "permissions.manage.permissions", description = "List all permissions" )
@@ -53,7 +55,6 @@ public class PermissionCommands extends PermissionBaseCommand
 		if ( args.containsKey( "parent" ) )
 		{
 			Permission root = PermissionManager.instance().getNode( args.get( "parent" ) );
-
 			if ( root == null )
 				sender.sendMessage( EnumColor.RED + "There was no such permission '" + args.get( "parent" ) + "'!" );
 			else

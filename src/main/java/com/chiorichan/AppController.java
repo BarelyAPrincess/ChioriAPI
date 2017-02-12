@@ -1,16 +1,13 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.event.EventRegistrar;
@@ -29,7 +26,11 @@ import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.terminal.CommandDispatch;
-import com.chiorichan.util.Versioning;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class AppController implements Runnable, EventRegistrar, TaskRegistrar, Listener
 {
@@ -43,6 +44,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 	protected static AppController instance;
 	public static int lastFiveTick = -1;
 	public static Thread primaryThread;
+	private static boolean hasErrored = false;
 
 	public static void handleExceptions( Throwable... ts )
 	{
@@ -57,14 +59,24 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 		{
 			List<IException> list = Arrays.asList( report.getNotIgnorableExceptions() );
 
+			hasErrored = true;
+
 			Log.get().severe( "Encountered " + list.size() + " exception(s):" );
 			for ( IException e : list )
-				Log.get().severe( e.getClass() + ": " + e.getMessage(), e instanceof Throwable && Versioning.isDevelopment() ? ( Throwable ) e : null );
+				if ( e instanceof Throwable )
+					Log.get().severe( ( Throwable ) e );
+				else
+					Log.get().severe( e.getClass() + ": " + e.getMessage() );
 
 			stopApplication( "CRASHED" );
 
 			// TODO Pass that this was a crash
 		}
+	}
+
+	public static boolean hasErrored()
+	{
+		return hasErrored;
 	}
 
 	public static boolean isPrimaryThread()
@@ -174,9 +186,16 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 		Log.get().info( "Saving Configuration..." );
 		AppConfig.get().save();
 
-		Log.get().info( "Clearing Excess Cache..." );
-		long keepHistory = AppConfig.get().getLong( "advanced.cache.keepHistory", 30L );
-		AppConfig.get().clearCache( keepHistory );
+		try
+		{
+			Log.get().info( "Clearing Excess Cache..." );
+			long keepHistory = AppConfig.get().getLong( "advanced.cache.keepHistory", 30L );
+			AppConfig.get().clearCache( keepHistory );
+		}
+		catch ( IllegalArgumentException e )
+		{
+			Log.get().warning( "Cache directory is invalid!" );
+		}
 
 		loader.runLevel( RunLevel.DISPOSED );
 
@@ -210,7 +229,7 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 
 			long q = 0L;
 			long j = 0L;
-			for ( ;; )
+			for ( ; ; )
 			{
 				long k = System.currentTimeMillis();
 				long l = k - i;

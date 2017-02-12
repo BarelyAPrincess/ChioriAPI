@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.event;
 
@@ -22,13 +24,13 @@ public class AccountPreLoginEvent extends AccountEvent implements Conditional, C
 {
 	private AccountDescriptiveReason reason = AccountDescriptiveReason.DEFAULT;
 	private final AccountPermissible via;
-	private final Object[] creds;
+	private final Object[] credentials;
 
-	public AccountPreLoginEvent( AccountMeta meta, AccountPermissible accountPermissible, String acctId, Object[] creds )
+	public AccountPreLoginEvent( AccountMeta meta, AccountPermissible accountPermissible, String acctId, Object[] credentials )
 	{
 		super( meta, accountPermissible );
 		via = accountPermissible;
-		this.creds = creds;
+		this.credentials = credentials;
 	}
 
 	@Override
@@ -56,7 +58,7 @@ public class AccountPreLoginEvent extends AccountEvent implements Conditional, C
 
 	public Object[] getCredentials()
 	{
-		return creds;
+		return credentials;
 	}
 
 	/**

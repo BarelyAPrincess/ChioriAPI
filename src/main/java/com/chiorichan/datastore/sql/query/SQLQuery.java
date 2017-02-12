@@ -3,13 +3,15 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.query;
 
 import com.chiorichan.datastore.sql.SQLBase;
 import com.chiorichan.datastore.sql.SQLWrapper;
-import com.chiorichan.util.DbFunc;
+import com.chiorichan.zutils.ZDB;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -69,7 +71,7 @@ public final class SQLQuery extends SQLBase<SQLQuery>
 		try
 		{
 			if ( query.toLowerCase().startsWith( "select" ) )
-				return DbFunc.rowCount( result() );
+				return ZDB.rowCount( result() );
 			else
 				return statement().getUpdateCount();
 		}

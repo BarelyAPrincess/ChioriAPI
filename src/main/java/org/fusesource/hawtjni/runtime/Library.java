@@ -1,7 +1,7 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * All Rights Reserved
  */
@@ -58,6 +58,7 @@ import java.util.ArrayList;
 public class Library
 {
 	static final String SLASH = System.getProperty( "file.separator" );
+
 	static private void close( Closeable file )
 	{
 		if ( file != null )
@@ -69,6 +70,7 @@ public class Library
 			{
 			}
 	}
+
 	public static int getBitModel()
 	{
 		String prop = System.getProperty( "sun.arch.data.model" );
@@ -78,6 +80,7 @@ public class Library
 			return Integer.parseInt( prop );
 		return -1; // we don't know..
 	}
+
 	public static String getOperatingSystem()
 	{
 		String name = System.getProperty( "os.name" ).toLowerCase().trim();
@@ -90,6 +93,7 @@ public class Library
 		return name.replaceAll( "\\W+", "_" );
 
 	}
+
 	public static String getPlatform()
 	{
 		return getOperatingSystem() + getBitModel();
@@ -103,6 +107,7 @@ public class Library
 		}
 		catch ( Throwable e )
 		{
+			// Ignore
 		}
 		return null;
 	}
@@ -139,16 +144,17 @@ public class Library
 		this.classLoader = classLoader;
 	}
 
-	private void chmod( String permision, File path )
+	private void chmod( String permission, File path )
 	{
 		if ( getPlatform().startsWith( "windows" ) )
 			return;
 		try
 		{
-			Runtime.getRuntime().exec( new String[] {"chmod", permision, path.getCanonicalPath()} ).waitFor();
+			Runtime.getRuntime().exec( new String[] {"chmod", permission, path.getCanonicalPath()} ).waitFor();
 		}
 		catch ( Throwable e )
 		{
+			// Ignore
 		}
 	}
 
@@ -182,14 +188,14 @@ public class Library
 		/* Try extracting the library from the jar */
 		if ( classLoader != null )
 		{
-			if ( exractAndLoad( errors, version, customPath, getArchSpecifcResourcePath() ) )
+			if ( extractAndLoad( errors, version, customPath, getArchSpecificResourcePath() ) )
 				return;
-			if ( exractAndLoad( errors, version, customPath, getPlatformSpecifcResourcePath() ) )
+			if ( extractAndLoad( errors, version, customPath, getPlatformSpecificResourcePath() ) )
 				return;
-			if ( exractAndLoad( errors, version, customPath, getOperatingSystemSpecifcResourcePath() ) )
+			if ( extractAndLoad( errors, version, customPath, getOperatingSystemSpecificResourcePath() ) )
 				return;
 			// For the simpler case where only 1 platform lib is getting packed into the jar
-			if ( exractAndLoad( errors, version, customPath, getResorucePath() ) )
+			if ( extractAndLoad( errors, version, customPath, getResourcePath() ) )
 				return;
 		}
 
@@ -197,7 +203,7 @@ public class Library
 		throw new UnsatisfiedLinkError( "Could not load library. Reasons: " + errors.toString() );
 	}
 
-	private boolean exractAndLoad( ArrayList<String> errors, String version, String customPath, String resourcePath )
+	private boolean extractAndLoad( ArrayList<String> errors, String version, String customPath, String resourcePath )
 	{
 		URL resource = classLoader.getResource( resourcePath );
 		if ( resource != null )
@@ -280,7 +286,7 @@ public class Library
 		return rc;
 	}
 
-	final public String getArchSpecifcResourcePath()
+	final public String getArchSpecificResourcePath()
 	{
 		return "META-INF/native/" + getPlatform() + "/" + System.getProperty( "os.arch" ) + "/" + map( name );
 	}
@@ -291,29 +297,29 @@ public class Library
 	}
 
 
-	final public String getOperatingSystemSpecifcResourcePath()
+	final public String getOperatingSystemSpecificResourcePath()
 	{
-		return getPlatformSpecifcResourcePath( getOperatingSystem() );
+		return getPlatformSpecificResourcePath( getOperatingSystem() );
 	}
 
-	final public String getPlatformSpecifcResourcePath()
+	final public String getPlatformSpecificResourcePath()
 	{
-		return getPlatformSpecifcResourcePath( getPlatform() );
+		return getPlatformSpecificResourcePath( getPlatform() );
 	}
 
-	final public String getPlatformSpecifcResourcePath( String platform )
+	final public String getPlatformSpecificResourcePath( String platform )
 	{
 		return "META-INF/native/" + platform + "/" + map( name );
 	}
 
-	final public String getResorucePath()
+	final public String getResourcePath()
 	{
 		return "META-INF/native/" + map( name );
 	}
 
 	/**
-     *
-     */
+	 *
+	 */
 	synchronized public void load()
 	{
 		if ( loaded )

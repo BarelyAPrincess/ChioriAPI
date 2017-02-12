@@ -3,15 +3,17 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
 import java.util.Iterator;
 import java.util.Set;
 
-import com.chiorichan.util.SecureFunc;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.zutils.ZEncryption;
+import com.chiorichan.zutils.ZStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
@@ -57,13 +59,13 @@ public class References implements Iterable<String>
 				else if ( ref.contains( "," ) )
 					add( ref.split( "," ) );
 				else
-					this.refs.add( StringFunc.removeInvalidChars( ref.toLowerCase() ) );
+					this.refs.add( ZStrings.removeInvalidChars( ref.toLowerCase() ) );
 		return this;
 	}
 	
 	public String hash()
 	{
-		return SecureFunc.md5( join() );
+		return ZEncryption.md5( join() );
 	}
 	
 	public boolean isEmpty()

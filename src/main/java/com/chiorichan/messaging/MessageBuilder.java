@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.messaging;
 
@@ -49,12 +51,12 @@ public class MessageBuilder
 		List<MessageReceiver> receivers = Lists.newArrayList();
 		receivers.addAll( receivers );
 		for ( MessageChannel channel : channels )
-			receivers.addAll( MessageDispatch.channelRecipents( channel ) );
+			receivers.addAll( MessageDispatch.channelRecipients( channel ) );
 		
 		if ( includeSender )
 		{
 			if ( sender instanceof MessageChannel )
-				receivers.addAll( MessageDispatch.channelRecipents( ( MessageChannel ) sender ) );
+				receivers.addAll( MessageDispatch.channelRecipients( ( MessageChannel ) sender ) );
 			else if ( sender instanceof MessageReceiver )
 				receivers.add( ( MessageReceiver ) sender );
 		}

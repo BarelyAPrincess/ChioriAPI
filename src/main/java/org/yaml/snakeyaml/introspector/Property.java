@@ -45,6 +45,7 @@ public abstract class Property implements Comparable<Property> {
         return getName() + " of " + getType();
     }
 
+    @Override
     public int compareTo(Property o) {
         return name.compareTo(o.name);
     }

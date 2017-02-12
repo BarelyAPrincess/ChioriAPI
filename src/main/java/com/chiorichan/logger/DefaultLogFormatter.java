@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.logger;
 
@@ -15,7 +17,7 @@ import java.util.logging.LogRecord;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.zutils.ZStrings;
 
 public class DefaultLogFormatter extends Formatter
 {
@@ -60,7 +62,7 @@ public class DefaultLogFormatter extends Formatter
 			if ( threadName.length() > 10 )
 				threadName = threadName.substring( 0, 2 ) + ".." + threadName.substring( threadName.length() - 6 );
 			else if ( threadName.length() < 10 )
-				threadName = threadName + StringFunc.repeat( " ", 10 - threadName.length() );
+				threadName = threadName + ZStrings.repeat( " ", 10 - threadName.length() );
 
 			style = style.replaceAll( "%ct", threadName );
 		}

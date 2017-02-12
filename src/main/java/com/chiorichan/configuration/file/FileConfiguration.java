@@ -1,11 +1,19 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
  */
 package com.chiorichan.configuration.file;
+
+import com.chiorichan.configuration.Configuration;
+import com.chiorichan.configuration.InvalidConfigurationException;
+import com.chiorichan.configuration.MemoryConfiguration;
+import com.chiorichan.zutils.ZIO;
+import com.chiorichan.zutils.ZObjects;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,12 +23,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import com.chiorichan.configuration.Configuration;
-import com.chiorichan.configuration.InvalidConfigurationException;
-import com.chiorichan.configuration.MemoryConfiguration;
-import com.chiorichan.util.ObjectFunc;
-import com.google.common.io.Files;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This is a base class for all File based implementations of {@link Configuration}
@@ -28,6 +32,7 @@ import com.google.common.io.Files;
 public abstract class FileConfiguration extends MemoryConfiguration
 {
 	private String loadedFrom = null;
+	protected boolean hasChanges = false;
 
 	/**
 	 * Creates an empty {@link FileConfiguration} with no default values.
@@ -41,8 +46,7 @@ public abstract class FileConfiguration extends MemoryConfiguration
 	 * Creates an empty {@link FileConfiguration} using the specified {@link Configuration} as a source for all default
 	 * values.
 	 *
-	 * @param defaults
-	 *             Default value provider
+	 * @param defaults Default value provider
 	 */
 	public FileConfiguration( Configuration defaults )
 	{
@@ -51,34 +55,29 @@ public abstract class FileConfiguration extends MemoryConfiguration
 
 	/**
 	 * Compiles the header for this {@link FileConfiguration} and returns the result.
-	 * <p>
+	 * <p/>
 	 * This will use the header from {@link #options()} -> {@link FileConfigurationOptions#header()}, respecting the rules of {@link FileConfigurationOptions#copyHeader()} if set.
 	 *
 	 * @return Compiled header
 	 */
-	protected abstract String buildHeader();
+	public abstract String buildHeader();
 
 	/**
 	 * Loads this {@link FileConfiguration} from the specified location.
-	 * <p>
+	 * <p/>
 	 * All the values contained within this configuration will be removed, leaving only settings and defaults, and the new values will be loaded from the given file.
-	 * <p>
+	 * <p/>
 	 * If the file cannot be loaded for any reason, an exception will be thrown.
 	 *
-	 * @param file
-	 *             File to load from.
-	 * @throws FileNotFoundException
-	 *              Thrown when the given file cannot be opened.
-	 * @throws IOException
-	 *              Thrown when the given file cannot be read.
-	 * @throws InvalidConfigurationException
-	 *              Thrown when the given file is not a valid Configuration.
-	 * @throws IllegalArgumentException
-	 *              Thrown when file is null.
+	 * @param file File to load from.
+	 * @throws FileNotFoundException         Thrown when the given file cannot be opened.
+	 * @throws IOException                   Thrown when the given file cannot be read.
+	 * @throws InvalidConfigurationException Thrown when the given file is not a valid Configuration.
+	 * @throws IllegalArgumentException      Thrown when file is null.
 	 */
-	public void load( File file ) throws FileNotFoundException, IOException, InvalidConfigurationException
+	public void load( File file ) throws IOException, InvalidConfigurationException
 	{
-		ObjectFunc.notNull( file, "File cannot be null" );
+		ZObjects.notNull( "File cannot be null" );
 
 		load( new FileInputStream( file ) );
 		loadedFrom = file.getAbsolutePath();
@@ -86,66 +85,40 @@ public abstract class FileConfiguration extends MemoryConfiguration
 
 	/**
 	 * Loads this {@link FileConfiguration} from the specified stream.
-	 * <p>
+	 * <p/>
 	 * All the values contained within this configuration will be removed, leaving only settings and defaults, and the new values will be loaded from the given stream.
 	 *
-	 * @param stream
-	 *             Stream to load from
-	 * @throws IOException
-	 *              Thrown when the given file cannot be read.
-	 * @throws InvalidConfigurationException
-	 *              Thrown when the given file is not a valid Configuration.
-	 * @throws IllegalArgumentException
-	 *              Thrown when stream is null.
+	 * @param stream Stream to load from
+	 * @throws IOException                   Thrown when the given file cannot be read.
+	 * @throws InvalidConfigurationException Thrown when the given file is not a valid Configuration.
+	 * @throws IllegalArgumentException      Thrown when stream is null.
 	 */
 	public void load( InputStream stream ) throws IOException, InvalidConfigurationException
 	{
-		ObjectFunc.notNull( stream, "Stream cannot be null" );
+		ZObjects.notNull( "Stream cannot be null" );
 
-		InputStreamReader reader = new InputStreamReader( stream );
-		StringBuilder builder = new StringBuilder();
-		BufferedReader input = new BufferedReader( reader );
-
-		try
-		{
-			String line;
-
-			while ( ( line = input.readLine() ) != null )
-			{
-				builder.append( line );
-				builder.append( '\n' );
-			}
-		}
-		finally
-		{
-			input.close();
-		}
-
-		loadFromString( builder.toString() );
+		loadFromString( new BufferedReader( new InputStreamReader( stream ) ).lines().collect( Collectors.joining( "\n" ) ) );
 		loadedFrom = null;
+		hasChanges = true;
 	}
 
 	/**
 	 * Loads this {@link FileConfiguration} from the specified location.
-	 * <p>
+	 * <p/>
 	 * All the values contained within this configuration will be removed, leaving only settings and defaults, and the new values will be loaded from the given file.
-	 * <p>
+	 * <p/>
 	 * If the file cannot be loaded for any reason, an exception will be thrown.
 	 *
-	 * @param file
-	 *             File to load from.
-	 * @throws FileNotFoundException
-	 *              Thrown when the given file cannot be opened.
-	 * @throws IOException
-	 *              Thrown when the given file cannot be read.
-	 * @throws InvalidConfigurationException
-	 *              Thrown when the given file is not a valid Configuration.
-	 * @throws IllegalArgumentException
-	 *              Thrown when file is null.
+	 * @param file File to load from.
+	 * @throws FileNotFoundException         Thrown when the given file cannot be opened.
+	 * @throws IOException                   Thrown when the given file cannot be read.
+	 * @throws InvalidConfigurationException Thrown when the given file is not a valid Configuration.
+	 * @throws IllegalArgumentException      Thrown when file is null.
 	 */
-	public void load( String file ) throws FileNotFoundException, IOException, InvalidConfigurationException
+	public void load( String file ) throws IOException, InvalidConfigurationException
 	{
-		ObjectFunc.notNull( file, "File cannot be null" );
+		if ( file == null )
+			throw new IllegalArgumentException( "File cannot be null" );
 
 		load( new File( file ) );
 	}
@@ -162,17 +135,14 @@ public abstract class FileConfiguration extends MemoryConfiguration
 
 	/**
 	 * Loads this {@link FileConfiguration} from the specified string, as opposed to from file.
-	 * <p>
+	 * <p/>
 	 * All the values contained within this configuration will be removed, leaving only settings and defaults, and the new values will be loaded from the given string.
-	 * <p>
+	 * <p/>
 	 * If the string is invalid in any way, an exception will be thrown.
 	 *
-	 * @param contents
-	 *             Contents of a Configuration to load.
-	 * @throws InvalidConfigurationException
-	 *              Thrown if the specified string is invalid.
-	 * @throws IllegalArgumentException
-	 *              Thrown if contents is null.
+	 * @param contents Contents of a Configuration to load.
+	 * @throws InvalidConfigurationException Thrown if the specified string is invalid.
+	 * @throws IllegalArgumentException      Thrown if contents is null.
 	 */
 	public abstract void loadFromString( String contents ) throws InvalidConfigurationException;
 
@@ -187,23 +157,22 @@ public abstract class FileConfiguration extends MemoryConfiguration
 
 	/**
 	 * Saves this {@link FileConfiguration} to the specified location.
-	 * <p>
+	 * <p/>
 	 * If the file does not exist, it will be created. If already exists, it will be overwritten. If it cannot be overwritten or created, an exception will be thrown.
 	 *
-	 * @param file
-	 *             File to save to.
-	 * @throws IOException
-	 *              Thrown when the given file cannot be written to for any reason.
-	 * @throws IllegalArgumentException
-	 *              Thrown when file is null.
+	 * @param file File to save to.
+	 * @throws IOException              Thrown when the given file cannot be written to for any reason.
+	 * @throws IllegalArgumentException Thrown when file is null.
 	 */
 	public void save( File file ) throws IOException
 	{
-		ObjectFunc.notNull( file, "File cannot be null" );
+		if ( file == null )
+			throw new IllegalArgumentException( "File cannot be null" );
 
-		Files.createParentDirs( file );
+		file.getParentFile().mkdirs();
 
 		String data = saveToString();
+		hasChanges = false;
 
 		FileWriter writer = new FileWriter( file );
 
@@ -219,19 +188,17 @@ public abstract class FileConfiguration extends MemoryConfiguration
 
 	/**
 	 * Saves this {@link FileConfiguration} to the specified location.
-	 * <p>
+	 * <p/>
 	 * If the file does not exist, it will be created. If already exists, it will be overwritten. If it cannot be overwritten or created, an exception will be thrown.
 	 *
-	 * @param file
-	 *             File to save to.
-	 * @throws IOException
-	 *              Thrown when the given file cannot be written to for any reason.
-	 * @throws IllegalArgumentException
-	 *              Thrown when file is null.
+	 * @param file File to save to.
+	 * @throws IOException              Thrown when the given file cannot be written to for any reason.
+	 * @throws IllegalArgumentException Thrown when file is null.
 	 */
 	public void save( String file ) throws IOException
 	{
-		ObjectFunc.notNull( file, "File cannot be null" );
+		if ( file == null )
+			throw new IllegalArgumentException( "File cannot be null" );
 
 		save( new File( file ) );
 	}

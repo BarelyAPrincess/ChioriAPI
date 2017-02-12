@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.auth;
 
@@ -83,9 +85,9 @@ public abstract class AccountAuthenticator
 	 *
 	 * @param acct
 	 *            The Account Meta
-	 * @param creds
+	 * @param credentials
 	 *            The Credentials to use for authentication
 	 * @return An instance of the Account Credentials
 	 */
-	public abstract AccountCredentials authorize( AccountMeta acct, Object... creds ) throws AccountException;
+	public abstract AccountCredentials authorize( AccountMeta acct, Object... credentials ) throws AccountException;
 }

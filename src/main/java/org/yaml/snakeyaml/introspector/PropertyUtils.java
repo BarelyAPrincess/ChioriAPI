@@ -37,7 +37,7 @@ public class PropertyUtils {
         }
 
         Map<String, Property> properties = new LinkedHashMap<String, Property>();
-        boolean inaccessableFieldsExist = false;
+        boolean inaccessibleFieldsExist = false;
         switch (bAccess) {
         case FIELD:
             for (Class<?> c = type; c != null; c = c.getSuperclass()) {
@@ -68,14 +68,14 @@ public class PropertyUtils {
                         if (Modifier.isPublic(modifiers)) {
                             properties.put(field.getName(), new FieldProperty(field));
                         } else {
-                            inaccessableFieldsExist = true;
+                            inaccessibleFieldsExist = true;
                         }
                     }
                 }
             }
             break;
         }
-        if (properties.isEmpty() && inaccessableFieldsExist) {
+        if (properties.isEmpty() && inaccessibleFieldsExist) {
             throw new YAMLException("No JavaBean properties found in " + type.getName());
         }
         propertiesCache.put(type, properties);

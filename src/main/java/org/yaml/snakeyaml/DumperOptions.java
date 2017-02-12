@@ -32,7 +32,7 @@ public class DumperOptions {
                 Character.valueOf('|')), FOLDED(Character.valueOf('>')), PLAIN(null);
         private Character styleChar;
 
-        private ScalarStyle(Character style) {
+        ScalarStyle( Character style ) {
             this.styleChar = style;
         }
 
@@ -78,7 +78,7 @@ public class DumperOptions {
 
         private Boolean styleBoolean;
 
-        private FlowStyle(Boolean flowStyle) {
+        FlowStyle( Boolean flowStyle ) {
             styleBoolean = flowStyle;
         }
 
@@ -100,7 +100,7 @@ public class DumperOptions {
 
         private String lineBreak;
 
-        private LineBreak(String lineBreak) {
+        LineBreak( String lineBreak ) {
             this.lineBreak = lineBreak;
         }
 
@@ -132,7 +132,7 @@ public class DumperOptions {
 
         private Integer[] version;
 
-        private Version(Integer[] version) {
+        Version( Integer[] version ) {
             this.version = version;
         }
 

@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.terminal;
 
@@ -14,12 +16,12 @@ import com.chiorichan.account.lang.AccountResult;
  */
 public interface TerminalHandler
 {
-	public enum TerminalType
+	enum TerminalType
 	{
-		LOCAL, TELNET, WEBSOCKET;
+		LOCAL, TELNET, WEBSOCKET
 	}
 	
-	String getIpAddr();
+	String getIpAddress();
 	
 	AccountResult kick( String reason );
 	

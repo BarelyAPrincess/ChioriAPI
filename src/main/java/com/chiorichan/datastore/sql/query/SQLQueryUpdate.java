@@ -1,9 +1,11 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.query;
 
@@ -17,7 +19,7 @@ import com.chiorichan.datastore.sql.skel.SQLWhereElement;
 import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
 import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
 import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
-import com.chiorichan.util.StringFunc;
+import com.chiorichan.zutils.ZStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -35,7 +37,7 @@ import java.util.Map.Entry;
  */
 public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQLSkelValues<SQLQueryUpdate>, SQLSkelWhere<SQLQueryUpdate, SQLQueryUpdate>, SQLSkelLimit<SQLQueryUpdate>, Cloneable
 {
-	private SQLWhereElementSep currentSeperator = SQLWhereElementSep.NONE;
+	private SQLWhereElementSep currentSeparator = SQLWhereElementSep.NONE;
 	private final List<SQLWhereElement> elements = Lists.newLinkedList();
 	private final List<Object> sqlValues = Lists.newLinkedList();
 	private final Map<String, Object> values = Maps.newHashMap();
@@ -60,9 +62,9 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 	public SQLQueryUpdate and()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.AND;
+			currentSeparator = SQLWhereElementSep.AND;
 		return this;
 	}
 
@@ -77,7 +79,7 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 	public SQLWhereGroup<SQLQueryUpdate, SQLQueryUpdate> group()
 	{
 		SQLWhereGroup<SQLQueryUpdate, SQLQueryUpdate> group = new SQLWhereGroup<SQLQueryUpdate, SQLQueryUpdate>( this, this );
-		group.seperator( currentSeperator );
+		group.seperator( currentSeparator );
 		elements.add( group );
 		needsUpdate = true;
 		or();
@@ -137,9 +139,9 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 	public SQLQueryUpdate or()
 	{
 		if ( elements.size() < 1 )
-			currentSeperator = SQLWhereElementSep.NONE;
+			currentSeparator = SQLWhereElementSep.NONE;
 		else
-			currentSeperator = SQLWhereElementSep.OR;
+			currentSeparator = SQLWhereElementSep.OR;
 		return this;
 	}
 
@@ -181,7 +183,7 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 
 			segments.add( "UPDATE" );
 
-			segments.add( StringFunc.wrap( table(), '`' ) );
+			segments.add( ZStrings.wrap( table(), '`' ) );
 
 			segments.add( "SET" );
 
@@ -243,7 +245,7 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 			values.put( keys[i], valuesArray[i] );
 
 		if ( keys.length != valuesArray.length )
-			DatastoreManager.getLogger().warning( "SQLQueryUpdate omited values/keys because the two lengths did not match, so we used the minimum of the two. Keys: (" + Joiner.on( ", " ).join( keys ) + ") Values: (" + Joiner.on( ", " ).join( valuesArray ) + ")" );
+			DatastoreManager.getLogger().warning( "SQLQueryUpdate omitted values/keys because the two lengths did not match, so we used the minimum of the two. Keys: (" + Joiner.on( ", " ).join( keys ) + ") Values: (" + Joiner.on( ", " ).join( valuesArray ) + ")" );
 
 		needsUpdate = true;
 
@@ -309,7 +311,7 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 	@Override
 	public SQLQueryUpdate where( SQLWhereElement element )
 	{
-		element.seperator( currentSeperator );
+		element.seperator( currentSeparator );
 		elements.add( element );
 		needsUpdate = true;
 		and();
@@ -373,7 +375,7 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 
 		super.clone( clone );
 
-		clone.currentSeperator = this.currentSeperator;
+		clone.currentSeparator = this.currentSeparator;
 		clone.sqlValues.addAll( this.sqlValues );
 		clone.elements.addAll( this.elements );
 		clone.needsUpdate = this.needsUpdate;

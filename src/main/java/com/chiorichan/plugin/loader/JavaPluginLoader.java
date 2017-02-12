@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.plugin.loader;
 
@@ -25,6 +27,7 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import com.chiorichan.zutils.ZIO;
 import org.apache.commons.lang3.Validate;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -50,7 +53,6 @@ import com.chiorichan.lang.UnknownDependencyException;
 import com.chiorichan.plugin.PluginInformation;
 import com.chiorichan.plugin.PluginManager;
 import com.chiorichan.services.ObjectContext;
-import com.chiorichan.util.FileFunc;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -250,6 +252,7 @@ public final class JavaPluginLoader implements PluginLoader
 				}
 				catch ( ClassNotFoundException cnfe )
 				{
+					// Ignore
 				}
 				if ( cachedClass != null )
 					return cachedClass;
@@ -312,21 +315,9 @@ public final class JavaPluginLoader implements PluginLoader
 		finally
 		{
 			if ( jar != null )
-				try
-				{
-					jar.close();
-				}
-				catch ( IOException e )
-				{
-				}
+				ZIO.closeQuietly( jar );
 			if ( stream != null )
-				try
-				{
-					stream.close();
-				}
-				catch ( IOException e )
-				{
-				}
+				ZIO.closeQuietly( stream );
 		}
 	}
 
@@ -358,7 +349,7 @@ public final class JavaPluginLoader implements PluginLoader
 
 		List<String> depend = description.getDepend();
 		if ( depend == null )
-			depend = ImmutableList.<String> of();
+			depend = ImmutableList.of();
 
 		for ( String pluginName : depend )
 		{
@@ -389,7 +380,7 @@ public final class JavaPluginLoader implements PluginLoader
 		if ( description.getNatives().size() > 0 )
 			try
 			{
-				FileFunc.extractNatives( description.getNatives(), file, dataFolder );
+				ZIO.extractNatives( description.getNatives(), file, dataFolder );
 			}
 			catch ( IOException e )
 			{
@@ -397,7 +388,7 @@ public final class JavaPluginLoader implements PluginLoader
 			}
 
 		// Attempts to extract bundled library files
-		FileFunc.extractLibraries( file, dataFolder );
+		ZIO.extractLibraries( file, dataFolder );
 
 		return loader.plugin;
 	}

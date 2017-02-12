@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql;
 
@@ -605,9 +607,9 @@ public class SQLResultSet implements ResultSet
 	}
 
 	@Override
-	public final boolean isWrapperFor( Class<?> iface ) throws SQLException
+	public final boolean isWrapperFor( Class<?> iFace ) throws SQLException
 	{
-		return result.isWrapperFor( iface );
+		return result.isWrapperFor( iFace );
 	}
 
 	@Override
@@ -683,9 +685,9 @@ public class SQLResultSet implements ResultSet
 	}
 
 	@Override
-	public final <T> T unwrap( Class<T> iface ) throws SQLException
+	public final <T> T unwrap( Class<T> iFace ) throws SQLException
 	{
-		return result.unwrap( iface );
+		return result.unwrap( iFace );
 	}
 
 	@Override

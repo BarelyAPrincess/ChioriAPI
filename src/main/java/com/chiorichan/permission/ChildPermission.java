@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission;
 
@@ -18,7 +20,7 @@ public final class ChildPermission implements Comparable<ChildPermission>
 	 * References a permission state/value against an entity
 	 *
 	 * @param entity
-	 *             The PermissiblEntity
+	 *             The PermissibleEntity
 	 * @param perm
 	 *             The permission this value ordains to
 	 * @param value

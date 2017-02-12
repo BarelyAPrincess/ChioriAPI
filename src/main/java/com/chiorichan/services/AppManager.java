@@ -3,16 +3,18 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.services;
 
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.services.ServiceRegisterEvent;
 import com.chiorichan.event.services.ServiceUnregisterEvent;
+import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.logger.Log;
-import com.chiorichan.util.ObjectFunc;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -160,7 +162,7 @@ public class AppManager<T extends ServiceManager>
 	{
 		synchronized ( providers )
 		{
-			return ImmutableSet.<Class<?>>copyOf( providers.keySet() );
+			return ImmutableSet.copyOf( providers.keySet() );
 		}
 	}
 
@@ -221,9 +223,9 @@ public class AppManager<T extends ServiceManager>
 			List<RegisteredServiceProvider<?, ServiceProvider>> registered = providers.get( service );
 
 			if ( registered == null )
-				return ImmutableList.<RegisteredServiceProvider<C, ServiceProvider>>of();
+				return ImmutableList.of();
 
-			ret = ImmutableList.<RegisteredServiceProvider<C, ServiceProvider>>builder();
+			ret = ImmutableList.builder();
 
 			for ( RegisteredServiceProvider<?, ServiceProvider> provider : registered )
 				ret.add( ( RegisteredServiceProvider<C, ServiceProvider> ) provider );
@@ -241,7 +243,7 @@ public class AppManager<T extends ServiceManager>
 	 */
 	public List<RegisteredServiceProvider<?, ServiceProvider>> getServiceRegistrations( ObjectContext context )
 	{
-		ImmutableList.Builder<RegisteredServiceProvider<?, ServiceProvider>> ret = ImmutableList.<RegisteredServiceProvider<?, ServiceProvider>>builder();
+		ImmutableList.Builder<RegisteredServiceProvider<?, ServiceProvider>> ret = ImmutableList.builder();
 		synchronized ( providers )
 		{
 			for ( List<RegisteredServiceProvider<?, ServiceProvider>> registered : providers.values() )
@@ -259,7 +261,7 @@ public class AppManager<T extends ServiceManager>
 		if ( instance != null )
 			throw new IllegalStateException( "The " + getName() + " has already been initialized!" );
 
-		instance = ObjectFunc.initClass( managerClass, args );
+		instance = ZObjects.initClass( managerClass, args );
 		instance.init();
 	}
 
@@ -351,6 +353,7 @@ public class AppManager<T extends ServiceManager>
 			}
 			catch ( NoSuchElementException e )
 			{
+				// Ignore
 			}
 		}
 		for ( ServiceUnregisterEvent<?> event : unregisteredEvents )
@@ -404,6 +407,7 @@ public class AppManager<T extends ServiceManager>
 			}
 			catch ( NoSuchElementException e )
 			{
+				// Ignore
 			}
 		}
 		for ( ServiceUnregisterEvent<?> event : unregisteredEvents )
@@ -456,6 +460,7 @@ public class AppManager<T extends ServiceManager>
 			}
 			catch ( NoSuchElementException e )
 			{
+				// Ignore
 			}
 		}
 		for ( ServiceUnregisterEvent<?> event : unregisteredEvents )

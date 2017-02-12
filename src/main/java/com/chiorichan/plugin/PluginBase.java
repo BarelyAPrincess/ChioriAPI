@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.plugin;
 
@@ -139,7 +141,7 @@ public abstract class PluginBase implements EventRegistrar, TaskRegistrar, Libra
 	public abstract void onEnable() throws PluginException;
 
 	/**
-	 * Called after a plugin is loaded but before it has been enabled. When mulitple plugins are loaded, the onLoad() for all plugins is called before any onEnable() is called.
+	 * Called after a plugin is loaded but before it has been enabled. When multiple plugins are loaded, the onLoad() for all plugins is called before any onEnable() is called.
 	 */
 	public abstract void onLoad() throws PluginException;
 

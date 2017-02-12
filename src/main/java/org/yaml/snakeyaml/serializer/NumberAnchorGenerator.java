@@ -19,6 +19,7 @@ public class NumberAnchorGenerator implements AnchorGenerator {
         this.lastAnchorId = lastAnchorId;
     }
 
+    @Override
     public String nextAnchor(Node node) {
         this.lastAnchorId++;
         NumberFormat format = NumberFormat.getNumberInstance();

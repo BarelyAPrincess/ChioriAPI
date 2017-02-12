@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
  */
 public class Ansi
 {
-	public static enum Attribute
+	public enum Attribute
 	{
 		RESET( 0, "RESET" ),
 		INTENSITY_BOLD( 1, "INTENSITY_BOLD" ),
@@ -60,7 +60,7 @@ public class Ansi
 		}
 
 	}
-	public static enum Color
+	public enum Color
 	{
 		BLACK( 0, "BLACK" ), RED( 1, "RED" ), GREEN( 2, "GREEN" ), YELLOW( 3, "YELLOW" ), BLUE( 4, "BLUE" ), MAGENTA( 5, "MAGENTA" ), CYAN( 6, "CYAN" ), WHITE( 7, "WHITE" ), DEFAULT( 9, "DEFAULT" );
 
@@ -105,7 +105,7 @@ public class Ansi
 		}
 	}
 
-	public static enum Erase
+	public enum Erase
 	{
 		FORWARD( 0, "FORWARD" ), BACKWARD( 1, "BACKWARD" ), ALL( 2, "ALL" );
 
@@ -128,7 +128,7 @@ public class Ansi
 		{
 			return value;
 		}
-	};
+	}
 
 	private static class NoAnsi extends Ansi
 	{
@@ -282,9 +282,9 @@ public class Ansi
 		{
 			return this;
 		}
-	};
+	}
 
-	private static final char FIRST_ESC_CHAR = 27;;
+	private static final char FIRST_ESC_CHAR = 27;
 
 	private static final char SECOND_ESC_CHAR = '[';
 

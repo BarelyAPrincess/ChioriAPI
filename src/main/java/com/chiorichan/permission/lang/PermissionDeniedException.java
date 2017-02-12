@@ -3,7 +3,9 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.permission.lang;
 
@@ -37,8 +39,8 @@ public class PermissionDeniedException extends PermissionException
 					return "This page is limited to server operators only!";
 				case DENIED:
 					if ( perm != null )
-						return "This page is limited to logins with access to the \"" + perm.getNamespace() + "\" permission.";
-					return "This page is limited to logins with an unspecified permission.";
+						return "You do not possess the permission \"" + perm.getNamespace() + "\", which is required to view this page.";
+					return "You do not possess the permissions required to view this page.";
 				default:
 					return "<Unknown Reason>";
 			}

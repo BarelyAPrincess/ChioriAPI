@@ -92,6 +92,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentNull implements Represent {
+        @Override
         public Node representData(Object data) {
             return representScalar(Tag.NULL, "null");
         }
@@ -100,6 +101,7 @@ class SafeRepresenter extends BaseRepresenter {
     public static Pattern MULTILINE_PATTERN = Pattern.compile("\n|\u0085|\u2028|\u2029");
 
     protected class RepresentString implements Represent {
+        @Override
         public Node representData(Object data) {
             Tag tag = Tag.STR;
             Character style = null;
@@ -125,6 +127,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentBoolean implements Represent {
+        @Override
         public Node representData(Object data) {
             String value;
             if (Boolean.TRUE.equals(data)) {
@@ -137,6 +140,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentNumber implements Represent {
+        @Override
         public Node representData(Object data) {
             Tag tag;
             String value;
@@ -162,6 +166,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentList implements Represent {
+        @Override
         @SuppressWarnings("unchecked")
         public Node representData(Object data) {
             return representSequence(getTag(data.getClass(), Tag.SEQ), (List<Object>) data, null);
@@ -169,6 +174,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentIterator implements Represent {
+        @Override
         @SuppressWarnings("unchecked")
         public Node representData(Object data) {
             Iterator<Object> iter = (Iterator<Object>) data;
@@ -184,12 +190,14 @@ class SafeRepresenter extends BaseRepresenter {
             this.iter = iter;
         }
 
+        @Override
         public Iterator<Object> iterator() {
             return iter;
         }
     }
 
     protected class RepresentArray implements Represent {
+        @Override
         public Node representData(Object data) {
             Object[] array = (Object[]) data;
             List<Object> list = Arrays.asList(array);
@@ -203,6 +211,7 @@ class SafeRepresenter extends BaseRepresenter {
      * autoboxing type.
      */
     protected class RepresentPrimitiveArray implements Represent {
+        @Override
         public Node representData(Object data) {
             Class<?> type = data.getClass().getComponentType();
 
@@ -293,6 +302,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentMap implements Represent {
+        @Override
         @SuppressWarnings("unchecked")
         public Node representData(Object data) {
             return representMapping(getTag(data.getClass(), Tag.MAP), (Map<Object, Object>) data,
@@ -301,6 +311,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentSet implements Represent {
+        @Override
         @SuppressWarnings("unchecked")
         public Node representData(Object data) {
             Map<Object, Object> value = new LinkedHashMap<Object, Object>();
@@ -313,6 +324,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentDate implements Represent {
+        @Override
         public Node representData(Object data) {
             // because SimpleDateFormat ignores timezone we have to use Calendar
             Calendar calendar;
@@ -389,6 +401,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentEnum implements Represent {
+        @Override
         public Node representData(Object data) {
             Tag tag = new Tag(data.getClass());
             return representScalar(getTag(data.getClass(), tag), ((Enum<?>) data).name());
@@ -396,6 +409,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentByteArray implements Represent {
+        @Override
         public Node representData(Object data) {
             char[] binary = Base64Coder.encode((byte[]) data);
             return representScalar(Tag.BINARY, String.valueOf(binary), '|');
@@ -411,6 +425,7 @@ class SafeRepresenter extends BaseRepresenter {
     }
 
     protected class RepresentUuid implements Represent {
+        @Override
         public Node representData(Object data) {
             return representScalar(getTag(data.getClass(), new Tag(UUID.class)), data.toString());
         }

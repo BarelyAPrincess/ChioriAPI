@@ -3,18 +3,11 @@
  * of the MIT license.  See the LICENSE file for details.
  *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
- * All Rights Reserved
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ *
+ * All Rights Reserved.
  */
 package com.chiorichan.account.types;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountContext;
@@ -25,15 +18,23 @@ import com.chiorichan.account.event.AccountLookupEvent;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
-import com.chiorichan.configuration.file.YamlConfiguration;
+import com.chiorichan.configuration.types.yaml.YamlConfiguration;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.util.FileFunc;
-import com.chiorichan.util.ObjectFunc;
+import com.chiorichan.zutils.ZIO;
+import com.chiorichan.zutils.ZObjects;
 import com.google.common.collect.Maps;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Handles Accounts that are loaded from File
@@ -44,7 +45,6 @@ public class FileTypeCreator extends AccountTypeCreator
 
 	private List<String> accountFields;
 	private File accountsDirectory = null;
-	private boolean enabled = true;
 
 	private Map<String, AccountContext> preloaded = Maps.newHashMap();
 
@@ -52,8 +52,8 @@ public class FileTypeCreator extends AccountTypeCreator
 	{
 		accountsDirectory = AppConfig.get().getDirectory( "accounts", "accounts" );
 
-		if ( !FileFunc.setDirectoryAccess( accountsDirectory ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + FileFunc.relPath( accountsDirectory ) + "\"!" );
+		if ( !ZIO.setDirectoryAccess( accountsDirectory ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( accountsDirectory ) + "\"!" );
 
 		accountFields = AppConfig.get().getStringList( "accounts.fileType.fields", new ArrayList<String>() );
 
@@ -156,7 +156,7 @@ public class FileTypeCreator extends AccountTypeCreator
 	@Override
 	public boolean isEnabled()
 	{
-		return enabled;
+		return true;
 	}
 
 	public AccountContext loadFromFile( File absoluteFilePath )
@@ -247,7 +247,7 @@ public class FileTypeCreator extends AccountTypeCreator
 	 */
 
 	@Override
-	public void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... creds ) throws AccountException
+	public void preLogin( AccountMeta meta, AccountPermissible via, String acctId, Object... credentials ) throws AccountException
 	{
 		if ( meta.getInteger( "numloginfail" ) > 5 )
 			if ( meta.getInteger( "lastloginfail" ) > Timings.epoch() - 1800 )
@@ -262,7 +262,7 @@ public class FileTypeCreator extends AccountTypeCreator
 		AccountContext context = null;
 
 		if ( acctId == null || acctId.isEmpty() )
-			throw new AccountException( AccountDescriptiveReason.EMPTY_ACCTID, AccountType.ACCOUNT_NONE );
+			throw new AccountException( AccountDescriptiveReason.EMPTY_ID, AccountType.ACCOUNT_NONE );
 
 		checkForFiles();
 
@@ -275,7 +275,7 @@ public class FileTypeCreator extends AccountTypeCreator
 			}
 
 			for ( String f : accountFields )
-				if ( context1.getValues().get( f ) != null && ObjectFunc.castToString( context1.getValues().get( f ) ).equalsIgnoreCase( acctId ) )
+				if ( context1.getValues().get( f ) != null && ZObjects.castToString( context1.getValues().get( f ) ).equalsIgnoreCase( acctId ) )
 				{
 					context = context1;
 					break;
