@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.permission;
@@ -12,6 +12,7 @@ package com.chiorichan.permission;
 import com.chiorichan.account.AccountType;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.lang.EnumColor;
+import com.chiorichan.logger.Log;
 import com.chiorichan.permission.event.PermissibleEntityEvent;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.services.ProviderChild;
@@ -151,6 +152,11 @@ public abstract class PermissibleEntity implements ProviderChild
 	{
 		ZObjects.notNull( perm );
 		ZObjects.notNull( refs );
+
+		getPermissionNames( References.format( "" ) ).stream().forEach( s ->
+		{
+			Log.get().debug( "Permission Debug for " + getId() + ": " + s );
+		} );
 
 		/*
 		 * We cache the results to reduce lag when a permission is checked multiple times over.

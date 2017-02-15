@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.query;
@@ -44,6 +44,7 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	private final List<String> fields = new LinkedList<>();
 	private boolean orderAscending = true;
 	private boolean needsUpdate = true;
+	private boolean orderRand = false;
 	private int offset = -1;
 	private int limit = -1;
 	private String table;
@@ -239,6 +240,22 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	}
 
 	@Override
+	public SQLQuerySelect rand()
+	{
+		return rand( true );
+	}
+
+	@Override
+	public SQLQuerySelect rand( boolean rand )
+	{
+		if ( rand )
+			orderBy.clear();
+		orderRand = rand;
+		needsUpdate = rand;
+		return this;
+	}
+
+	@Override
 	public int rowCount()
 	{
 		try
@@ -314,7 +331,9 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 			if ( groupBy.size() > 0 )
 				segments.add( "GROUP BY " + Joiner.on( ", " ).join( ZStrings.wrap( groupBy, '`' ) ) );
 
-			if ( orderBy.size() > 0 )
+			if ( orderRand )
+				segments.add( "ORDER BY RAND()" );
+			else if ( orderBy.size() > 0 )
 				segments.add( "ORDER BY " + Joiner.on( ", " ).join( ZStrings.wrap( orderBy, '`' ) ) + ( orderAscending ? " ASC" : " DESC" ) );
 
 			if ( limit() > 0 )
