@@ -9,22 +9,12 @@
  */
 package com.chiorichan.helpers;
 
-import com.chiorichan.zutils.ZObjects;
-import com.chiorichan.zutils.ZStrings;
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class Namespace extends NamespaceBase<Namespace> implements Cloneable
+public class Namespace extends NamespaceBase<Namespace>
 {
 	public static Namespace parseString( String namespace )
 	{

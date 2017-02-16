@@ -15,7 +15,7 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class NamespaceBase<T extends NamespaceBase>
+public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneable
 {
 	protected static Pattern rangeExpression = Pattern.compile( "(0-9+)-(0-9+)" );
 
