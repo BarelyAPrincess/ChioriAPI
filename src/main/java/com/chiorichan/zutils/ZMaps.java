@@ -57,4 +57,14 @@ public class ZMaps
 			}
 		}};
 	}
+
+	public static <K, V> Map<K, V> newHashMap( K key, V val )
+	{
+		return new HashMap<K, V>()
+		{
+			{
+				put( key, val );
+			}
+		};
+	}
 }

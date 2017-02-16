@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.permission.backend.sql;
@@ -26,7 +26,7 @@ import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.permission.PermissionValue;
 import com.chiorichan.permission.References;
-import com.chiorichan.helpers.PermissionNamespace;
+import com.chiorichan.permission.PermissionNamespace;
 
 public class SQLEntity extends PermissibleEntity
 {
@@ -76,7 +76,7 @@ public class SQLEntity extends PermissibleEntity
 			if ( select.rowCount() > 0 )
 				for ( Map<String, String> row : select.stringSet() )
 				{
-					PermissionNamespace ns = new PermissionNamespace( row.get( "permission" ) );
+					PermissionNamespace ns = PermissionNamespace.parseString( row.get( "permission" ) );
 
 					if ( !ns.containsOnlyValidChars() )
 					{

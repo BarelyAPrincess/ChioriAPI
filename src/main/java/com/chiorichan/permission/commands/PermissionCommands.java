@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.permission.commands;
@@ -18,7 +18,7 @@ import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.permission.PermissionType;
 import com.chiorichan.terminal.commands.advanced.CommandHandler;
-import com.chiorichan.helpers.PermissionNamespace;
+import com.chiorichan.permission.PermissionNamespace;
 
 /**
  * Manages permissions
@@ -42,7 +42,7 @@ public class PermissionCommands extends PermissionBaseCommand
 			return;
 		}
 
-		PermissionNamespace ns = new PermissionNamespace( args.get( "node" ) );
+		PermissionNamespace ns = PermissionNamespace.parseString( args.get( "node" ) );
 
 		ns.createPermission( type );
 

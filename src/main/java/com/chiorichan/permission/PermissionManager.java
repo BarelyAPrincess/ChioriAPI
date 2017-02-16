@@ -18,7 +18,6 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.event.EventPriority;
 import com.chiorichan.event.EventRegistrar;
-import com.chiorichan.helpers.PermissionNamespace;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.logger.Log;
 import com.chiorichan.permission.backend.file.FileBackend;
@@ -207,6 +206,9 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 	 */
 	public Permission createNode( String namespace, PermissionType type )
 	{
+		if ( isDebug() )
+			getLogger().info( EnumColor.YELLOW + "Created permission " + namespace + " as type " + type.name() );
+
 		String[] nodes = namespace.split( "\\." );
 
 		if ( nodes.length < 1 )
@@ -530,7 +532,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 	public List<Permission> getNodes( String ns )
 	{
-		return getNodes( new PermissionNamespace( ns ) );
+		return getNodes( PermissionNamespace.parseString( ns ) );
 	}
 
 	public Collection<String> getReferences()
@@ -540,7 +542,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 	public Collection<String> getRefInheritance( String ref )
 	{
-		return refInheritance.containsKey( ref ) ? refInheritance.get( ref ) : new HashSet<String>();
+		return refInheritance.containsKey( ref ) ? refInheritance.get( ref ) : new HashSet<>();
 	}
 
 	protected Permission getRootNode( String name )

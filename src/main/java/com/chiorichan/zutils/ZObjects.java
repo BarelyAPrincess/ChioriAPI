@@ -86,13 +86,18 @@ public class ZObjects
 
 	public static Boolean castToBool( Object value )
 	{
+		return castToBool( value, false );
+	}
+
+	public static Boolean castToBool( Object value, Boolean def )
+	{
 		try
 		{
 			return castToBoolWithException( value );
 		}
 		catch ( Exception e )
 		{
-			return false;
+			return def;
 		}
 	}
 
@@ -130,13 +135,18 @@ public class ZObjects
 
 	public static Double castToDouble( Object value )
 	{
+		return castToDouble( value, 0D );
+	}
+
+	public static Double castToDouble( Object value, Double def )
+	{
 		try
 		{
 			return castToDoubleWithException( value );
 		}
 		catch ( Exception e )
 		{
-			return 0D;
+			return def;
 		}
 	}
 
@@ -163,13 +173,18 @@ public class ZObjects
 
 	public static Integer castToInt( Object value )
 	{
+		return castToInt( value, -1 );
+	}
+
+	public static Integer castToInt( Object value, Integer def )
+	{
 		try
 		{
 			return castToIntWithException( value );
 		}
 		catch ( Exception e )
 		{
-			return -1;
+			return def;
 		}
 	}
 
@@ -199,14 +214,18 @@ public class ZObjects
 
 	public static Long castToLong( Object value )
 	{
+		return castToLong( value, 0L );
+	}
+
+	public static Long castToLong( Object value, Long def )
+	{
 		try
 		{
 			return castToLongWithException( value );
 		}
 		catch ( ClassCastException e )
 		{
-			e.printStackTrace();
-			return 0L;
+			return def;
 		}
 	}
 
@@ -233,13 +252,18 @@ public class ZObjects
 
 	public static String castToString( Object value )
 	{
+		return castToString( value, null );
+	}
+
+	public static String castToString( Object value, String def )
+	{
 		try
 		{
 			return castToStringWithException( value );
 		}
 		catch ( ClassCastException e )
 		{
-			return null;
+			return def;
 		}
 	}
 

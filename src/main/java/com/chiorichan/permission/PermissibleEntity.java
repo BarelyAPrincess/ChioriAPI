@@ -153,11 +153,6 @@ public abstract class PermissibleEntity implements ProviderChild
 		ZObjects.notNull( perm );
 		ZObjects.notNull( refs );
 
-		getPermissionNames( References.format( "" ) ).stream().forEach( s ->
-		{
-			Log.get().debug( "Permission Debug for " + getId() + ": " + s );
-		} );
-
 		/*
 		 * We cache the results to reduce lag when a permission is checked multiple times over.
 		 */
