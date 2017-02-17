@@ -813,6 +813,18 @@ public class ZIO
 		return file.exists() && file.isDirectory() && file.list().length == 0;
 	}
 
+	public static String getFileName( String path )
+	{
+		path = path.replace( "\\/", "/" );
+		if ( path.contains( File.pathSeparator ) )
+			return path.substring( path.lastIndexOf( File.pathSeparator ) + 1 );
+		if ( path.contains( "/" ) )
+			return path.substring( path.lastIndexOf( "/" ) + 1 );
+		if ( path.contains( "\\" ) )
+			return path.substring( path.lastIndexOf( "\\" ) + 1 );
+		return path;
+	}
+
 	static class LibraryPath
 	{
 		private List<String> libPath;
@@ -833,7 +845,7 @@ public class ZIO
 
 		void read()
 		{
-			libPath = new ArrayList<String>( Splitter.on( ":" ).splitToList( System.getProperty( "java.library.path" ) ) );
+			libPath = new ArrayList<>( Splitter.on( ":" ).splitToList( System.getProperty( "java.library.path" ) ) );
 		}
 
 		void set()

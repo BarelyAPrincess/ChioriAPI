@@ -15,6 +15,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.awt.Color;
@@ -75,20 +76,14 @@ public class ZStrings
 	/**
 	 * Copies all elements from the iterable collection of originals to the collection provided.
 	 *
-	 * @param token
-	 *             String to search for
-	 * @param originals
-	 *             An iterable collection of strings to filter.
-	 * @param collection
-	 *             The collection to add matches to
+	 * @param token      String to search for
+	 * @param originals  An iterable collection of strings to filter.
+	 * @param collection The collection to add matches to
 	 * @return the collection provided that would have the elements copied into
-	 * @throws UnsupportedOperationException
-	 *              if the collection is immutable and originals contains a string which starts with the specified search
-	 *              string.
-	 * @throws IllegalArgumentException
-	 *              if any parameter is is null
-	 * @throws IllegalArgumentException
-	 *              if originals contains a null element. <b>Note: the collection may be modified before this is thrown</b>
+	 * @throws UnsupportedOperationException if the collection is immutable and originals contains a string which starts with the specified search
+	 *                                       string.
+	 * @throws IllegalArgumentException      if any parameter is is null
+	 * @throws IllegalArgumentException      if originals contains a null element. <b>Note: the collection may be modified before this is thrown</b>
 	 */
 	public static <T extends Collection<String>> T copyPartialMatches( final String token, final Iterable<String> originals, final T collection ) throws UnsupportedOperationException, IllegalArgumentException
 	{
@@ -111,8 +106,7 @@ public class ZStrings
 	/**
 	 * Determines if a string is all lowercase using the toLowerCase() method.
 	 *
-	 * @param str
-	 *             The string to check
+	 * @param str The string to check
 	 * @return Is it all lowercase?
 	 */
 	public static boolean isLowercase( String str )
@@ -123,8 +117,7 @@ public class ZStrings
 	/**
 	 * Determines if a string is all uppercase using the toUpperCase() method.
 	 *
-	 * @param str
-	 *             The string to check
+	 * @param str The string to check
 	 * @return Is it all uppercase?
 	 */
 	public static boolean isUppercase( String str )
@@ -297,15 +290,11 @@ public class ZStrings
 	 * This method uses a substring to check case-insensitive equality. This means the internal array does not need to be
 	 * copied like a toLowerCase() call would.
 	 *
-	 * @param string
-	 *             String to check
-	 * @param prefix
-	 *             Prefix of string to compare
+	 * @param string String to check
+	 * @param prefix Prefix of string to compare
 	 * @return true if provided string starts with, ignoring case, the prefix provided
-	 * @throws NullPointerException
-	 *              if prefix is null
-	 * @throws IllegalArgumentException
-	 *              if string is null
+	 * @throws NullPointerException     if prefix is null
+	 * @throws IllegalArgumentException if string is null
 	 */
 	public static boolean startsWithIgnoreCase( final String string, final String prefix ) throws IllegalArgumentException, NullPointerException
 	{
@@ -339,8 +328,7 @@ public class ZStrings
 	/**
 	 * Scans a string list for entries that are not lower case.
 	 *
-	 * @param strings
-	 *             The original list to check.
+	 * @param strings The original list to check.
 	 * @return Lowercase string array.
 	 */
 	public static String[] toLowerCase( Collection<String> strings )
@@ -355,8 +343,7 @@ public class ZStrings
 	/**
 	 * Scans a string array for entries that are not lower case.
 	 *
-	 * @param array
-	 *             The original array to check.
+	 * @param array The original array to check.
 	 * @return The corrected string array.
 	 */
 	public static String[] toLowerCase( String... array )
@@ -377,8 +364,7 @@ public class ZStrings
 	/**
 	 * Scans a string array for entries that are not lower case.
 	 *
-	 * @param array
-	 *             The original array to check.
+	 * @param array The original array to check.
 	 * @return The corrected string array.
 	 */
 	public static Collection<String> toLowerCaseList( String... array )
@@ -389,10 +375,8 @@ public class ZStrings
 	/**
 	 * Trim specified character from both ends of a String
 	 *
-	 * @param text
-	 *             Text
-	 * @param character
-	 *             Character to remove
+	 * @param text      Text
+	 * @param character Character to remove
 	 * @return Trimmed text
 	 */
 	public static String trimAll( String text, char character )
@@ -405,10 +389,8 @@ public class ZStrings
 	/**
 	 * Trim specified character from end of string
 	 *
-	 * @param text
-	 *             Text
-	 * @param character
-	 *             Character to remove
+	 * @param text      Text
+	 * @param character Character to remove
 	 * @return Trimmed text
 	 */
 	public static String trimEnd( String text, char character )
@@ -431,10 +413,8 @@ public class ZStrings
 	/**
 	 * Trim specified character from front of string
 	 *
-	 * @param text
-	 *             Text
-	 * @param character
-	 *             Character to remove
+	 * @param text      Text
+	 * @param character Character to remove
 	 * @return Trimmed text
 	 */
 	public static String trimFront( String text, char character )
@@ -611,5 +591,55 @@ public class ZStrings
 		}
 
 		return false;
+	}
+
+	public static int countInstances( String str, char chr )
+	{
+		int cnt = 0;
+		for ( int i = 0; i < str.length(); i++ )
+			if ( str.charAt( i ) == chr )
+				cnt++;
+		return cnt;
+	}
+
+	public static String capitalizeWordsFully( String str )
+	{
+		return capitalizeWordsFully( str, ' ' );
+	}
+
+	public static String capitalizeWordsFully( String str, char delimiter )
+	{
+		if ( ZObjects.isEmpty( str ) )
+			return str;
+
+		return capitalizeWords( str.toLowerCase(), delimiter );
+	}
+
+	public static String capitalizeWords( String str )
+	{
+		return capitalizeWords( str, ' ' );
+	}
+
+	public static String capitalizeWords( String str, char delimiter )
+	{
+		if ( ZObjects.isEmpty( str ) )
+			return str;
+
+		ZObjects.notNull( delimiter );
+
+		final char[] buffer = str.toCharArray();
+		boolean capitalizeNext = true;
+		for ( int i = 0; i < buffer.length; i++ )
+		{
+			final char ch = buffer[i];
+			if ( ch == delimiter )
+				capitalizeNext = true;
+			else if ( capitalizeNext )
+			{
+				buffer[i] = Character.toTitleCase( ch );
+				capitalizeNext = false;
+			}
+		}
+		return new String( buffer );
 	}
 }
