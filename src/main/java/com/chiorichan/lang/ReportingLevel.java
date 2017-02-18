@@ -42,7 +42,7 @@ public enum ReportingLevel
 	E_WARNING( 0x01, true ),
 	E_ERROR( 0x00, false );
 
-	private static final List<ReportingLevel> enabledErrorLevels = new ArrayList<ReportingLevel>( Arrays.asList( parse( "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
+	private static final List<ReportingLevel> enabledErrorLevels = new ArrayList<>( Arrays.asList( parse( "E_ALL ~E_NOTICE ~E_STRICT ~E_DEPRECATED" ) ) );
 
 	public static boolean disableErrorLevel( ReportingLevel... level )
 	{

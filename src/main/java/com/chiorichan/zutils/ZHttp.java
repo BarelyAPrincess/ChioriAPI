@@ -167,7 +167,7 @@ public class ZHttp
 		HttpURLConnection conn = ( HttpURLConnection ) url.openConnection();
 		conn.setDoInput( true );
 		conn.setDoOutput( false );
-		System.setProperty( "com.chiorichan.http.agent", getUserAgent() );
+		System.setProperty( "http.agent", getUserAgent() );
 		conn.setRequestProperty( "User-Agent", getUserAgent() );
 		HttpURLConnection.setFollowRedirects( true );
 		conn.setUseCaches( false );
