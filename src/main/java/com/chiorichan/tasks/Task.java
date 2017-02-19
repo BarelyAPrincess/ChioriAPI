@@ -9,8 +9,7 @@
  */
 package com.chiorichan.tasks;
 
-
-class Task implements ITask, Runnable
+public class Task implements ITask, Runnable
 {
 	private volatile Task next = null;
 	/**
