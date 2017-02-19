@@ -12,7 +12,6 @@ package com.chiorichan.permission;
 import com.chiorichan.account.AccountType;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.logger.Log;
 import com.chiorichan.permission.event.PermissibleEntityEvent;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.services.ProviderChild;
@@ -537,9 +536,18 @@ public abstract class PermissibleEntity implements ProviderChild
 		return result.isTrue( false );
 	}
 
+	public void setBanned( boolean banned )
+	{
+		PermissionResult result = checkPermission( PermissionDefault.BANNED.getNode() );
+		if ( banned )
+			result.assign();
+		else
+			result.unassign();
+	}
+
 	public boolean isBanned()
 	{
-		// You can't ban an OP entity
+		// You can't ban an OP entity, unless OPs are disabled.
 		if ( PermissionManager.allowOps && isOp() )
 			return false;
 
@@ -574,9 +582,21 @@ public abstract class PermissibleEntity implements ProviderChild
 		return virtual;
 	}
 
+	public void setWhitelisted( boolean whitelist )
+	{
+		PermissionResult result = checkPermission( PermissionDefault.WHITELISTED.getNode() );
+		if ( whitelist )
+			result.assign();
+		else
+			result.unassign();
+	}
+
 	public boolean isWhitelisted()
 	{
-		if ( !PermissionManager.instance().hasWhitelist() || PermissionManager.allowOps && isOp() )
+		if ( isBanned() )
+			return false;
+
+		if ( !PermissionManager.instance().hasWhitelist() || PermissionManager.allowOps && isOp() || isAdminOnly() || isNoneAccount() )
 			return true;
 
 		PermissionResult result = checkPermission( PermissionDefault.WHITELISTED.getNode() );

@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.permission;
@@ -51,6 +51,11 @@ public class PermissionResult
 		return assign( null );
 	}
 
+	public PermissionResult assign( References refs )
+	{
+		return assign( null, refs );
+	}
+
 	public PermissionResult assign( Object val, References refs )
 	{
 		if ( refs == null )
@@ -62,9 +67,20 @@ public class PermissionResult
 		return this;
 	}
 
-	public PermissionResult assign( References refs )
+	public PermissionResult unassign()
 	{
-		return assign( null, refs );
+		return assign( null );
+	}
+
+	public PermissionResult unassign( References refs )
+	{
+		if ( refs == null )
+			refs = References.format();
+
+		entity.removePermission( perm, refs );
+
+		recalculatePermissions();
+		return this;
 	}
 
 	/**
