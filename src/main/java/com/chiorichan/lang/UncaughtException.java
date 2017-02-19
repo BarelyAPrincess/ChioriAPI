@@ -85,9 +85,9 @@ public class UncaughtException extends RuntimeException implements IException
 	}
 
 	@Override
-	public boolean handle( ExceptionReport report, ExceptionContext context )
+	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 	{
-		return false;
+		return ReportingLevel.E_UNHANDLED;
 	}
 
 	@Override

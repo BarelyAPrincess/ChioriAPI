@@ -31,6 +31,7 @@ public enum ReportingLevel
 	L_SUCCESS( 0xf1, true ),
 	L_DEFAULT( 0xf0, true ),
 
+	E_UNHANDLED( 0x10, false ),
 	E_DEPRECATED( 0x09, true ),
 	E_IGNORABLE( 0x08, true ),
 	E_STRICT( 0x07, false ),

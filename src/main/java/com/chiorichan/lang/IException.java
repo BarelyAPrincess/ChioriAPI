@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.lang;
@@ -13,8 +13,8 @@ public interface IException
 {
 	static void check( IException t )
 	{
-		if ( ! ( t instanceof Throwable ) )
-			throw new IllegalArgumentException( "IException must be implemented by java.lang.Throwable only, this is a serious programming bug!" );
+		if ( !( t instanceof Throwable ) )
+			throw new IllegalArgumentException( "IException interface can only be implemented by class that also extent java.lang.Throwable, this is a serious programming bug!" );
 	}
 
 	Throwable getCause();
@@ -28,13 +28,11 @@ public interface IException
 	 * <p/>
 	 * Typically you would just add your exception to the report with {@code report.addException( this );} and provide some possible unique debug information, if any exists.
 	 *
-	 * @param report
-	 *             The ExceptionReport to fill
-	 * @param context
-	 *             The Exception Context
-	 * @return Did this method successfully handle the reporting of this exception. On false, the application will make up it's own conclusion.
+	 * @param report  The ExceptionReport to fill
+	 * @param context The Exception Context
+	 * @return The reporting level produced by this handler, returning null will cause the application to conclude it's own handling procedure, which is essentially the same as returning {@link ReportingLevel#E_UNHANDLED}.
 	 */
-	boolean handle( ExceptionReport report, ExceptionContext context );
+	ReportingLevel handle( ExceptionReport report, ExceptionContext context );
 
 	boolean isIgnorable();
 

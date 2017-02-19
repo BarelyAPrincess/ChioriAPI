@@ -10,11 +10,11 @@
 package com.chiorichan.lang;
 
 import com.chiorichan.logger.Log;
+import com.chiorichan.zutils.ZObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.Validate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -128,91 +128,84 @@ public class ExceptionReport
 	 */
 	public final boolean handleException( Throwable cause, ExceptionContext context )
 	{
-		// ScriptingResult result = context.result();
-
-		if ( cause == null )
+		if ( ZObjects.isNull( cause ) )
 			return false;
 
+		/* Give an IException a chance to self-handle the exception report */
 		if ( cause instanceof IException )
-			return ( ( IException ) cause ).handle( this, context );
-		else if ( cause instanceof MultipleException )
+		{
+			// TODO Might not be desirable if a handle method was to return severe but not provide any exception or debug information to the ExceptionReport
+			ReportingLevel reportingLevel = ( ( IException ) cause ).handle( this, context );
+			if ( reportingLevel != null )
+				return !reportingLevel.isIgnorable();
+		}
+
+		/* Parse each IException and return true if one or more IExceptions produced NonIgnorableExceptions */
+		if ( cause instanceof MultipleException )
 		{
 			boolean abort = false;
 			for ( IException e : ( ( MultipleException ) cause ).getExceptions() )
 			{
 				IException.check( e );
 				if ( handleException( ( Throwable ) e, context ) )
-				{
 					abort = true;
-					break;
-				}
 			}
 			return abort;
 		}
-		else if ( cause instanceof NullPointerException || cause instanceof ArrayIndexOutOfBoundsException || cause instanceof IOException || cause instanceof StackOverflowError || cause instanceof ClassFormatError )
+
+		Map<Class<? extends Throwable>, ExceptionCallback> assignable = new HashMap<>();
+
+		for ( Entry<Class<? extends Throwable>, ExceptionCallback> entry : registered.entrySet() )
+			if ( cause.getClass().equals( entry.getKey() ) )
+			{
+				ReportingLevel e = entry.getValue().callback( cause, this, context );
+				if ( e != null )
+					return !e.isIgnorable();
+			}
+			else if ( entry.getKey().isAssignableFrom( cause.getClass() ) )
+				assignable.put( entry.getKey(), entry.getValue() );
+
+		if ( assignable.size() == 1 )
 		{
-			addException( ReportingLevel.E_ERROR, cause );
-			return true;
+			ReportingLevel e = assignable.values().toArray( new ExceptionCallback[0] )[0].callback( cause, this, context );
+			if ( e != null )
+				return !e.isIgnorable();
 		}
-		else
-		{
-			boolean handled = false;
-
-			Map<Class<? extends Throwable>, ExceptionCallback> assignable = new HashMap<>();
-
-			for ( Entry<Class<? extends Throwable>, ExceptionCallback> entry : registered.entrySet() )
-				if ( cause.getClass().equals( entry.getKey() ) )
-				{
-					ReportingLevel e = entry.getValue().callback( cause, this, context );
-					if ( e == null )
+		else if ( assignable.size() > 1 )
+			for ( Entry<Class<? extends Throwable>, ExceptionCallback> entry : assignable.entrySet() )
+			{
+				for ( Class<?> iface : cause.getClass().getInterfaces() )
+					if ( iface.equals( entry.getKey() ) )
 					{
-						handled = true;
+						ReportingLevel e = entry.getValue().callback( cause, this, context );
+						if ( e != null )
+							return !e.isIgnorable();
 						break;
 					}
-					else
-						return !e.isIgnorable();
-				}
-				else if ( entry.getKey().isAssignableFrom( cause.getClass() ) )
-					assignable.put( entry.getKey(), entry.getValue() );
 
-			if ( !handled )
-				if ( assignable.size() == 0 )
-				{
-					if ( cause instanceof IException )
-						addException( ( IException ) cause );
-					else
+				Class<?> superClass = cause.getClass();
+				if ( superClass != null )
+					do
 					{
-						Log.get().severe( "Uncaught exception in EvalFactory for exception " + cause.getClass().getName(), cause );
-						addException( ReportingLevel.E_ERROR, "Uncaught exception in EvalFactory", cause );
-					}
-				}
-				else if ( assignable.size() == 1 )
-				{
-					ReportingLevel e = assignable.values().toArray( new ExceptionCallback[0] )[0].callback( cause, this, context );
-					if ( e == null )
-					{
-						addException( ReportingLevel.E_ERROR, cause );
-						return true;
-					}
-					else if ( !e.isIgnorable() )
-						return true;
-				}
-				else
-					for ( Entry<Class<? extends Throwable>, ExceptionCallback> entry : assignable.entrySet() )
-					{
-						boolean noAssignment = true;
-						for ( Class<? extends Throwable> sub : assignable.keySet() )
-							if ( sub != entry.getKey() )
-								if ( sub.isAssignableFrom( entry.getKey() ) )
-									noAssignment = false;
-						if ( noAssignment )
+						if ( superClass.equals( entry.getKey() ) )
 						{
 							ReportingLevel e = entry.getValue().callback( cause, this, context );
-							return e != null && !e.isIgnorable();
+							if ( e != null )
+								return !e.isIgnorable();
+							break;
 						}
+						superClass = cause.getClass();
 					}
-		}
-		return false;
+					while ( superClass != null );
+			}
+
+		/*
+		 * Handle the remainder unhandled run of the mill exceptions
+		 * NullPointerException, ArrayIndexOutOfBoundsException, IOException, StackOverflowError, ClassFormatError
+		 */
+		Log.get().severe( String.format( "The exception %s went unhandled in the EvalFactory.", cause.getClass().getName() ), cause );
+		addException( ReportingLevel.E_UNHANDLED, cause );
+		return true;
 	}
 
 	/**

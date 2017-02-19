@@ -62,8 +62,8 @@ public class EventException extends ApplicationException
 	}
 
 	@Override
-	public boolean handle( ExceptionReport report, ExceptionContext context )
+	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 	{
-		return false;
+		return null;
 	}
 }
