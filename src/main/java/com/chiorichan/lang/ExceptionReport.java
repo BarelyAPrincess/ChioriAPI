@@ -16,10 +16,12 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 
 /**
@@ -31,10 +33,14 @@ public class ExceptionReport
 
 	public static String printExceptions( IException... exceptions )
 	{
+		return printExceptions( Arrays.stream( exceptions ) );
+	}
+
+	public static String printExceptions( Stream<IException> exceptions )
+	{
 		// Might need some better handling for this!
 		StringBuilder sb = new StringBuilder();
-		for ( IException e : exceptions )
-			sb.append( e.getMessage() + "\n" );
+		exceptions.forEach( e -> sb.append( e.getMessage() ).append( "\n" ) );
 		return sb.toString();
 	}
 
@@ -84,39 +90,37 @@ public class ExceptionReport
 	public ExceptionReport addException( ReportingLevel level, String msg, Throwable throwable )
 	{
 		if ( throwable != null )
-			caughtExceptions.add( new UncaughtException( level, msg, throwable ) );
+			if ( throwable instanceof UncaughtException )
+			{
+				( ( UncaughtException ) throwable ).setReportingLevel( level );
+				caughtExceptions.add( ( IException ) throwable );
+			}
+			else
+				caughtExceptions.add( new UncaughtException( level, msg, throwable ) );
 		return this;
 	}
 
 	public ExceptionReport addException( ReportingLevel level, Throwable throwable )
 	{
 		if ( throwable != null )
-			caughtExceptions.add( new UncaughtException( level, throwable ) );
+			if ( throwable instanceof UncaughtException )
+			{
+				( ( UncaughtException ) throwable ).setReportingLevel( level );
+				caughtExceptions.add( ( IException ) throwable );
+			}
+			else
+				caughtExceptions.add( new UncaughtException( level, throwable ) );
 		return this;
 	}
 
-	public IException[] getIgnorableExceptions()
+	public Stream<IException> getIgnorableExceptions()
 	{
-		return new ArrayList<IException>()
-		{
-			{
-				for ( IException e : caughtExceptions )
-					if ( e.reportingLevel().isIgnorable() )
-						add( e );
-			}
-		}.toArray( new IException[0] );
+		return caughtExceptions.stream().filter( e -> e.reportingLevel().isIgnorable() );
 	}
 
-	public IException[] getNotIgnorableExceptions()
+	public Stream<IException> getNotIgnorableExceptions()
 	{
-		return new ArrayList<IException>()
-		{
-			{
-				for ( IException e : caughtExceptions )
-					if ( !e.reportingLevel().isIgnorable() )
-						add( e );
-			}
-		}.toArray( new IException[0] );
+		return caughtExceptions.stream().filter( e -> !e.reportingLevel().isIgnorable() );
 	}
 
 	/**

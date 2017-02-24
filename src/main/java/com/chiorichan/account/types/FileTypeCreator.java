@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account.types;
@@ -23,6 +23,8 @@ import com.chiorichan.event.EventHandler;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.permission.PermissibleEntity;
+import com.chiorichan.permission.Permission;
+import com.chiorichan.permission.PermissionDefault;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.zutils.ZIO;
 import com.chiorichan.zutils.ZObjects;
@@ -334,7 +336,9 @@ public class FileTypeCreator extends AccountTypeCreator
 	@Override
 	public void successInit( AccountMeta meta, PermissibleEntity entity )
 	{
-		// Do Nothing
+		Permission userNode = PermissionDefault.USER.getNode();
+		if ( meta.context().creator() == this && !entity.checkPermission( userNode ).isAssigned() )
+			entity.addPermission( userNode, true, null );
 	}
 
 	@Override

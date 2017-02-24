@@ -191,13 +191,13 @@ public class PluginInformation
 	 * Single author example: <blockquote>
 	 *
 	 * <pre>
-	 * author: CaptainInflamo
+	 * author: BobJones
 	 * </pre>
 	 *
 	 * </blockquote> Multiple author example: <blockquote>
 	 *
 	 * <pre>
-	 * authors: [Cogito, verrier, EvilSeph]
+	 * authors: [ChioriGreene, elfinpen, Joey13]
 	 * </pre>
 	 *
 	 * </blockquote> When both are specified, author will be the first entry in the list, so this example: <blockquote>
@@ -354,8 +354,9 @@ public class PluginInformation
 	 * <li>Possible values are in {@link RunLevel}.
 	 * <li>Defaults to {@link RunLevel#INITIALIZED}.
 	 * <li>Certain caveats apply to each phase.
-	 * <li>When different, {@link #getDepend()}, {@link #getSoftDepend()}, and {@link #getLoadBefore()} become relative in order loaded per-phase. If a plugin loads at <code>STARTUP</code>, but a dependency loads at <code>POSTWORLD</code>, the dependency
-	 * will not be loaded before the plugin is loaded.
+	 * <li>When different, {@link #getDepend()}, {@link #getSoftDepend()}, and {@link #getLoadBefore()}
+	 * become relative in order loaded per-phase. If a plugin loads at <code>STARTUP</code>, but a dependency
+	 * loads at <code>RUNNING</code>, the dependency will not be loaded before the plugin is loaded.
 	 * </ul>
 	 * <p>
 	 * In the plugin.yaml, this entry is named <code>runlevel</code>.
@@ -502,7 +503,7 @@ public class PluginInformation
 				else if ( natives.containsKey( key ) )
 					natives.get( key ).add( section.getString( key ) );
 				else
-					natives.put( key, new ArrayList<String>( Arrays.asList( section.getString( key ) ) ) );
+					natives.put( key, new ArrayList<>( Arrays.asList( section.getString( key ) ) ) );
 
 		return natives;
 

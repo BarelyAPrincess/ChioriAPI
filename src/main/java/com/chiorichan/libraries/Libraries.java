@@ -1,25 +1,13 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.libraries;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.chiorichan.zutils.ZHttp;
-import com.chiorichan.zutils.ZIO;
-import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.DeployWrapper;
@@ -28,6 +16,17 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.logger.Log;
 import com.chiorichan.logger.LogSource;
+import com.chiorichan.zutils.ZHttp;
+import com.chiorichan.zutils.ZIO;
+import org.apache.commons.lang3.Validate;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used as a helper class for retrieving files from the central maven repository
@@ -189,27 +188,29 @@ public class Libraries implements LibrarySource, LogSource
 				Log.get( SELF ).info( ( Log.useColor() ? EnumColor.GOLD : "" ) + "Downloading the library `" + lib.toString() + "` from url `" + urlJar + "`... Please Wait!" );
 
 				// Try download from JCenter Bintray Maven Repository
-				if ( ZHttp.downloadFile( urlPom, mavenLocalPom ) )
+				try
 				{
-					if ( !ZHttp.downloadFile( urlJar, mavenLocalJar ) )
-						return false;
+					ZHttp.downloadFile( urlPom, mavenLocalPom );
+					ZHttp.downloadFile( urlJar, mavenLocalJar );
 				}
-				else
+				catch ( IOException e )
 				{
 					// Try download from alternative Maven Central Repository
-
 					String urlJarAlt = lib.mavenUrlAlt( "jar" );
 					String urlPomAlt = lib.mavenUrlAlt( "pom" );
 
-					if ( urlJar == null || urlJar.isEmpty() || urlPom == null || urlPom.isEmpty() )
-						return false;
+					Log.get( SELF ).warning( "Primary download location failed, trying secondary location `" + urlJarAlt + "`... Please Wait!" );
 
-					Log.get( SELF ).warning( ( Log.useColor() ? EnumColor.GOLD : "" ) + "Primary download location failed, trying alternative url `" + urlJarAlt + "`... Please Wait!" );
-
-					if ( !ZHttp.downloadFile( urlPomAlt, mavenLocalPom ) )
+					try
+					{
+						ZHttp.downloadFile( urlPomAlt, mavenLocalPom );
+						ZHttp.downloadFile( urlJarAlt, mavenLocalJar );
+					}
+					catch ( IOException ee )
+					{
+						Log.get( SELF ).severe( "Primary and secondary download location have FAILED!" );
 						return false;
-					if ( !ZHttp.downloadFile( urlJarAlt, mavenLocalJar ) )
-						return false;
+					}
 				}
 			}
 

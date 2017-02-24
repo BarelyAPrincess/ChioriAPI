@@ -14,9 +14,9 @@ import com.chiorichan.event.EventRegistrar;
 import com.chiorichan.event.Listener;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
+import com.chiorichan.lang.ExceptionContext;
 import com.chiorichan.lang.ExceptionReport;
 import com.chiorichan.lang.IException;
-import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.RunLevel;
 import com.chiorichan.lang.StartupAbortException;
 import com.chiorichan.logger.Log;
@@ -27,12 +27,12 @@ import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.terminal.CommandDispatch;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-public final class AppController implements Runnable, EventRegistrar, TaskRegistrar, Listener
+public final class AppController implements Runnable, EventRegistrar, TaskRegistrar, Listener, ExceptionContext
 {
 	public static final String BROADCAST_CHANNEL_ADMINISTRATIVE = "sys.admin";
 	public static final String BROADCAST_CHANNEL_USERS = "sys.user";
@@ -48,30 +48,56 @@ public final class AppController implements Runnable, EventRegistrar, TaskRegist
 
 	public static void handleExceptions( Throwable... ts )
 	{
+		handleExceptions( true, ts );
+	}
+
+	public static void handleExceptions( boolean crashOnError, Throwable... ts )
+	{
 		ExceptionReport report = new ExceptionReport();
 		for ( Throwable t : ts )
-			if ( t instanceof IException )
-				report.addException( ( IException ) t );
-			else
-				report.addException( ReportingLevel.E_ERROR, t );
-
-		if ( report.hasNonIgnorableExceptions() )
 		{
-			List<IException> list = Arrays.asList( report.getNotIgnorableExceptions() );
-
-			hasErrored = true;
-
-			Log.get().severe( "Encountered " + list.size() + " exception(s):" );
-			for ( IException e : list )
-				if ( e instanceof Throwable )
-					Log.get().severe( ( Throwable ) e );
-				else
-					Log.get().severe( e.getClass() + ": " + e.getMessage() );
-
-			stopApplication( "CRASHED" );
-
-			// TODO Pass that this was a crash
+			t.printStackTrace();
+			if ( report.handleException( t, AppController.instance ) )
+				hasErrored = true;
 		}
+
+		/* Non-Ignorable Exceptions */
+
+		Supplier<Stream<IException>> errorStream = report::getNotIgnorableExceptions;
+
+		Log.get().severe( "We Encountered " + errorStream.get().count() + " Non-Ignorable Exception(s):" );
+
+		errorStream.get().forEach( e ->
+		{
+			if ( e instanceof Throwable )
+				Log.get().severe( ( Throwable ) e );
+			else
+				Log.get().severe( e.getClass() + ": " + e.getMessage() );
+		} );
+
+		/* Ignorable Exceptions */
+
+		Supplier<Stream<IException>> debugStream = report::getIgnorableExceptions;
+
+		if ( debugStream.get().count() > 0 )
+		{
+			Log.get().severe( "In Addition, We Encountered " + debugStream.get().count() + " Ignorable Exception(s):" );
+
+			debugStream.get().forEach( e ->
+			{
+				if ( e instanceof Throwable )
+					Log.get().warning( ( Throwable ) e );
+				else
+					Log.get().warning( e.getClass() + ": " + e.getMessage() );
+			} );
+		}
+
+		if ( hasErrored )
+			Log.get().fine( "The AppController has reached an errored state!" );
+
+		/* TODO Pass crash information */
+		if ( crashOnError && hasErrored )
+			AppController.stopApplication( "CRASHED" );
 	}
 
 	public static boolean hasErrored()

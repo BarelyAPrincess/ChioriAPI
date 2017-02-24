@@ -1,24 +1,16 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account.types;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.chiorichan.AppConfig;
+import com.chiorichan.Versioning;
 import com.chiorichan.account.AccountContext;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountMeta;
@@ -35,9 +27,19 @@ import com.chiorichan.datastore.sql.query.SQLQuerySelect;
 import com.chiorichan.event.EventHandler;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.permission.PermissibleEntity;
+import com.chiorichan.permission.Permission;
+import com.chiorichan.permission.PermissionDefault;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.zutils.ZDB;
-import com.chiorichan.Versioning;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Handles Accounts that are loaded from SQL
@@ -308,7 +310,9 @@ public class SqlTypeCreator extends AccountTypeCreator
 	@Override
 	public void successInit( AccountMeta meta, PermissibleEntity entity )
 	{
-		// Do Nothing
+		Permission userNode = PermissionDefault.USER.getNode();
+		if ( meta.context().creator() == this && !entity.checkPermission( userNode ).isAssigned() )
+			entity.addPermission( userNode, true, null );
 	}
 
 	@Override

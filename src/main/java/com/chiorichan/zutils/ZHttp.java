@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.zutils;
@@ -83,7 +83,7 @@ public class ZHttp
 		return str.toLowerCase( Locale.US );
 	}
 
-	public static boolean downloadFile( String url, File dest ) throws IOException
+	public static void downloadFile( String url, File dest ) throws IOException
 	{
 		ReadableByteChannel rbc = null;
 		FileOutputStream fos = null;
@@ -97,13 +97,9 @@ public class ZHttp
 		}
 		finally
 		{
-			if ( rbc != null )
-				rbc.close();
-			if ( fos != null )
-				fos.close();
+			ZIO.closeQuietly( rbc );
+			ZIO.closeQuietly( fos );
 		}
-
-		return true;
 	}
 
 	/* public static Date getNTPDate()

@@ -12,13 +12,14 @@ package com.chiorichan.permission;
 
 public enum PermissionDefault
 {
-	ADMIN( "sys.admin" ), BANNED( "sys.banned" ), DEFAULT( "default" ), EVERYBODY( "" ), OP( "sys.op" ), WHITELISTED( "sys.whitelisted" ), QUERY( "sys.query" );
+	USER( "sys.user" ), ADMIN( "sys.admin" ), BANNED( "sys.banned" ), DEFAULT( "default" ), EVERYBODY( "" ), OP( "sys.op" ), WHITELISTED( "sys.whitelisted" ), QUERY( "sys.query" );
 
 	/**
 	 * By calling each Permission node we forces it's creation if non-existent
 	 */
 	public static void initNodes()
 	{
+		USER.getNode();
 		ADMIN.getNode();
 		BANNED.getNode();
 		DEFAULT.getNode();
@@ -80,6 +81,9 @@ public enum PermissionDefault
 				case OP:
 					result.getModel().setDescription( "Indicates OP entities. (DO NOT EDIT!)" );
 					break;
+				case USER:
+					result.getModel().setDescription( "Indicates a general USER entity. (DO NOT EDIT!)" );
+					break;
 				case ADMIN:
 					result.getModel().setDescription( "Indicates ADMIN entities. (DO NOT EDIT!)" );
 					break;
@@ -103,6 +107,6 @@ public enum PermissionDefault
 	@Override
 	public String toString()
 	{
-		return name() + "(namespace=" + namespace + ")";
+		return name() + " {namespace=" + namespace + "}";
 	}
 }

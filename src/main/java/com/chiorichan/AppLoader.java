@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan;
@@ -15,8 +15,6 @@ import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.Listener;
 import com.chiorichan.event.application.RunlevelEvent;
-import com.chiorichan.zutils.ZIO;
-import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.lang.ReportingLevel;
@@ -33,6 +31,8 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Worker;
+import com.chiorichan.zutils.ZIO;
+import com.chiorichan.zutils.ZObjects;
 import com.chiorichan.zutils.ZSystem;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -363,7 +363,8 @@ public abstract class AppLoader implements Listener
 			{
 				if ( instance != null )
 					instance.runLevel( RunLevel.CRASHED );
-				AppController.handleExceptions( t );
+				AppController.handleExceptions( false, t );
+				AppController.stopApplication( "CRASHED" );
 			}
 
 			if ( isRunning && Log.get() != null )
@@ -373,7 +374,8 @@ public abstract class AppLoader implements Listener
 		}
 		catch ( UncaughtException | ApplicationException e )
 		{
-			AppController.handleExceptions( e );
+			AppController.handleExceptions( false, e );
+			AppController.stopApplication( "CRASHED" );
 		}
 	}
 

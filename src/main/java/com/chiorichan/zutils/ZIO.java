@@ -528,16 +528,15 @@ public class ZIO
 
 	public static ByteArrayOutputStream inputStream2ByteArray( InputStream is ) throws IOException
 	{
-		int nRead;
-		byte[] data = new byte[16384];
-		ByteArrayOutputStream bs = new ByteArrayOutputStream();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-		while ( ( nRead = is.read( data, 0, data.length ) ) != -1 )
-			bs.write( data, 0, nRead );
+		int len;
+		byte[] buffer = new byte[4096];
+		while ( -1 != ( len = is.read( buffer ) ) )
+			bos.write( buffer, 0, len );
 
-		bs.flush();
-
-		return bs;
+		bos.flush();
+		return bos;
 	}
 
 	public static byte[] inputStream2Bytes( InputStream is ) throws IOException
@@ -823,6 +822,14 @@ public class ZIO
 		if ( path.contains( "\\" ) )
 			return path.substring( path.lastIndexOf( "\\" ) + 1 );
 		return path;
+	}
+
+	public static Byte[] bytesToBytes( byte[] bytes )
+	{
+		Byte[] newBytes = new Byte[bytes.length];
+		for ( int i = 0; i < bytes.length; i++ )
+			newBytes[i] = bytes[i];
+		return newBytes;
 	}
 
 	static class LibraryPath

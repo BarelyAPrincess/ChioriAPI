@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.logger;
@@ -430,7 +430,7 @@ public class Log implements LogAPI
 	@Override
 	public void severe( Throwable t )
 	{
-		log( Level.SEVERE, "Unexpected Exception", t );
+		log( Level.SEVERE, "Severe Exception", t );
 	}
 
 	public void unmarkError()
@@ -454,5 +454,10 @@ public class Log implements LogAPI
 	public void warning( String s, Throwable t )
 	{
 		log( Level.WARNING, s, t );
+	}
+
+	public void warning( Throwable t )
+	{
+		log( Level.SEVERE, "Warning Exception", t );
 	}
 }

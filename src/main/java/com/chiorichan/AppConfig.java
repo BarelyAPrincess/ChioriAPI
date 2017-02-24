@@ -50,15 +50,14 @@ import java.util.stream.Stream;
 public class AppConfig implements Configuration, TaskRegistrar
 {
 	private static final AppConfig instance = new AppConfig();
-	protected static File lockFile;
 	protected static File appDirectory = null;
+	protected static File lockFile;
 
 	static
 	{
 		try
 		{
 			lockFile = getLockFile();
-			// lockFile = AppLoader.getLockFile();
 
 			// TODO check that the enclosed lock PID number is currently running
 			if ( lockFile.exists() )
