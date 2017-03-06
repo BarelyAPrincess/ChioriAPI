@@ -15,7 +15,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.awt.Color;
@@ -641,5 +640,11 @@ public class ZStrings
 			}
 		}
 		return new String( buffer );
+	}
+
+	public static boolean isCapitalizedWords( String str )
+	{
+		ZObjects.notNull( str );
+		return str.equals( capitalizeWords( str ) );
 	}
 }

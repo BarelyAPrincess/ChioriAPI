@@ -71,9 +71,8 @@ public class Watchdog implements Runnable, TaskRegistrar
 	}
 
 	private int state = -1;
-	private int lastOutput = Timings.epoch();
-
-	private int lastRestart = Timings.epoch();
+	private long lastOutput = Timings.epoch();
+	private long lastRestart = Timings.epoch();
 	private Future<String> future = null;
 	private ProcessBuilder processBuilder = null;
 
@@ -264,7 +263,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 					}
 					catch ( TimeoutException e )
 					{
-						int lastTotal = Timings.epoch() - lastOutput;
+						long lastTotal = Timings.epoch() - lastOutput;
 						if ( lastTotal > Timings.MINUTE_15 )
 						{
 							log( "No output detected, it's assumed that the server has crashed. Server will now be restarted!" );

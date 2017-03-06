@@ -115,7 +115,7 @@ public class FileTypeCreator extends AccountTypeCreator
 		if ( yser == null )
 			return;
 
-		int lastloginfail = Timings.epoch();
+		long lastloginfail = Timings.epoch();
 		int numloginfail = meta.getInteger( "numloginfail", 0 ) + 1;
 
 		meta.set( "lastloginfail", lastloginfail );
@@ -357,8 +357,8 @@ public class FileTypeCreator extends AccountTypeCreator
 		if ( yser == null )
 			return;
 
-		int lastactive = Timings.epoch();
-		int lastlogin = Timings.epoch();
+		long lastactive = Timings.epoch();
+		long lastlogin = Timings.epoch();
 		int lastloginfail = 0;
 		int numloginfail = 0;
 

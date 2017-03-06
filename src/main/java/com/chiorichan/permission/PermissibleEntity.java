@@ -481,7 +481,7 @@ public abstract class PermissibleEntity implements ProviderChild
 	 * @param refs The permission references
 	 * @return remaining lifetime in seconds of timed permission. 0 if permission is transient
 	 */
-	public int getTimedPermissionLifetime( Permission perm, References refs )
+	public long getTimedPermissionLifetime( Permission perm, References refs )
 	{
 		for ( Entry<ChildPermission, TimedReferences> entry : timedPermissions.entrySet() )
 			if ( entry.getValue().match( refs ) && entry.getKey().getPermission() == perm )

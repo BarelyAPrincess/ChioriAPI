@@ -28,7 +28,7 @@ public class PermissionResult
 	private final Permission perm;
 	private References refs;
 
-	protected int epoch = Timings.epoch();
+	protected long epoch = Timings.epoch();
 
 	PermissionResult( PermissibleEntity entity, Permission perm )
 	{

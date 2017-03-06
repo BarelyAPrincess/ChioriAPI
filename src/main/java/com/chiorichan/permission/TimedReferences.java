@@ -13,7 +13,7 @@ import com.chiorichan.tasks.Timings;
 
 public class TimedReferences extends References
 {
-	int lifeTime;
+	long lifeTime;
 	
 	public TimedReferences( int lifeTime )
 	{
