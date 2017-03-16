@@ -12,10 +12,12 @@ package com.chiorichan.datastore.sql.skel;
 import java.util.Collection;
 
 /**
- *
+ * SQL Skel for Order By builder methods
  */
 public interface SQLSkelOrderBy<T>
 {
+	T orderBy( Collection<String> columns, String dir );
+
 	T orderBy( Collection<String> columns );
 
 	T orderBy( String... columns );

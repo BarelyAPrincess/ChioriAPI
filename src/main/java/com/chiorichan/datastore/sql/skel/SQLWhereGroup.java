@@ -1,16 +1,17 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.skel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,7 +25,7 @@ import com.google.common.collect.Lists;
  */
 public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElement implements SQLSkelWhere<SQLWhereGroup<B, P>, P>
 {
-	private List<SQLWhereElement> elements = Lists.newLinkedList();
+	private List<SQLWhereElement> elements = new LinkedList<>();
 	private SQLWhereElementSep currentSeparator = SQLWhereElementSep.NONE;
 
 	/*
@@ -68,7 +69,7 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 	@Override
 	public SQLWhereGroup<SQLWhereGroup<B, P>, P> group()
 	{
-		SQLWhereGroup<SQLWhereGroup<B, P>, P> group = new SQLWhereGroup<SQLWhereGroup<B, P>, P>( this, parent );
+		SQLWhereGroup<SQLWhereGroup<B, P>, P> group = new SQLWhereGroup<>( this, parent );
 		group.seperator( currentSeparator );
 		elements.add( group );
 		or();
@@ -184,6 +185,12 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 	public SQLWhereKeyValue<SQLWhereGroup<B, P>> where( String key )
 	{
 		return new SQLWhereKeyValue<SQLWhereGroup<B, P>>( this, key );
+	}
+
+	@Override
+	public SQLWhereElementSep separator()
+	{
+		return currentSeparator;
 	}
 
 	@Override

@@ -385,4 +385,10 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 
 		return clone;
 	}
+
+	@Override
+	public SQLWhereElementSep separator()
+	{
+		return currentSeparator;
+	}
 }

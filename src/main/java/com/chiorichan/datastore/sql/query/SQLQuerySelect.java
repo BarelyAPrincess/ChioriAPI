@@ -105,7 +105,7 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	@Override
 	public SQLWhereGroup<SQLQuerySelect, SQLQuerySelect> group()
 	{
-		SQLWhereGroup<SQLQuerySelect, SQLQuerySelect> group = new SQLWhereGroup<SQLQuerySelect, SQLQuerySelect>( this, this );
+		SQLWhereGroup<SQLQuerySelect, SQLQuerySelect> group = new SQLWhereGroup<>( this, this );
 		group.seperator( currentSeparator );
 		elements.add( group );
 		needsUpdate = true;
@@ -202,9 +202,40 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	}
 
 	@Override
+	public SQLWhereElementSep separator()
+	{
+		return currentSeparator;
+	}
+
+	@Override
+	public SQLQuerySelect orderDesc()
+	{
+		needsUpdate = true;
+		orderAscending = false;
+		return this;
+	}
+
+	@Override
 	public SQLQuerySelect orderAsc()
 	{
+		needsUpdate = true;
 		orderAscending = true;
+		return this;
+	}
+
+	@Override
+	public SQLQuerySelect orderBy( Collection<String> columns, String dir )
+	{
+		orderBy.addAll( columns );
+
+		if ( dir.trim().equalsIgnoreCase( "asc" ) )
+			orderAsc();
+		else if ( dir.trim().equalsIgnoreCase( "desc" ) )
+			orderDesc();
+		else
+			throw new IllegalArgumentException( dir + " is not a valid sorting direction." );
+
+		needsUpdate = true;
 		return this;
 	}
 
@@ -229,13 +260,6 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	{
 		orderBy.add( column );
 		needsUpdate = true;
-		return this;
-	}
-
-	@Override
-	public SQLQuerySelect orderDesc()
-	{
-		orderAscending = false;
 		return this;
 	}
 
@@ -418,7 +442,7 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	@Override
 	public SQLWhereKeyValue<SQLQuerySelect> where( String key )
 	{
-		return new SQLWhereKeyValue<SQLQuerySelect>( this, key );
+		return new SQLWhereKeyValue<>( this, key );
 	}
 
 	@Override

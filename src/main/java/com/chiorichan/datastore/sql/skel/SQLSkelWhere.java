@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.skel;
@@ -21,13 +21,15 @@ public interface SQLSkelWhere<B extends SQLSkelWhere<?, ?>, P>
 
 	B and();
 
+	SQLWhereGroup<B, P> group();
+
 	SQLWhereKeyValue<B> where( String key );
+
+	SQLWhereElementSep separator();
 
 	B where( SQLWhereElement element );
 
 	B where( Map<String, Object> map );
-
-	SQLWhereGroup<B, P> group();
 
 	B whereMatches( Map<String, Object> values );
 
