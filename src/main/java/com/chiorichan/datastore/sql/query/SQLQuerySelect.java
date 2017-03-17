@@ -20,7 +20,7 @@ import com.chiorichan.datastore.sql.skel.SQLWhereElement;
 import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
 import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
 import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -328,11 +328,11 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 			else if ( fields.size() == 0 )
 				segments.add( "*" );
 			else
-				segments.add( Joiner.on( ", " ).join( ZStrings.wrap( fields, '`' ) ) );
+				segments.add( Joiner.on( ", " ).join( UtilStrings.wrap( fields, '`' ) ) );
 
 			segments.add( "FROM" );
 
-			segments.add( ZStrings.wrap( table(), '`' ) );
+			segments.add( UtilStrings.wrap( table(), '`' ) );
 
 			sqlValues.clear();
 
@@ -353,12 +353,12 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 			}
 
 			if ( groupBy.size() > 0 )
-				segments.add( "GROUP BY " + Joiner.on( ", " ).join( ZStrings.wrap( groupBy, '`' ) ) );
+				segments.add( "GROUP BY " + Joiner.on( ", " ).join( UtilStrings.wrap( groupBy, '`' ) ) );
 
 			if ( orderRand )
 				segments.add( "ORDER BY RAND()" );
 			else if ( orderBy.size() > 0 )
-				segments.add( "ORDER BY " + Joiner.on( ", " ).join( ZStrings.wrap( orderBy, '`' ) ) + ( orderAscending ? " ASC" : " DESC" ) );
+				segments.add( "ORDER BY " + Joiner.on( ", " ).join( UtilStrings.wrap( orderBy, '`' ) ) + ( orderAscending ? " ASC" : " DESC" ) );
 
 			if ( limit() > 0 )
 				segments.add( "LIMIT " + limit() );

@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.chiorichan.zutils.ZSystem;
+import com.chiorichan.utils.UtilSystem;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import sun.misc.Signal;
@@ -110,7 +110,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 
 		List<String> commands = Lists.newArrayList();
 
-		if ( ZSystem.isWindows() )
+		if ( UtilSystem.isWindows() )
 			commands.add( "javaw" );
 		else
 			commands.add( "java" );
@@ -148,7 +148,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 		watchdogThread.setPriority( Thread.MAX_PRIORITY );
 		watchdogThread.start();
 
-		if ( ZSystem.isUnixLikeOS() )
+		if ( UtilSystem.isUnixLikeOS() )
 		{
 			Signal.handle( new Signal( "TERM" ), new SignalHandler()
 			{
@@ -255,7 +255,7 @@ public class Watchdog implements Runnable, TaskRegistrar
 					}
 					catch ( CancellationException e )
 					{
-						if ( ZSystem.isUnixLikeOS() && getPid( process ) > 0 )
+						if ( UtilSystem.isUnixLikeOS() && getPid( process ) > 0 )
 							Runtime.getRuntime().exec( "kill -SIGTERM " + getPid( process ) );
 						else
 							process.destroy();

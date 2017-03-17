@@ -10,7 +10,7 @@
 package com.chiorichan.datastore.sql;
 
 import com.chiorichan.datastore.DatastoreManager;
-import com.chiorichan.zutils.ZDB;
+import com.chiorichan.utils.UtilDB;
 import com.google.common.base.Joiner;
 import com.mysql.jdbc.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
@@ -125,7 +125,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	@Override
 	public final Map<String, Map<String, Object>> map() throws SQLException
 	{
-		return ZDB.resultToMap( resultSet() );
+		return UtilDB.resultToMap( resultSet() );
 	}
 
 	private PreparedStatement query( String sqlQuery, boolean isUpdate, boolean save, boolean retry, Object... args ) throws SQLException
@@ -178,9 +178,9 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 				setStatement( stmt );
 
 			if ( debug && save )
-				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + ZDB.toString( stmt ) + "\" " + ( isUpdate ? "affected" : "returned" ) + " " + rowCount() + " results" );
+				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + UtilDB.toString( stmt ) + "\" " + ( isUpdate ? "affected" : "returned" ) + " " + rowCount() + " results" );
 			else if ( debug )
-				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + ZDB.toString( stmt ) + "\"" );
+				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + UtilDB.toString( stmt ) + "\"" );
 
 			setPass();
 			return stmt;
@@ -252,7 +252,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	{
 		ResultSet result = resultSet();
 		if ( result != null && result.absolute( row ) )
-			return ZDB.rowToMap( result );
+			return UtilDB.rowToMap( result );
 		return null;
 	}
 
@@ -261,7 +261,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	{
 		ResultSet result = resultSet();
 		if ( result != null && result.first() )
-			return ZDB.rowToMap( result );
+			return UtilDB.rowToMap( result );
 		return null;
 	}
 
@@ -270,20 +270,20 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	{
 		ResultSet result = resultSet();
 		if ( result != null && result.last() )
-			return ZDB.rowToMap( result );
+			return UtilDB.rowToMap( result );
 		return null;
 	}
 
 	@Override
 	public final Map<String, Object> row() throws SQLException
 	{
-		return ZDB.rowToMap( resultSet() );
+		return UtilDB.rowToMap( resultSet() );
 	}
 
 	@Override
 	public final Set<Map<String, Object>> set() throws SQLException
 	{
-		return ZDB.resultToSet( resultSet() );
+		return UtilDB.resultToSet( resultSet() );
 	}
 
 	protected void setFail( SQLException lastException )
@@ -332,25 +332,25 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	@Override
 	public final Map<String, Map<String, String>> stringMap() throws SQLException
 	{
-		return ZDB.resultToStringMap( resultSet() );
+		return UtilDB.resultToStringMap( resultSet() );
 	}
 
 	@Override
 	public Map<String, String> stringRow() throws SQLException
 	{
-		return ZDB.rowToStringMap( resultSet() );
+		return UtilDB.rowToStringMap( resultSet() );
 	}
 
 	@Override
 	public Set<Map<String, String>> stringSet() throws SQLException
 	{
-		return ZDB.resultToStringSet( resultSet() );
+		return UtilDB.resultToStringSet( resultSet() );
 	}
 
 	@Override
 	public String toString()
 	{
-		return ZDB.toString( stmt );
+		return UtilDB.toString( stmt );
 	}
 
 	protected void updateExecution()

@@ -7,15 +7,15 @@
  *
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class ZDate
+public class UtilDate
 {
-	private ZDate()
+	private UtilDate()
 	{
 
 	}

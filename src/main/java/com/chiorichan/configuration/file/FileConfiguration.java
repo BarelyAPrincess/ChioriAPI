@@ -12,8 +12,7 @@ package com.chiorichan.configuration.file;
 import com.chiorichan.configuration.Configuration;
 import com.chiorichan.configuration.InvalidConfigurationException;
 import com.chiorichan.configuration.MemoryConfiguration;
-import com.chiorichan.zutils.ZIO;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is a base class for all File based implementations of {@link Configuration}
@@ -77,7 +75,7 @@ public abstract class FileConfiguration extends MemoryConfiguration
 	 */
 	public void load( File file ) throws IOException, InvalidConfigurationException
 	{
-		ZObjects.notNull( "File cannot be null" );
+		UtilObjects.notNull( "File cannot be null" );
 
 		load( new FileInputStream( file ) );
 		loadedFrom = file.getAbsolutePath();
@@ -95,7 +93,7 @@ public abstract class FileConfiguration extends MemoryConfiguration
 	 */
 	public void load( InputStream stream ) throws IOException, InvalidConfigurationException
 	{
-		ZObjects.notNull( "Stream cannot be null" );
+		UtilObjects.notNull( "Stream cannot be null" );
 
 		loadFromString( new BufferedReader( new InputStreamReader( stream ) ).lines().collect( Collectors.joining( "\n" ) ) );
 		loadedFrom = null;

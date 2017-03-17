@@ -18,7 +18,7 @@ import org.joda.time.Duration;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 
 /**
  * Provides timing, date, and time utilities.
@@ -181,7 +181,7 @@ public class Timings
 	 */
 	public static String readoutDuration( String seconds )
 	{
-		return readoutDuration( ZObjects.castToInt( seconds ) );
+		return readoutDuration( UtilObjects.castToInt( seconds ) );
 	}
 
 	/**

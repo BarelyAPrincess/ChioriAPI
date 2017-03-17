@@ -7,8 +7,9 @@
  * <p>
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
+import com.chiorichan.helpers.EscapeTranslator;
 import com.chiorichan.helpers.Version;
 import com.chiorichan.logger.Log;
 import com.google.common.base.Joiner;
@@ -18,7 +19,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.awt.Color;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,9 +43,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ZStrings
+public class UtilStrings
 {
-	private ZStrings()
+	private UtilStrings()
 	{
 
 	}
@@ -250,7 +253,7 @@ public class ZStrings
 
 	public static String repeat( String string, int count )
 	{
-		ZObjects.notNull( string );
+		UtilObjects.notNull( string );
 
 		if ( count <= 1 )
 			return count == 0 ? "" : string;
@@ -541,7 +544,7 @@ public class ZStrings
 
 	public static boolean isCamelCase( String var )
 	{
-		ZObjects.notNull( var );
+		UtilObjects.notNull( var );
 		return var.matches( "[a-z0-9]+(?:[A-Z]{1,2}[a-z0-9]+)*" );
 	}
 
@@ -601,6 +604,16 @@ public class ZStrings
 		return cnt;
 	}
 
+	public static String escapeHtml( String str )
+	{
+		return EscapeTranslator.HTML_ESCAPE().translate( str );
+	}
+
+	public static String unescapeHtml( String str )
+	{
+		return EscapeTranslator.HTML_UNESCAPE().translate( str );
+	}
+
 	public static String capitalizeWordsFully( String str )
 	{
 		return capitalizeWordsFully( str, ' ' );
@@ -608,7 +621,7 @@ public class ZStrings
 
 	public static String capitalizeWordsFully( String str, char delimiter )
 	{
-		if ( ZObjects.isEmpty( str ) )
+		if ( UtilObjects.isEmpty( str ) )
 			return str;
 
 		return capitalizeWords( str.toLowerCase(), delimiter );
@@ -621,10 +634,10 @@ public class ZStrings
 
 	public static String capitalizeWords( String str, char delimiter )
 	{
-		if ( ZObjects.isEmpty( str ) )
+		if ( UtilObjects.isEmpty( str ) )
 			return str;
 
-		ZObjects.notNull( delimiter );
+		UtilObjects.notNull( delimiter );
 
 		final char[] buffer = str.toCharArray();
 		boolean capitalizeNext = true;
@@ -644,7 +657,32 @@ public class ZStrings
 
 	public static boolean isCapitalizedWords( String str )
 	{
-		ZObjects.notNull( str );
+		UtilObjects.notNull( str );
 		return str.equals( capitalizeWords( str ) );
+	}
+
+	public static Map<String, String> queryToMap( String query ) throws UnsupportedEncodingException
+	{
+		Map<String, String> result = new HashMap<>();
+
+		if ( query == null )
+			return result;
+
+		for ( String param : query.split( "&" ) )
+		{
+			String[] pair = param.split( "=" );
+			try
+			{
+				if ( pair.length > 1 )
+					result.put( URLDecoder.decode( UtilStrings.trimEnd( pair[0], '%' ), "ISO-8859-1" ), URLDecoder.decode( UtilStrings.trimEnd( pair[1], '%' ), "ISO-8859-1" ) );
+				else if ( pair.length == 1 )
+					result.put( URLDecoder.decode( UtilStrings.trimEnd( pair[0], '%' ), "ISO-8859-1" ), "" );
+			}
+			catch ( IllegalArgumentException e )
+			{
+				Log.get().warning( "Malformed URL exception was thrown, key: `" + pair[0] + "`, val: '" + pair[1] + "'" );
+			}
+		}
+		return result;
 	}
 }

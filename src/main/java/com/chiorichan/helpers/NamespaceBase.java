@@ -1,7 +1,7 @@
 package com.chiorichan.helpers;
 
-import com.chiorichan.zutils.ZObjects;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilObjects;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.ArrayUtils;
@@ -23,12 +23,12 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	protected NamespaceBase( String[] nodes )
 	{
-		this.nodes = ZStrings.toLowerCase( nodes );
+		this.nodes = UtilStrings.toLowerCase( nodes );
 	}
 
 	protected NamespaceBase( List<String> nodes )
 	{
-		this.nodes = ZStrings.toLowerCase( nodes.toArray( new String[0] ) );
+		this.nodes = UtilStrings.toLowerCase( nodes.toArray( new String[0] ) );
 	}
 
 	protected NamespaceBase()
@@ -45,7 +45,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	private String[] splitString( String str, String separator )
 	{
-		if ( ZObjects.isEmpty( separator ) )
+		if ( UtilObjects.isEmpty( separator ) )
 			separator = ".";
 		return Splitter.on( separator ).omitEmptyStrings().splitToList( str ).toArray( new String[0] );
 	}
@@ -241,7 +241,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	public int matchPercentage( String namespace, String separator )
 	{
-		ZObjects.notEmpty( namespace );
+		UtilObjects.notEmpty( namespace );
 
 		String[] dest = Splitter.on( separator ).splitToList( namespace.toLowerCase() ).toArray( new String[0] );
 

@@ -27,7 +27,7 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
-import com.chiorichan.zutils.ZIO;
+import com.chiorichan.utils.UtilIO;
 import org.apache.commons.lang3.Validate;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -315,9 +315,9 @@ public final class JavaPluginLoader implements PluginLoader
 		finally
 		{
 			if ( jar != null )
-				ZIO.closeQuietly( jar );
+				UtilIO.closeQuietly( jar );
 			if ( stream != null )
-				ZIO.closeQuietly( stream );
+				UtilIO.closeQuietly( stream );
 		}
 	}
 
@@ -380,7 +380,7 @@ public final class JavaPluginLoader implements PluginLoader
 		if ( description.getNatives().size() > 0 )
 			try
 			{
-				ZIO.extractNatives( description.getNatives(), file, dataFolder );
+				UtilIO.extractNatives( description.getNatives(), file, dataFolder );
 			}
 			catch ( IOException e )
 			{
@@ -388,7 +388,7 @@ public final class JavaPluginLoader implements PluginLoader
 			}
 
 		// Attempts to extract bundled library files
-		ZIO.extractLibraries( file, dataFolder );
+		UtilIO.extractLibraries( file, dataFolder );
 
 		return loader.plugin;
 	}

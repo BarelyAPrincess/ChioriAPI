@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.Versioning;
@@ -42,14 +42,14 @@ import java.util.regex.Pattern;
 /**
  * Provides Network Utilities
  */
-public class ZHttp
+public class UtilHttp
 {
 	public static final String REGEX_IPV4 = "^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$";
 	public static final String REGEX_IPV6 = "^((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$";
 
 	private static final Pattern DNS_WILDCARD_PATTERN = Pattern.compile( "^\\*\\..*" );
 
-	private ZHttp()
+	private UtilHttp()
 	{
 
 	}
@@ -97,8 +97,8 @@ public class ZHttp
 		}
 		finally
 		{
-			ZIO.closeQuietly( rbc );
-			ZIO.closeQuietly( fos );
+			UtilIO.closeQuietly( rbc );
+			UtilIO.closeQuietly( fos );
 		}
 	}
 
@@ -132,7 +132,7 @@ public class ZHttp
 
 	public static String getUserAgent()
 	{
-		return Versioning.getProductSimple() + "/" + Versioning.getVersion() + "/" + ZSystem.getJavaVersion();
+		return Versioning.getProductSimple() + "/" + Versioning.getVersion() + "/" + UtilSystem.getJavaVersion();
 	}
 
 	public static boolean isValidIPv4( String ip )

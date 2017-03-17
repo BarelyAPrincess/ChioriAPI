@@ -9,7 +9,7 @@
  */
 package com.chiorichan.helpers;
 
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,7 +34,7 @@ public class ObjectStacker<T>
 
 	public ObjectStacker( String key, T value )
 	{
-		ZObjects.notNull( key );
+		UtilObjects.notNull( key );
 
 		this.key = key;
 		this.value = value;
@@ -87,7 +87,7 @@ public class ObjectStacker<T>
 
 	public ObjectStacker<T> getChild( Namespace nodes, boolean create )
 	{
-		ZObjects.notNull( nodes, "nodes can not be null" );
+		UtilObjects.notNull( nodes, "nodes can not be null" );
 		if ( nodes.getNodeCount() == 0 )
 			return this;
 		String key = nodes.getFirst();

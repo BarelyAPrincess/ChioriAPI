@@ -19,7 +19,7 @@ import com.chiorichan.datastore.sql.skel.SQLWhereElement;
 import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
 import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
 import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -183,7 +183,7 @@ public final class SQLQueryUpdate extends SQLBase<SQLQueryUpdate> implements SQL
 
 			segments.add( "UPDATE" );
 
-			segments.add( ZStrings.wrap( table(), '`' ) );
+			segments.add( UtilStrings.wrap( table(), '`' ) );
 
 			segments.add( "SET" );
 

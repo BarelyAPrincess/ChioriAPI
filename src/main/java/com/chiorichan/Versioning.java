@@ -10,7 +10,7 @@
 package com.chiorichan;
 
 import com.chiorichan.logger.Log;
-import com.chiorichan.zutils.ZIO;
+import com.chiorichan.utils.UtilIO;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -166,7 +166,7 @@ public class Versioning
 		}
 		finally
 		{
-			ZIO.closeQuietly( is );
+			UtilIO.closeQuietly( is );
 		}
 	}
 }

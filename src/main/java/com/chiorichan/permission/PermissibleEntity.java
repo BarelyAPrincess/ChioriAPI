@@ -16,7 +16,7 @@ import com.chiorichan.permission.event.PermissibleEntityEvent;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.services.ProviderChild;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	protected final void addPermission( ChildPermission perm, References refs )
 	{
-		ZObjects.notNull( perm );
+		UtilObjects.notNull( perm );
 
 		if ( checkPermission( perm.getPermission() ).isAssigned() )
 		{
@@ -149,8 +149,8 @@ public abstract class PermissibleEntity implements ProviderChild
 
 	public PermissionResult checkPermission( Permission perm, References refs )
 	{
-		ZObjects.notNull( perm );
-		ZObjects.notNull( refs );
+		UtilObjects.notNull( perm );
+		UtilObjects.notNull( refs );
 
 		/*
 		 * We cache the results to reduce lag when a permission is checked multiple times over.

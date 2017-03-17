@@ -7,7 +7,7 @@
  *
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import com.chiorichan.tasks.Timings;
 import com.google.common.collect.Maps;
@@ -33,9 +33,9 @@ import java.util.TreeMap;
  * Provides basic methods for database convenience
  */
 @Deprecated
-public class ZDB
+public class UtilDB
 {
-	private ZDB()
+	private UtilDB()
 	{
 
 	}
@@ -262,7 +262,7 @@ public class ZDB
 		boolean next = rs.isFirst() || rs.next();
 		while ( next )
 		{
-			result.put( "" + x, ZObjects.castMap( rowToMap( rs ), String.class, String.class ) );
+			result.put( "" + x, UtilObjects.castMap( rowToMap( rs ), String.class, String.class ) );
 			x++;
 			next = rs.next();
 		}
@@ -382,7 +382,7 @@ public class ZDB
 
 	public static Map<String, String> rowToStringMap( ResultSet rs ) throws SQLException
 	{
-		return ZObjects.castMap( rowToMap( rs ), String.class, String.class );
+		return UtilObjects.castMap( rowToMap( rs ), String.class, String.class );
 	}
 
 	public static <K, V> Map<String, Map<K, V>> sortByColumnValue( Map<?, Map<K, V>> orig, String keyName )
@@ -410,10 +410,10 @@ public class ZDB
 			Map<K, V> row = e.getValue();
 			if ( row.containsKey( keyName ) )
 				if ( strategy == SortStrategy.Default )
-					result.put( ZObjects.castTo( row.get( keyName ), keyType ), row );
+					result.put( UtilObjects.castTo( row.get( keyName ), keyType ), row );
 				else if ( strategy == SortStrategy.MoveNext )
 				{
-					Integer v = ZObjects.castToInt( row.get( keyName ) );
+					Integer v = UtilObjects.castToInt( row.get( keyName ) );
 
 					if ( result.containsKey( v ) )
 						moveNext( result, v );
@@ -422,7 +422,7 @@ public class ZDB
 				}
 				else if ( strategy == SortStrategy.MovePrevious )
 				{
-					Integer v = ZObjects.castToInt( row.get( keyName ) );
+					Integer v = UtilObjects.castToInt( row.get( keyName ) );
 
 					if ( result.containsKey( v ) )
 						movePrevious( result, v );

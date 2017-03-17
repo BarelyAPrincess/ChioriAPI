@@ -15,7 +15,7 @@ import com.chiorichan.datastore.sql.SQLTable;
 import com.chiorichan.datastore.sql.SQLTableColumns;
 import com.chiorichan.datastore.sql.SQLWrapper;
 import com.chiorichan.datastore.sql.skel.SQLSkelValues;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -110,9 +110,9 @@ public final class SQLQueryInsert extends SQLBase<SQLQueryInsert> implements SQL
 
 			segments.add( "INSERT INTO" );
 
-			segments.add( ZStrings.wrap( table(), '`' ) );
+			segments.add( UtilStrings.wrap( table(), '`' ) );
 
-			segments.add( String.format( "(%s) VALUES (%s)", Joiner.on( ", " ).join( ZStrings.wrap( values.keySet(), '`' ) ), Joiner.on( ", " ).join( ZStrings.repeatToList( "?", values.values().size() ) ) ) );
+			segments.add( String.format( "(%s) VALUES (%s)", Joiner.on( ", " ).join( UtilStrings.wrap( values.keySet(), '`' ) ), Joiner.on( ", " ).join( UtilStrings.repeatToList( "?", values.values().size() ) ) ) );
 
 			return Joiner.on( " " ).join( segments ) + ";";
 		}

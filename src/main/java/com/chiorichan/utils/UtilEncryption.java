@@ -7,7 +7,7 @@
  *
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,9 +32,9 @@ import com.google.common.primitives.Chars;
 /**
  * Provides basic encryption and randomizing functions
  */
-public class ZEncryption
+public class UtilEncryption
 {
-	private ZEncryption()
+	private UtilEncryption()
 	{
 
 	}
@@ -207,7 +207,7 @@ public class ZEncryption
 	 */
 	public static Random random()
 	{
-		String seed = ZEncryption.md5( ZEncryption.seed( 4 ) ).replaceAll( "\\D", "" );
+		String seed = UtilEncryption.md5( UtilEncryption.seed( 4 ) ).replaceAll( "\\D", "" );
 		return new Random( Long.parseLong( seed.length() > 12 ? seed.substring( 0, 12 ) : seed ) ^ System.nanoTime() );
 	}
 

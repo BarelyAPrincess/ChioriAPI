@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import com.chiorichan.helpers.Pair;
 import com.chiorichan.lang.StartupException;
@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ZObjects
+public class UtilObjects
 {
-	private ZObjects()
+	private UtilObjects()
 	{
 
 	}
@@ -287,7 +287,7 @@ public class ZObjects
 		if ( value instanceof Map )
 			return ( ( Map<?, ?> ) value ).entrySet().stream().map( e -> castToString( e.getKey() ) + "=\"" + castToString( e.getValue() ) + "\"" ).collect( Collectors.joining( "," ) );
 		if ( value instanceof List )
-			return ( ( List<?> ) value ).stream().map( ZObjects::castToString ).collect( Collectors.joining( "," ) );
+			return ( ( List<?> ) value ).stream().map( UtilObjects::castToString ).collect( Collectors.joining( "," ) );
 		throw new ClassCastException( "Uncaught Convertion to String of Type: " + value.getClass().getName() );
 	}
 
@@ -515,7 +515,7 @@ public class ZObjects
 
 		for ( Object e : col )
 		{
-			V v = ZObjects.castTo( e, clz );
+			V v = UtilObjects.castTo( e, clz );
 
 			if ( v != null )
 				newCol.add( v );
@@ -526,14 +526,14 @@ public class ZObjects
 
 	public static <K, V> Map<K, V> castMap( Map<?, ?> map, Class<K> keyClz, Class<V> valClz )
 	{
-		ZObjects.notNull( map );
+		UtilObjects.notNull( map );
 
 		Map<K, V> newMap = Maps.newLinkedHashMap();
 
 		for ( Map.Entry<?, ?> e : map.entrySet() )
 		{
-			K k = ZObjects.castTo( e.getKey(), keyClz );
-			V v = ZObjects.castTo( e.getValue(), valClz );
+			K k = UtilObjects.castTo( e.getKey(), keyClz );
+			V v = UtilObjects.castTo( e.getValue(), valClz );
 
 			if ( k != null && v != null )
 				newMap.put( k, v );

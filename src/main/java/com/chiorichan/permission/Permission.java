@@ -14,7 +14,7 @@ import com.chiorichan.account.AccountAttachment;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.helpers.Namespace;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilStrings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,7 +98,7 @@ public final class Permission implements Comparable<Permission>
 
 	public void debugPermissionStack( AccountAttachment sender, int depth )
 	{
-		String spacing = depth > 0 ? ZStrings.repeat( "      ", depth - 1 ) + "|---> " : "";
+		String spacing = depth > 0 ? UtilStrings.repeat( "      ", depth - 1 ) + "|---> " : "";
 
 		sender.sendMessage( String.format( "%s%s%s=%s", EnumColor.YELLOW, spacing, getLocalName(), model ) );
 

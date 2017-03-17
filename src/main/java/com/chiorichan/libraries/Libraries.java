@@ -16,8 +16,8 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.logger.Log;
 import com.chiorichan.logger.LogSource;
-import com.chiorichan.zutils.ZHttp;
-import com.chiorichan.zutils.ZIO;
+import com.chiorichan.utils.UtilHttp;
+import com.chiorichan.utils.UtilIO;
 import org.apache.commons.lang3.Validate;
 
 import java.io.File;
@@ -46,11 +46,11 @@ public class Libraries implements LibrarySource, LogSource
 		LIBRARY_DIR = DeployWrapper.isDeployment() ? new File( "libraries" ) : AppConfig.get().getDirectory( "lib", "libraries" );
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 
-		if ( !ZIO.setDirectoryAccess( LIBRARY_DIR ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( LIBRARY_DIR ) + "\"!" );
+		if ( !UtilIO.setDirectoryAccess( LIBRARY_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + UtilIO.relPath( LIBRARY_DIR ) + "\"!" );
 
-		if ( !ZIO.setDirectoryAccess( INCLUDES_DIR ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( INCLUDES_DIR ) + "\"!" );
+		if ( !UtilIO.setDirectoryAccess( INCLUDES_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + UtilIO.relPath( INCLUDES_DIR ) + "\"!" );
 
 		addLoaded( "org.fusesource.jansi:jansi:1.11" );
 		addLoaded( "net.sf.jopt-simple:jopt-simple:4.7" );
@@ -160,7 +160,7 @@ public class Libraries implements LibrarySource, LogSource
 
 		try
 		{
-			ZIO.extractNatives( lib, lib.getParentFile() );
+			UtilIO.extractNatives( lib, lib.getParentFile() );
 		}
 		catch ( IOException e )
 		{
@@ -190,8 +190,8 @@ public class Libraries implements LibrarySource, LogSource
 				// Try download from JCenter Bintray Maven Repository
 				try
 				{
-					ZHttp.downloadFile( urlPom, mavenLocalPom );
-					ZHttp.downloadFile( urlJar, mavenLocalJar );
+					UtilHttp.downloadFile( urlPom, mavenLocalPom );
+					UtilHttp.downloadFile( urlJar, mavenLocalJar );
 				}
 				catch ( IOException e )
 				{
@@ -203,8 +203,8 @@ public class Libraries implements LibrarySource, LogSource
 
 					try
 					{
-						ZHttp.downloadFile( urlPomAlt, mavenLocalPom );
-						ZHttp.downloadFile( urlJarAlt, mavenLocalJar );
+						UtilHttp.downloadFile( urlPomAlt, mavenLocalPom );
+						UtilHttp.downloadFile( urlJarAlt, mavenLocalJar );
 					}
 					catch ( IOException ee )
 					{
@@ -227,7 +227,7 @@ public class Libraries implements LibrarySource, LogSource
 		loadedLibraries.put( lib.getKey(), lib );
 		try
 		{
-			ZIO.extractNatives( lib.jarFile(), lib.baseDir() );
+			UtilIO.extractNatives( lib.jarFile(), lib.baseDir() );
 		}
 		catch ( IOException e )
 		{

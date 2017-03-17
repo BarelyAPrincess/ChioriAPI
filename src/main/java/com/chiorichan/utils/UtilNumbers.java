@@ -7,11 +7,11 @@
  * <p>
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
-public class ZNumbers
+public class UtilNumbers
 {
-	private ZNumbers()
+	private UtilNumbers()
 	{
 
 	}

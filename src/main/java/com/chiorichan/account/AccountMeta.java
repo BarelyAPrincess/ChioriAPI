@@ -10,12 +10,12 @@
 package com.chiorichan.account;
 
 import com.chiorichan.account.lang.AccountException;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.lang.UncaughtException;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.services.AppManager;
-import com.chiorichan.zutils.ZEncryption;
+import com.chiorichan.utils.UtilEncryption;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.Validate;
@@ -116,7 +116,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	{
 		try
 		{
-			return ZObjects.castToBoolWithException( metadata.get( key ) );
+			return UtilObjects.castToBoolWithException( metadata.get( key ) );
 		}
 		catch ( ClassCastException e )
 		{
@@ -159,7 +159,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	public Integer getInteger( String key, int def )
 	{
 		Object obj = metadata.get( key );
-		Integer val = ZObjects.castToInt( obj );
+		Integer val = UtilObjects.castToInt( obj );
 
 		return val == null ? def : val;
 	}
@@ -206,7 +206,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 
 	public String getString( String key, String def )
 	{
-		String val = ZObjects.castToString( metadata.get( key ) );
+		String val = UtilObjects.castToString( metadata.get( key ) );
 		return val == null ? def : val;
 	}
 
@@ -298,7 +298,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 
 	public void requireActivation()
 	{
-		metadata.put( "actnum", ZEncryption.randomize( "z154f98wfjascvc" ) );
+		metadata.put( "actnum", UtilEncryption.randomize( "z154f98wfjascvc" ) );
 	}
 
 	public void save() throws AccountException

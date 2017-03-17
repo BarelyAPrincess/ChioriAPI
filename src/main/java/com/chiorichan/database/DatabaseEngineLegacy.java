@@ -12,9 +12,9 @@ package com.chiorichan.database;
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.datastore.sql.SQLWrapper;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.zutils.ZDB;
-import com.chiorichan.zutils.ZObjects;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilDB;
+import com.chiorichan.utils.UtilObjects;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
@@ -187,7 +187,7 @@ public class DatabaseEngineLegacy
 
 		for ( Entry<String, Object> e : source.entrySet() )
 		{
-			String val = ZObjects.castToString( e.getValue() );
+			String val = UtilObjects.castToString( e.getValue() );
 			if ( val != null )
 				result.put( e.getKey(), val );
 		}
@@ -420,16 +420,16 @@ public class DatabaseEngineLegacy
 
 		for ( Entry<String, Object> e : where.entrySet() )
 		{
-			String key = ZDB.escape( e.getKey() );
+			String key = UtilDB.escape( e.getKey() );
 
 			String value;
 			try
 			{
-				value = ZDB.escape( ( String ) e.getValue() );
+				value = UtilDB.escape( ( String ) e.getValue() );
 			}
 			catch ( Exception ee )
 			{
-				value = ZObjects.castToString( e.getValue() );
+				value = UtilObjects.castToString( e.getValue() );
 			}
 
 			if ( keys.isEmpty() )
@@ -653,7 +653,7 @@ public class DatabaseEngineLegacy
 				stmt.close();
 		}
 
-		log( "SQL Query: \"%s\" which affected %s row(s).", ZStrings.limitLength( query, 512 ), cnt );
+		log( "SQL Query: \"%s\" which affected %s row(s).", UtilStrings.limitLength( query, 512 ), cnt );
 		return cnt;
 	}
 
@@ -687,7 +687,7 @@ public class DatabaseEngineLegacy
 			stmt.execute();
 			updated = stmt.getUpdateCount();
 
-			log( "SQL Query: \"%s\" which affected %s row(s).", ZStrings.limitLength( stmt.toString().substring( stmt.toString().indexOf( ": " ) + 2 ), 512 ), updated );
+			log( "SQL Query: \"%s\" which affected %s row(s).", UtilStrings.limitLength( stmt.toString().substring( stmt.toString().indexOf( ": " ) + 2 ), 512 ), updated );
 		}
 		catch ( MySQLNonTransientConnectionException e )
 		{
@@ -792,7 +792,7 @@ public class DatabaseEngineLegacy
 
 		if ( options0 != null )
 			for ( Entry<String, Object> o : options0.entrySet() )
-				options.put( o.getKey().toLowerCase(), ZObjects.castToString( o.getValue() ) );
+				options.put( o.getKey().toLowerCase(), UtilObjects.castToString( o.getValue() ) );
 
 		if ( !options.containsKey( "limit" ) || !( options.get( "limit" ) instanceof String ) )
 			options.put( "limit", "0" );
@@ -820,7 +820,7 @@ public class DatabaseEngineLegacy
 
 		try
 		{
-			boolean debug = ZObjects.isTrue( options.get( "debug" ) );
+			boolean debug = UtilObjects.isTrue( options.get( "debug" ) );
 			ResultSet rs = query( query );
 
 			if ( rs == null )
@@ -861,7 +861,7 @@ public class DatabaseEngineLegacy
 		if ( sql == null )
 			throw new SQLException( "The SQL connection is closed or was never opened." );
 
-		if ( ZObjects.isNull( keys ) || ZObjects.isNull( values ) )
+		if ( UtilObjects.isNull( keys ) || UtilObjects.isNull( values ) )
 		{
 			DatastoreManager.getLogger().warning( "[DB ERROR] Either keys array or values array equals null!\n" );
 			return null;
@@ -987,7 +987,7 @@ public class DatabaseEngineLegacy
 
 	public boolean update( String table, List<? extends Object> keys, List<? extends Object> list, List<? extends Object> keysW, List<? extends Object> valuesW )
 	{
-		if ( ZObjects.isNull( keys ) || ZObjects.isNull( list ) )
+		if ( UtilObjects.isNull( keys ) || UtilObjects.isNull( list ) )
 		{
 			System.err.print( "[DB ERROR] Either keys array or values array equals null!\n" );
 			return false;
@@ -1024,7 +1024,7 @@ public class DatabaseEngineLegacy
 			prefix = ", ";
 		}
 
-		if ( !ZObjects.isNull( keysW ) && !ZObjects.isNull( valuesW ) && keysW.size() > 0 && valuesW.size() > 0 )
+		if ( !UtilObjects.isNull( keysW ) && !UtilObjects.isNull( valuesW ) && keysW.size() > 0 && valuesW.size() > 0 )
 		{
 			x = 0;
 			prefix = "";

@@ -27,9 +27,9 @@ import com.chiorichan.logger.Log;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Ticks;
-import com.chiorichan.zutils.ZIO;
-import com.chiorichan.zutils.ZObjects;
-import com.chiorichan.zutils.ZSystem;
+import com.chiorichan.utils.UtilIO;
+import com.chiorichan.utils.UtilObjects;
+import com.chiorichan.utils.UtilSystem;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -62,7 +62,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 			// TODO check that the enclosed lock PID number is currently running
 			if ( lockFile.exists() )
 			{
-				String pidraw = ZIO.readFileToString( lockFile );
+				String pidraw = UtilIO.readFileToString( lockFile );
 
 				if ( pidraw != null && pidraw.length() > 0 )
 				{
@@ -70,7 +70,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 					try
 					{
-						if ( pid != Integer.parseInt( ZSystem.getProcessID() ) && ZSystem.isPIDRunning( pid ) )
+						if ( pid != Integer.parseInt( UtilSystem.getProcessID() ) && UtilSystem.isPIDRunning( pid ) )
 							throw new StartupException( "We have detected the server jar is already running. Please terminate PID " + pid + " or disregard this notice and try again." );
 					}
 					catch ( IOException e )
@@ -80,7 +80,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 				}
 			}
 
-			ZIO.writeStringToFile( lockFile, ZSystem.getProcessID() );
+			UtilIO.writeStringToFile( lockFile, UtilSystem.getProcessID() );
 			lockFile.deleteOnExit();
 		}
 		catch ( IOException e )
@@ -93,7 +93,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public static AppConfig get()
 	{
-		if ( ZObjects.stackTraceAntiLoop( AppConfig.class, "loadConfig" ) && !instance.isConfigLoaded() )
+		if ( UtilObjects.stackTraceAntiLoop( AppConfig.class, "loadConfig" ) && !instance.isConfigLoaded() )
 			instance.loadConfig();
 		return instance;
 	}
@@ -184,8 +184,8 @@ public class AppConfig implements Configuration, TaskRegistrar
 
 	public void clearCache( File path, long keepHistory )
 	{
-		ZObjects.notNull( path );
-		ZObjects.notNull( keepHistory );
+		UtilObjects.notNull( path );
+		UtilObjects.notNull( keepHistory );
 
 		if ( !path.exists() || !path.isDirectory() )
 			throw new IllegalArgumentException( "Path must exist and be a directory." );
@@ -401,21 +401,21 @@ public class AppConfig implements Configuration, TaskRegistrar
 					dir = defPath;
 				}
 
-				File file = ZIO.isAbsolute( dir ) ? new File( dir ) : new File( getDirectory().getAbsolutePath(), dir );
+				File file = UtilIO.isAbsolute( dir ) ? new File( dir ) : new File( getDirectory().getAbsolutePath(), dir );
 
 				if ( directoryCheck )
-					if ( !ZIO.setDirectoryAccess( file ) )
-						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
+					if ( !UtilIO.setDirectoryAccess( file ) )
+						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + UtilIO.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
 
 				directories.put( configKey, file );
 			}
 			catch ( NoClassDefFoundError e )
 			{
-				File file = ZIO.isAbsolute( defPath ) ? new File( defPath ) : new File( getDirectory(), defPath );
+				File file = UtilIO.isAbsolute( defPath ) ? new File( defPath ) : new File( getDirectory(), defPath );
 
 				if ( directoryCheck )
-					if ( !ZIO.setDirectoryAccess( file ) )
-						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
+					if ( !UtilIO.setDirectoryAccess( file ) )
+						throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + UtilIO.relPath( file ) + "\"! If the path is incorrect, check config option \"directories." + configKey + "\"." );
 
 				return file;
 
@@ -433,8 +433,8 @@ public class AppConfig implements Configuration, TaskRegistrar
 	public File getDirectoryCache( String subdir )
 	{
 		File file = new File( getDirectoryCache(), subdir );
-		if ( !ZIO.setDirectoryAccess( file ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( file ) + "\"!" );
+		if ( !UtilIO.setDirectoryAccess( file ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + UtilIO.relPath( file ) + "\"!" );
 		return file;
 	}
 
@@ -843,7 +843,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 			yaml.setDefaults( YamlConfiguration.loadConfiguration( getClass().getClassLoader().getResourceAsStream( "com/chiorichan/config.yaml" ) ) );
 			directories.clear();
 
-			Log.get().info( String.format( "Loaded application configuration from %s", ZIO.relPath( configFile ) ) );
+			Log.get().info( String.format( "Loaded application configuration from %s", UtilIO.relPath( configFile ) ) );
 		}
 		catch ( NoClassDefFoundError e )
 		{
@@ -972,7 +972,7 @@ public class AppConfig implements Configuration, TaskRegistrar
 	{
 		Stream<String> lines = new BufferedReader( new InputStreamReader( getClass().getClassLoader().getResourceAsStream( resourcePath ) ) ).lines();
 
-		if ( !ZObjects.isEmpty( localFile ) )
+		if ( !UtilObjects.isEmpty( localFile ) )
 		{
 			File local = new File( getDirectory(), localFile );
 			if ( local.exists() && local.isFile() )

@@ -12,7 +12,7 @@ package com.chiorichan.services;
 import com.chiorichan.event.EventBus;
 import com.chiorichan.event.services.ServiceRegisterEvent;
 import com.chiorichan.event.services.ServiceUnregisterEvent;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.logger.Log;
 import com.google.common.collect.ImmutableList;
@@ -261,7 +261,7 @@ public class AppManager<T extends ServiceManager>
 		if ( instance != null )
 			throw new IllegalStateException( "The " + getName() + " has already been initialized!" );
 
-		instance = ZObjects.initClass( managerClass, args );
+		instance = UtilObjects.initClass( managerClass, args );
 		instance.init();
 	}
 

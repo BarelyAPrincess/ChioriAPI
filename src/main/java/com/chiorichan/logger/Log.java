@@ -11,8 +11,8 @@ package com.chiorichan.logger;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
-import com.chiorichan.zutils.ZIO;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilIO;
+import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.Versioning;
 
@@ -61,7 +61,7 @@ public class Log implements LogAPI
 			if ( log.exists() )
 			{
 				if ( archiveLimit > 0 )
-					ZIO.gzFile( log, new File( AppConfig.get().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
+					UtilIO.gzFile( log, new File( AppConfig.get().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
 				log.delete();
 			}
 
@@ -106,10 +106,10 @@ public class Log implements LogAPI
 			return;
 		}
 
-		ZIO.SortableFile[] sfiles = new ZIO.SortableFile[files.length];
+		UtilIO.SortableFile[] sfiles = new UtilIO.SortableFile[files.length];
 
 		for ( int i = 0; i < files.length; i++ )
-			sfiles[i] = new ZIO.SortableFile( files[i] );
+			sfiles[i] = new UtilIO.SortableFile( files[i] );
 
 		Arrays.sort( sfiles );
 
@@ -289,7 +289,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( !ZObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
+			if ( !UtilObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg );
@@ -307,7 +307,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( !ZObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
+			if ( !UtilObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, params );
@@ -325,7 +325,7 @@ public class Log implements LogAPI
 	{
 		try
 		{
-			if ( !ZObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
+			if ( !UtilObjects.stackTraceAntiLoop( Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
 			{
 				altOutputStream.println( "Failover Logger [" + l.getName() + "] " + msg );
 				t.printStackTrace( altOutputStream );

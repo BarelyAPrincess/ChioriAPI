@@ -22,7 +22,7 @@ import com.chiorichan.account.LocationService;
 import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
@@ -137,7 +137,7 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 		for ( Object obj : objs )
 			try
 			{
-				handler.println( sender.getDisplayName() + ": " + ZObjects.castToStringWithException( obj ) );
+				handler.println( sender.getDisplayName() + ": " + UtilObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{
@@ -151,7 +151,7 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 		for ( Object obj : objs )
 			try
 			{
-				handler.println( ZObjects.castToStringWithException( obj ) );
+				handler.println( UtilObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{

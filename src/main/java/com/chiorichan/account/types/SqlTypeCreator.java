@@ -30,7 +30,7 @@ import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionDefault;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.zutils.ZDB;
+import com.chiorichan.utils.UtilDB;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -271,7 +271,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 			{
 				String key = e.getKey();
 
-				String type = ZDB.objectToSqlType( e.getValue() );
+				String type = UtilDB.objectToSqlType( e.getValue() );
 				if ( !columns.contains( key ) )
 					try
 					{
@@ -287,7 +287,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 
 			for ( SQLTableColumns.SQLColumn col : columns.columnsRequired() )
 				if ( !metaData.containsKey( col.name() ) )
-					metaData.put( col.name(), ZDB.sqlTypeToObject( col.type() ) );
+					metaData.put( col.name(), UtilDB.sqlTypeToObject( col.type() ) );
 
 
 			SQLQuerySelect select = table.select().where( "acctId" ).matches( context.getAcctId() ).limit( 1 ).execute();

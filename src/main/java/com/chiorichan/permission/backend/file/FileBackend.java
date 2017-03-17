@@ -26,7 +26,7 @@ import com.chiorichan.permission.PermissionType;
 import com.chiorichan.permission.References;
 import com.chiorichan.permission.lang.PermissionBackendException;
 import com.chiorichan.permission.lang.PermissionException;
-import com.chiorichan.zutils.ZIO;
+import com.chiorichan.utils.UtilIO;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
@@ -87,7 +87,7 @@ public class FileBackend extends PermissionBackend
 		String defaultGroupProperty = "default";
 		for ( String ref : refs )
 		{
-			defaultGroupProperty = ZIO.buildPath( "refs", ref, defaultGroupProperty );
+			defaultGroupProperty = UtilIO.buildPath( "refs", ref, defaultGroupProperty );
 
 			for ( Map.Entry<String, Object> entry : groups.getValues( false ).entrySet() )
 				if ( entry.getValue() instanceof ConfigurationSection )
@@ -151,7 +151,7 @@ public class FileBackend extends PermissionBackend
 			AppConfig.get().set( "permissions.file", "permissions.yaml" );
 		}
 
-		permissionsFile = ZIO.isAbsolute( permissionFilename ) ? new File( permissionFilename ) : new File( AppConfig.get().getDirectory(), permissionFilename );
+		permissionsFile = UtilIO.isAbsolute( permissionFilename ) ? new File( permissionFilename ) : new File( AppConfig.get().getDirectory(), permissionFilename );
 
 		FileConfiguration newPermissions = new YamlConfiguration();
 		try
@@ -329,7 +329,7 @@ public class FileBackend extends PermissionBackend
 
 		String defaultGroupProperty = "default";
 		if ( refs != null )
-			defaultGroupProperty = ZIO.buildPath( "refs", refs, defaultGroupProperty );
+			defaultGroupProperty = UtilIO.buildPath( "refs", refs, defaultGroupProperty );
 
 		boolean success = false;
 

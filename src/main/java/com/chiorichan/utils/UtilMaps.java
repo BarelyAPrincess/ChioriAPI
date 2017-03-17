@@ -7,15 +7,15 @@
  * <p>
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class ZMaps
+public class UtilMaps
 {
-	private ZMaps()
+	private UtilMaps()
 	{
 	}
 
@@ -52,7 +52,7 @@ public class ZMaps
 		{{
 			for ( Map.Entry<String, T> entry : map.entrySet() )
 			{
-				if ( ZNumbers.isNumber( entry.getKey() ) )
+				if ( UtilNumbers.isNumber( entry.getKey() ) )
 					put( Integer.parseInt( entry.getKey() ), entry.getValue() );
 			}
 		}};

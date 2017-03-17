@@ -34,7 +34,7 @@ import com.chiorichan.services.ServicePriority;
 import com.chiorichan.services.ServiceProvider;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -596,7 +596,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 		String backendName = AppConfig.get().getString( "permissions.backend" );
 
-		if ( ZObjects.isEmpty( backendName ) )
+		if ( UtilObjects.isEmpty( backendName ) )
 		{
 			backendName = PermissionBackend.defaultBackend; // Default backend
 			AppConfig.get().set( "permissions.backend", backendName );

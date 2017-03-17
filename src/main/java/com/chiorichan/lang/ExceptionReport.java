@@ -10,7 +10,7 @@
 package com.chiorichan.lang;
 
 import com.chiorichan.logger.Log;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.Validate;
@@ -132,7 +132,7 @@ public class ExceptionReport
 	 */
 	public final boolean handleException( Throwable cause, ExceptionContext context )
 	{
-		if ( ZObjects.isNull( cause ) )
+		if ( UtilObjects.isNull( cause ) )
 			return false;
 
 		/* Give an IException a chance to self-handle the exception report */

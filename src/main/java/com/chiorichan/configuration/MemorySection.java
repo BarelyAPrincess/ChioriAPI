@@ -10,9 +10,9 @@
 package com.chiorichan.configuration;
 
 import com.chiorichan.logger.Log;
-import com.chiorichan.zutils.ZLists;
-import com.chiorichan.zutils.ZMaps;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilLists;
+import com.chiorichan.utils.UtilMaps;
+import com.chiorichan.utils.UtilObjects;
 
 import java.awt.Color;
 import java.lang.reflect.Constructor;
@@ -311,9 +311,9 @@ public class MemorySection implements ConfigurationSection
 	{
 		return new ArrayList<T>()
 		{{
-			if ( ZLists.incremented( map.keySet() ) )
+			if ( UtilLists.incremented( map.keySet() ) )
 			{
-				for ( Map.Entry<Integer, Object> section : ZMaps.asNumericallySortedMap( map ).entrySet() )
+				for ( Map.Entry<Integer, Object> section : UtilMaps.asNumericallySortedMap( map ).entrySet() )
 					if ( section.getValue() instanceof ConfigurationSection )
 						add( ( ( ConfigurationSection ) section.getValue() ).asObject( cls ) );
 			}
@@ -372,22 +372,22 @@ public class MemorySection implements ConfigurationSection
 					}
 					else if ( value instanceof ConfigurationSection )
 					{
-						Object newValue = ZLists.incremented( ( ( ConfigurationSection ) value ).getKeys() ) ? ( ( ConfigurationSection ) value ).asObjectList( field.getType() ) : ( ( ConfigurationSection ) value ).asObject( field.getType() );
+						Object newValue = UtilLists.incremented( ( ( ConfigurationSection ) value ).getKeys() ) ? ( ( ConfigurationSection ) value ).asObjectList( field.getType() ) : ( ( ConfigurationSection ) value ).asObject( field.getType() );
 						if ( newValue == null )
 							Log.get().severe( "Failed to cast ConfigurationSection " + entry.getKey() + " to object " + field.getType() + ". [" + value.getClass() + " // " + field.getType() + "]" );
 						else
 							field.set( obj, newValue );
 					}
 					else if ( String.class.isAssignableFrom( field.getType() ) )
-						field.set( obj, ZObjects.castToString( value ) );
+						field.set( obj, UtilObjects.castToString( value ) );
 					else if ( Double.class.isAssignableFrom( field.getType() ) )
-						field.set( obj, ZObjects.castToDouble( value ) );
+						field.set( obj, UtilObjects.castToDouble( value ) );
 					else if ( Integer.class.isAssignableFrom( field.getType() ) )
-						field.set( obj, ZObjects.castToInt( value ) );
+						field.set( obj, UtilObjects.castToInt( value ) );
 					else if ( Long.class.isAssignableFrom( field.getType() ) )
-						field.set( obj, ZObjects.castToLong( value ) );
+						field.set( obj, UtilObjects.castToLong( value ) );
 					else if ( Boolean.class.isAssignableFrom( field.getType() ) )
-						field.set( obj, ZObjects.castToBool( value ) );
+						field.set( obj, UtilObjects.castToBool( value ) );
 					else if ( field.get( obj ) == null )
 						Log.get().severe( "Failed to find a casting for field \"" + entry.getKey() + "\" with type \"" + field.getType() + "\" in object \"" + value.getClass() + "\"." );
 				}
@@ -1060,7 +1060,7 @@ public class MemorySection implements ConfigurationSection
 				ConfigurationSection section = ( ConfigurationSection ) obj;
 				Map<String, Object> values = section.getValues( false );
 
-				if ( ZLists.incremented( values.keySet() ) )
+				if ( UtilLists.incremented( values.keySet() ) )
 					result.put( key, new ArrayList<>( values.values() ) );
 				else
 					result.put( key, values );
@@ -1072,7 +1072,7 @@ public class MemorySection implements ConfigurationSection
 		}
 
 		if ( deep )
-			result.putAll( ZMaps.flattenMap( result ) );
+			result.putAll( UtilMaps.flattenMap( result ) );
 
 		return result;
 	}
@@ -1250,7 +1250,7 @@ public class MemorySection implements ConfigurationSection
 	@Override
 	public void set( String path, Object value, boolean convert )
 	{
-		ZObjects.notEmpty( path, "Path cannot be empty" );
+		UtilObjects.notEmpty( path, "Path cannot be empty" );
 
 		Configuration root = getRoot();
 		if ( root == null )

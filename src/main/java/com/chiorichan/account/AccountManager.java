@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilStrings;
 import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppConfig;
@@ -23,7 +23,7 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.event.account.KickEvent;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
-import com.chiorichan.zutils.ZEncryption;
+import com.chiorichan.utils.UtilEncryption;
 import com.chiorichan.Versioning;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
@@ -95,10 +95,10 @@ public final class AccountManager extends AccountEvents
 		{
 			seed = seed.replaceAll( "[\\W\\d]", "" );
 
-			acctId = ZStrings.randomChars( seed, 2 ).toLowerCase();
-			String sum = ZStrings.removeLetters( ZEncryption.md5( seed ) );
-			acctId += sum.length() < 3 ? ZEncryption.randomize( "123" ) : sum.substring( 0, 3 );
-			acctId += ZStrings.randomChars( seed, 1 ).toUpperCase();
+			acctId = UtilStrings.randomChars( seed, 2 ).toLowerCase();
+			String sum = UtilStrings.removeLetters( UtilEncryption.md5( seed ) );
+			acctId += sum.length() < 3 ? UtilEncryption.randomize( "123" ) : sum.substring( 0, 3 );
+			acctId += UtilStrings.randomChars( seed, 1 ).toUpperCase();
 		}
 
 		if ( acctId == null || acctId.isEmpty() )
@@ -113,9 +113,9 @@ public final class AccountManager extends AccountEvents
 
 			// When our tries are divisible by 25 we attempt to randomize the last letter for more chances.
 			if ( tries % 25 == 0 )
-				acctId = acctId.substring( 0, 4 ) + ZEncryption.randomize( acctId.substring( 5 ) );
+				acctId = acctId.substring( 0, 4 ) + UtilEncryption.randomize( acctId.substring( 5 ) );
 
-			acctId = acctId.substring( 0, 2 ) + ZEncryption.randomize( "123" ) + acctId.substring( 5 );
+			acctId = acctId.substring( 0, 2 ) + UtilEncryption.randomize( "123" ) + acctId.substring( 5 );
 
 			tries++;
 		}

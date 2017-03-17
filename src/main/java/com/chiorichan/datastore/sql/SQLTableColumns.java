@@ -9,7 +9,7 @@
  */
 package com.chiorichan.datastore.sql;
 
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.google.common.collect.Lists;
 
 import java.sql.ResultSet;
@@ -87,7 +87,7 @@ public class SQLTableColumns implements Iterable<String>
 	{
 		List<String> rtn = Lists.newArrayList();
 		for ( SQLColumn m : columns )
-			if ( ZObjects.isNull( m.def ) && !m.isNullable )
+			if ( UtilObjects.isNull( m.def ) && !m.isNullable )
 				rtn.add( m.name );
 		return rtn;
 	}
@@ -101,7 +101,7 @@ public class SQLTableColumns implements Iterable<String>
 	{
 		List<SQLColumn> rtn = Lists.newArrayList();
 		for ( SQLColumn m : columns )
-			if ( ZObjects.isNull( m.def ) && !m.isNullable )
+			if ( UtilObjects.isNull( m.def ) && !m.isNullable )
 				rtn.add( m );
 		return rtn;
 	}

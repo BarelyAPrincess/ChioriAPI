@@ -27,8 +27,8 @@ import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ServiceManager;
-import com.chiorichan.zutils.ZIO;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilIO;
+import com.chiorichan.utils.UtilObjects;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
@@ -224,7 +224,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 		for ( Object obj : objs )
 			try
 			{
-				Log.get( this ).info( sender.getDisplayName() + ": " + ZObjects.castToStringWithException( obj ) );
+				Log.get( this ).info( sender.getDisplayName() + ": " + UtilObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{
@@ -238,7 +238,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 		for ( Object obj : objs )
 			try
 			{
-				Log.get( this ).info( ZObjects.castToStringWithException( obj ) );
+				Log.get( this ).info( UtilObjects.castToStringWithException( obj ) );
 			}
 			catch ( ClassCastException e )
 			{
@@ -261,7 +261,7 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 			{
 				is = getClass().getClassLoader().getResourceAsStream( "com/chiorichan/banner.txt" );
 
-				String[] banner = new String( ZIO.inputStream2Bytes( is ) ).split( "\\n" );
+				String[] banner = new String( UtilIO.inputStream2Bytes( is ) ).split( "\\n" );
 
 				for ( String l : banner )
 					Log.get().info( EnumColor.GOLD + l );

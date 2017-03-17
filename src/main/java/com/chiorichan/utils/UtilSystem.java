@@ -7,7 +7,7 @@
  *
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import com.chiorichan.AppLoader;
 import org.apache.commons.lang3.SystemUtils;
@@ -25,7 +25,7 @@ import java.lang.management.ManagementFactory;
 /**
  * Provides easy access to the server metadata plus operating system and jvm information
  */
-public class ZSystem
+public class UtilSystem
 {
 	private static final String OS = System.getProperty( "os.name" ).toLowerCase();
 
@@ -38,7 +38,7 @@ public class ZSystem
 	{
 		String path = System.getProperty( "java.home" ) + File.pathSeparator + "bin" + File.pathSeparator;
 
-		if ( ZSystem.isWindows() )
+		if ( UtilSystem.isWindows() )
 			if ( new File( path + "javaw.exe" ).isFile() )
 				return path + "javaw.exe";
 			else if ( new File( path + "java.exe" ).isFile() )
@@ -263,7 +263,7 @@ public class ZSystem
 		return formatter.print( duration.toPeriod() );
 	}
 
-	private ZSystem()
+	private UtilSystem()
 	{
 
 	}

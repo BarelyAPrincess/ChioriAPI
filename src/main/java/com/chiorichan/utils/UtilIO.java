@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
@@ -64,13 +64,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-public class ZIO
+public class UtilIO
 {
 	public static final String PATH_SEPERATOR = File.separator;
 	private static final int EOF = -1;
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
-	private ZIO()
+	private UtilIO()
 	{
 
 	}
@@ -368,7 +368,7 @@ public class ZIO
 
 	public static boolean extractNatives( Map<String, List<String>> natives, File libFile, File baseDir ) throws IOException
 	{
-		if ( !ZObjects.containsKeys( natives, Arrays.asList( OSInfo.NATIVE_SEARCH_PATHS ) ) )
+		if ( !UtilObjects.containsKeys( natives, Arrays.asList( OSInfo.NATIVE_SEARCH_PATHS ) ) )
 			PluginManager.getLogger().warning( String.format( "%sWe were unable to locate any natives libraries that match architectures '%s' within plugin '%s'.", EnumColor.DARK_GRAY, Joiner.on( ", '" ).join( OSInfo.NATIVE_SEARCH_PATHS ), libFile.getAbsolutePath() ) );
 
 		List<String> nativesExtracted = new ArrayList<>();
@@ -500,7 +500,7 @@ public class ZIO
 
 	private static String fileExtension( String fileName )
 	{
-		return ZStrings.regexCapture( fileName, ".*\\.(.*)$" );
+		return UtilStrings.regexCapture( fileName, ".*\\.(.*)$" );
 	}
 
 	public static void gzFile( File source ) throws IOException
@@ -567,7 +567,7 @@ public class ZIO
 
 	public static String md5( File file )
 	{
-		return ZEncryption.md5( file );
+		return UtilEncryption.md5( file );
 	}
 
 	public static String nameSpaceToPath( String namespace )
@@ -726,10 +726,10 @@ public class ZIO
 			try
 			{
 				if ( file.exists() && file.isFile() )
-					ZObjects.notFalse( file.delete(), "failed to delete directory!" );
-				ZObjects.notFalse( file.mkdirs(), "failed to create directory!" );
-				ZObjects.notFalse( file.setWritable( true ), "failed to set directory writable!" );
-				ZObjects.notFalse( file.setReadable( true ), "failed to set directory readable!" );
+					UtilObjects.notFalse( file.delete(), "failed to delete directory!" );
+				UtilObjects.notFalse( file.mkdirs(), "failed to create directory!" );
+				UtilObjects.notFalse( file.setWritable( true ), "failed to set directory writable!" );
+				UtilObjects.notFalse( file.setReadable( true ), "failed to set directory readable!" );
 
 				Log.get().fine( "Setting read and write access for directory \"" + relPath( file ) + "\" was successful!" );
 			}
@@ -807,7 +807,7 @@ public class ZIO
 
 	public static boolean isDirectoryEmpty( File file )
 	{
-		ZObjects.notNull( file, "file is null" );
+		UtilObjects.notNull( file, "file is null" );
 
 		return file.exists() && file.isDirectory() && file.list().length == 0;
 	}
@@ -1204,54 +1204,45 @@ public class ZIO
 			/* A file path: easy enough */
 			return new File( dirURL.toURI() ).list();
 
-		if ( dirURL.getProtocol().equals( "jar" ) )
+		if ( dirURL.getProtocol().equals( "jar" ) || dirURL.getProtocol().equals( "zip" ) )
 		{
-			/* A JAR path */
-			String jarPath = dirURL.getPath().substring( 5, dirURL.getPath().indexOf( "!" ) ); // strip out only the JAR file
-			JarFile jar = new JarFile( URLDecoder.decode( jarPath, "UTF-8" ) );
-			Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries in jar
-			Set<String> result = new HashSet<String>(); // avoid duplicates in case it is a subdirectory
-			while ( entries.hasMoreElements() )
+			/* A JAR or ZIP path */
+			String archivePath = dirURL.getPath().substring( 5, dirURL.getPath().indexOf( "!" ) ); // strip out only the archive file
+			Set<String> result;
+			if ( dirURL.getProtocol().equals( "jar" ) )
 			{
-				String name = entries.nextElement().getName();
-				if ( name.startsWith( path ) )
-				{ // filter according to the path
-					String entry = name.substring( path.length() );
-					int checkSubdir = entry.indexOf( "/" );
-					if ( checkSubdir >= 0 )
-						// if it is a subdirectory, we just return the directory name
-						entry = entry.substring( 0, checkSubdir );
-					result.add( entry );
-				}
+				JarFile jar = new JarFile( URLDecoder.decode( archivePath, "UTF-8" ) );
+				result = entriesToSet( archivePath, jar.entries() );
+				jar.close();
 			}
-			jar.close();
-			return result.toArray( new String[result.size()] );
-		}
-
-		if ( dirURL.getProtocol().equals( "zip" ) )
-		{
-			/* A ZIP path */
-			String zipPath = dirURL.getPath().substring( 5, dirURL.getPath().indexOf( "!" ) ); // strip out only the JAR file
-			ZipFile zip = new ZipFile( URLDecoder.decode( zipPath, "UTF-8" ) );
-			Enumeration<? extends ZipEntry> entries = zip.entries(); // gives ALL entries in jar
-			Set<String> result = new HashSet<String>(); // avoid duplicates in case it is a subdirectory
-			while ( entries.hasMoreElements() )
+			else// if ( dirURL.getProtocol().equals( "zip" ) )
 			{
-				String name = entries.nextElement().getName();
-				if ( name.startsWith( path ) )
-				{ // filter according to the path
-					String entry = name.substring( path.length() );
-					int checkSubdir = entry.indexOf( "/" );
-					if ( checkSubdir >= 0 )
-						// if it is a subdirectory, we just return the directory name
-						entry = entry.substring( 0, checkSubdir );
-					result.add( entry );
-				}
+				ZipFile zip = new ZipFile( URLDecoder.decode( archivePath, "UTF-8" ) );
+				result = entriesToSet( archivePath, zip.entries() );
+				zip.close();
 			}
-			zip.close();
 			return result.toArray( new String[result.size()] );
 		}
 
 		throw new UnsupportedOperationException( "Cannot list files for URL " + dirURL );
+	}
+
+	public static Set<String> entriesToSet( String archivePath, Enumeration<? extends ZipEntry> entries )
+	{
+		Set<String> result = new HashSet<>(); // avoid duplicates in case it is a subdirectory
+		while ( entries.hasMoreElements() )
+		{
+			String name = entries.nextElement().getName();
+			if ( name.startsWith( archivePath ) )
+			{ // filter according to the path
+				String entry = name.substring( archivePath.length() );
+				int checkSubdir = entry.indexOf( "/" );
+				if ( checkSubdir >= 0 )
+					// if it is a subdirectory, we just return the directory name
+					entry = entry.substring( 0, checkSubdir );
+				result.add( entry );
+			}
+		}
+		return result;
 	}
 }

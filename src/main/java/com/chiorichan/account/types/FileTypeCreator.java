@@ -26,8 +26,8 @@ import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionDefault;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.zutils.ZIO;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilIO;
+import com.chiorichan.utils.UtilObjects;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
@@ -54,8 +54,8 @@ public class FileTypeCreator extends AccountTypeCreator
 	{
 		accountsDirectory = AppConfig.get().getDirectory( "accounts", "accounts" );
 
-		if ( !ZIO.setDirectoryAccess( accountsDirectory ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + ZIO.relPath( accountsDirectory ) + "\"!" );
+		if ( !UtilIO.setDirectoryAccess( accountsDirectory ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + UtilIO.relPath( accountsDirectory ) + "\"!" );
 
 		accountFields = AppConfig.get().getStringList( "accounts.fileType.fields", new ArrayList<String>() );
 
@@ -277,7 +277,7 @@ public class FileTypeCreator extends AccountTypeCreator
 			}
 
 			for ( String f : accountFields )
-				if ( context1.getValues().get( f ) != null && ZObjects.castToString( context1.getValues().get( f ) ).equalsIgnoreCase( acctId ) )
+				if ( context1.getValues().get( f ) != null && UtilObjects.castToString( context1.getValues().get( f ) ).equalsIgnoreCase( acctId ) )
 				{
 					context = context1;
 					break;

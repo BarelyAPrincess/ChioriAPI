@@ -14,7 +14,7 @@ import com.chiorichan.logger.Log;
 import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.configuration.InvalidConfigurationException;
 import com.chiorichan.configuration.file.FileConfiguration;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -192,7 +192,7 @@ public class YamlConfiguration extends FileConfiguration
 	@Override
 	public void loadFromString( String contents ) throws InvalidConfigurationException
 	{
-		if ( ZObjects.isEmpty( contents ) )
+		if ( UtilObjects.isEmpty( contents ) )
 			return;
 
 		Map<?, ?> input;

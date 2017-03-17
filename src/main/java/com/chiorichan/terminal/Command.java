@@ -19,7 +19,7 @@ import com.chiorichan.messaging.MessageReceiver;
 import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionManager;
 import com.chiorichan.helpers.Namespace;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.collect.Sets;
 
 /**
@@ -147,7 +147,7 @@ public abstract class Command
 	public Command setAliases( Collection<String> aliases )
 	{
 		this.aliases.clear();
-		this.aliases.addAll( ZStrings.toLowerCaseList( aliases ) );
+		this.aliases.addAll( UtilStrings.toLowerCaseList( aliases ) );
 		return this;
 	}
 

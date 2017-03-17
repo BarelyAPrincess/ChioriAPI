@@ -13,7 +13,7 @@ import com.chiorichan.account.AccountType;
 import com.chiorichan.permission.lang.PermissionException;
 import com.chiorichan.permission.lang.PermissionValueException;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 
 /**
  * Holds the union between {@link Permission} and {@link PermissibleEntity}<br>
@@ -37,8 +37,8 @@ public class PermissionResult
 
 	PermissionResult( PermissibleEntity entity, Permission perm, References refs )
 	{
-		ZObjects.notNull( entity );
-		ZObjects.notNull( perm );
+		UtilObjects.notNull( entity );
+		UtilObjects.notNull( perm );
 
 		this.entity = entity;
 		this.perm = perm;
@@ -103,7 +103,7 @@ public class PermissionResult
 
 	public int getInt()
 	{
-		return ZObjects.castToInt( getValue().getValue() );
+		return UtilObjects.castToInt( getValue().getValue() );
 	}
 
 	public Permission getPermission()
@@ -118,7 +118,7 @@ public class PermissionResult
 
 	public String getString()
 	{
-		return ZObjects.castToString( getValue().getValue() );
+		return UtilObjects.castToString( getValue().getValue() );
 	}
 
 	public PermissionValue getValue()
@@ -262,7 +262,7 @@ public class PermissionResult
 		if ( perm.getType() == PermissionType.DEFAULT )
 			return isAssigned();
 
-		return getValueObject() == null ? false : ZObjects.castToBool( getValueObject() );
+		return getValueObject() == null ? false : UtilObjects.castToBool( getValueObject() );
 	}
 
 	public PermissionResult recalculatePermissions()

@@ -34,7 +34,7 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ServiceManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
-import com.chiorichan.zutils.ZIO;
+import com.chiorichan.utils.UtilIO;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.Validate;
 
@@ -94,7 +94,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 			return;
 
 		File updateFile = new File( AppConfig.get().getDirectoryUpdates(), file.getName() );
-		if ( updateFile.isFile() && ZIO.copy( updateFile, file ) )
+		if ( updateFile.isFile() && UtilIO.copy( updateFile, file ) )
 			updateFile.delete();
 	}
 

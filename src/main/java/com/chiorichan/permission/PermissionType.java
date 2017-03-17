@@ -12,7 +12,7 @@ package com.chiorichan.permission;
 import java.util.Arrays;
 import java.util.List;
 
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.google.common.collect.Lists;
 
 /**
@@ -29,7 +29,7 @@ public abstract class PermissionType
 		{
 			try
 			{
-				return ZObjects.castToBoolWithException( obj );
+				return UtilObjects.castToBoolWithException( obj );
 			}
 			catch ( ClassCastException e )
 			{
@@ -86,7 +86,7 @@ public abstract class PermissionType
 		{
 			try
 			{
-				return ZObjects.castToBoolWithException( obj );
+				return UtilObjects.castToBoolWithException( obj );
 			}
 			catch ( ClassCastException e )
 			{
@@ -141,7 +141,7 @@ public abstract class PermissionType
 		@Override
 		Double cast( Object obj ) throws ClassCastException
 		{
-			return ZObjects.castToDoubleWithException( obj );
+			return UtilObjects.castToDoubleWithException( obj );
 		}
 		
 		@Override
@@ -191,7 +191,7 @@ public abstract class PermissionType
 		@Override
 		String cast( Object obj ) throws ClassCastException
 		{
-			return ZObjects.castToStringWithException( obj );
+			return UtilObjects.castToStringWithException( obj );
 		}
 		
 		@Override
@@ -241,7 +241,7 @@ public abstract class PermissionType
 		@Override
 		Integer cast( Object obj )
 		{
-			return ZObjects.castToIntWithException( obj );
+			return UtilObjects.castToIntWithException( obj );
 		}
 		
 		@Override
@@ -291,7 +291,7 @@ public abstract class PermissionType
 		@Override
 		String cast( Object obj ) throws ClassCastException
 		{
-			return ZObjects.castToStringWithException( obj );
+			return UtilObjects.castToStringWithException( obj );
 		}
 		
 		@Override

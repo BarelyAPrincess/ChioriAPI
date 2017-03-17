@@ -31,9 +31,9 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.TaskRegistrar;
 import com.chiorichan.tasks.Worker;
-import com.chiorichan.zutils.ZIO;
-import com.chiorichan.zutils.ZObjects;
-import com.chiorichan.zutils.ZSystem;
+import com.chiorichan.utils.UtilIO;
+import com.chiorichan.utils.UtilObjects;
+import com.chiorichan.utils.UtilSystem;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -253,16 +253,16 @@ public abstract class AppLoader implements Listener
 				// TODO check that the enclosed lock PID number is currently running
 				if ( lockFile.exists() )
 				{
-					String pidraw = ZIO.readFileToString( lockFile );
+					String pidraw = UtilIO.readFileToString( lockFile );
 
 					if ( pidraw != null && pidraw.length() > 0 )
 					{
 						int pid = Integer.parseInt( pidraw );
-						if ( ZSystem.isPIDRunning( pid ) )
+						if ( UtilSystem.isPIDRunning( pid ) )
 						{
 							if ( options.has( "stop" ) )
 							{
-								if ( ZSystem.terminatePID( pid ) )
+								if ( UtilSystem.terminatePID( pid ) )
 									Log.get().info( EnumColor.GREEN + Versioning.getProduct() + " " + Versioning.getVersion() + " has been terminated! (PID " + pid + ")" );
 								else
 									Log.get().info( EnumColor.RED + "Failed to terminate PID " + pid + "!" );
@@ -348,7 +348,7 @@ public abstract class AppLoader implements Listener
 					AppManager.manager( TaskManager.class ).init();
 					AppManager.manager( EventBus.class ).init();
 
-					instance = ZObjects.initClass( loaderClass );
+					instance = UtilObjects.initClass( loaderClass );
 					instances.add( instance );
 
 					instance.start();

@@ -12,7 +12,7 @@ package com.chiorichan.datastore.file;
 import com.chiorichan.configuration.ConfigurationSection;
 import com.chiorichan.configuration.types.yaml.YamlConfiguration;
 import com.chiorichan.datastore.Datastore;
-import com.chiorichan.zutils.ZIO;
+import com.chiorichan.utils.UtilIO;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,7 +32,7 @@ public class FileDatastore extends Datastore
 {
 	public static FileDatastore loadDirectory( File dir, String regexPattern )
 	{
-		List<File> files = ZIO.recursiveFiles( dir, StringUtils.countMatches( regexPattern, "/" ), regexPattern );
+		List<File> files = UtilIO.recursiveFiles( dir, StringUtils.countMatches( regexPattern, "/" ), regexPattern );
 		return new FileDatastore( files );
 	}
 

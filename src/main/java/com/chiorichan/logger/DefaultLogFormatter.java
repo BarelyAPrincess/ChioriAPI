@@ -17,7 +17,7 @@ import java.util.logging.LogRecord;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.lang.EnumColor;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilStrings;
 
 public class DefaultLogFormatter extends Formatter
 {
@@ -62,7 +62,7 @@ public class DefaultLogFormatter extends Formatter
 			if ( threadName.length() > 10 )
 				threadName = threadName.substring( 0, 2 ) + ".." + threadName.substring( threadName.length() - 6 );
 			else if ( threadName.length() < 10 )
-				threadName = threadName + ZStrings.repeat( " ", 10 - threadName.length() );
+				threadName = threadName + UtilStrings.repeat( " ", 10 - threadName.length() );
 
 			style = style.replaceAll( "%ct", threadName );
 		}

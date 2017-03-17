@@ -11,7 +11,7 @@ package com.chiorichan.datastore.sql.query;
 
 import com.chiorichan.datastore.sql.SQLBase;
 import com.chiorichan.datastore.sql.SQLWrapper;
-import com.chiorichan.zutils.ZDB;
+import com.chiorichan.utils.UtilDB;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public final class SQLQuery extends SQLBase<SQLQuery>
 		try
 		{
 			if ( query.toLowerCase().startsWith( "select" ) )
-				return ZDB.rowCount( result() );
+				return UtilDB.rowCount( result() );
 			else
 				return statement().getUpdateCount();
 		}

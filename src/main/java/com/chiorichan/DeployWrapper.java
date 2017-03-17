@@ -10,7 +10,7 @@
 package com.chiorichan;
 
 import com.chiorichan.configuration.types.yaml.YamlConfiguration;
-import com.chiorichan.zutils.ZIO;
+import com.chiorichan.utils.UtilIO;
 import com.chiorichan.libraries.Libraries;
 import com.chiorichan.libraries.MavenReference;
 import com.chiorichan.logger.Log;
@@ -74,7 +74,7 @@ public class DeployWrapper
 		}
 		finally
 		{
-			ZIO.closeQuietly( is );
+			UtilIO.closeQuietly( is );
 		}
 	}
 

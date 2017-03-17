@@ -9,7 +9,7 @@
  */
 package com.chiorichan.helpers;
 
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -76,8 +76,8 @@ public class GarbageCollectingSet<V, G> implements Iterable<V>
 
 	public void add( V value, G garbageObject )
 	{
-		ZObjects.notNull( garbageObject );
-		ZObjects.notNull( value );
+		UtilObjects.notNull( garbageObject );
+		UtilObjects.notNull( value );
 
 		if ( value == garbageObject )
 			throw new IllegalArgumentException( "value can't be equal to garbageObject for gc to work" );

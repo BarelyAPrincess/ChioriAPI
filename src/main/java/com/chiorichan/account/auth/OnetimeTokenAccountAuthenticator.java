@@ -29,7 +29,7 @@ import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.tasks.TaskManager;
 import com.chiorichan.tasks.Ticks;
 import com.chiorichan.tasks.Timings;
-import com.chiorichan.zutils.ZEncryption;
+import com.chiorichan.utils.UtilEncryption;
 
 /**
  * Used to authenticate an account using an Account Id and Token combination
@@ -201,7 +201,7 @@ public class OnetimeTokenAccountAuthenticator extends AccountAuthenticator imple
 	{
 		Validate.notNull( acct );
 
-		String token = ZEncryption.randomize( acct.getId() ) + Timings.epoch();
+		String token = UtilEncryption.randomize( acct.getId() ) + Timings.epoch();
 		try
 		{
 			// if ( db.queryUpdate( "INSERT INTO `accounts_token` (`acctId`,`token`,`expires`) VALUES (?,?,?);", acct.getId(), token, ( Timings.epoch() + ( 60 * 60 * 24 * 7 ) ) ) < 1 )

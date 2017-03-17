@@ -9,7 +9,7 @@
  */
 package com.chiorichan.lang;
 
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.Ansi.Attribute;
 
@@ -181,8 +181,8 @@ RESET( 'r', 0x15 ),
 	 */
 	public static EnumColor getByChar( String code )
 	{
-		ZObjects.notNull( code, "Code cannot be null" );
-		ZObjects.notFalse( code.length() > 0, "Code must have at least one char" );
+		UtilObjects.notNull( code, "Code cannot be null" );
+		UtilObjects.notFalse( code.length() > 0, "Code must have at least one char" );
 
 		return BY_CHAR.get( code.charAt( 0 ) );
 	}

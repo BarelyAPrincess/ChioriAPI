@@ -12,8 +12,8 @@ package com.chiorichan.permission;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.chiorichan.zutils.ZEncryption;
-import com.chiorichan.zutils.ZStrings;
+import com.chiorichan.utils.UtilEncryption;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
@@ -59,13 +59,13 @@ public class References implements Iterable<String>
 				else if ( ref.contains( "," ) )
 					add( ref.split( "," ) );
 				else
-					this.refs.add( ZStrings.removeInvalidChars( ref.toLowerCase() ) );
+					this.refs.add( UtilStrings.removeInvalidChars( ref.toLowerCase() ) );
 		return this;
 	}
 	
 	public String hash()
 	{
-		return ZEncryption.md5( join() );
+		return UtilEncryption.md5( join() );
 	}
 	
 	public boolean isEmpty()

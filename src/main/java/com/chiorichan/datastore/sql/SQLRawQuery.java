@@ -9,7 +9,7 @@
  */
 package com.chiorichan.datastore.sql;
 
-import com.chiorichan.zutils.ZDB;
+import com.chiorichan.utils.UtilDB;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class SQLRawQuery extends SQLBase<SQLRawQuery>
 		try
 		{
 			int cnt = statement().getUpdateCount();
-			return cnt == -1 ? ZDB.rowCount( resultSet() ) : cnt;
+			return cnt == -1 ? UtilDB.rowCount( resultSet() ) : cnt;
 		}
 		catch ( NullPointerException | SQLException e )
 		{

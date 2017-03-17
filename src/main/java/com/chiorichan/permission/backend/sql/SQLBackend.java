@@ -21,7 +21,7 @@ import com.chiorichan.AppConfig;
 import com.chiorichan.datastore.sql.SQLExecute;
 import com.chiorichan.datastore.sql.bases.SQLDatastore;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissibleGroup;
 import com.chiorichan.permission.Permission;
@@ -416,7 +416,7 @@ public class SQLBackend extends PermissionBackend
 	{
 		try
 		{
-			return updateDBValue( ns, key, ZObjects.castToStringWithException( val ) );
+			return updateDBValue( ns, key, UtilObjects.castToStringWithException( val ) );
 		}
 		catch ( ClassCastException e )
 		{

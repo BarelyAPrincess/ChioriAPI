@@ -30,10 +30,10 @@ import com.chiorichan.permission.References;
 import com.chiorichan.terminal.Command;
 import com.chiorichan.terminal.CommandDispatch;
 import com.chiorichan.terminal.TerminalEntity;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.Versioning;
-import com.chiorichan.zutils.ZStrings;
-import com.chiorichan.zutils.ZSystem;
+import com.chiorichan.utils.UtilStrings;
+import com.chiorichan.utils.UtilSystem;
 import com.google.common.base.Joiner;
 
 /**
@@ -58,7 +58,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				sender.sendMessage( "Uptime: " + ZSystem.uptime() );
+				sender.sendMessage( "Uptime: " + UtilSystem.uptime() );
 				return true;
 			}
 		} );
@@ -99,9 +99,9 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				String color = "" + ( args.length < 1 ? !ZObjects.isTrue( sender.getVariable( "color", "true" ) ) : ZObjects.isTrue( args[0] ) );
+				String color = "" + ( args.length < 1 ? !UtilObjects.isTrue( sender.getVariable( "color", "true" ) ) : UtilObjects.isTrue( args[0] ) );
 				sender.setVariable( "color", color );
-				sender.sendMessage( EnumColor.AQUA + "Console color has been " + ( ZObjects.isTrue( color ) ? "enabled" : "disabled" ) + "." );
+				sender.sendMessage( EnumColor.AQUA + "Console color has been " + ( UtilObjects.isTrue( color ) ? "enabled" : "disabled" ) + "." );
 				return true;
 			}
 		} );
@@ -128,7 +128,7 @@ public abstract class BuiltinCommand extends Command
 						String reason = "Kicked by an operator.";
 
 						if ( args.length > 1 )
-							reason = ZStrings.join( args, 1 );
+							reason = UtilStrings.join( args, 1 );
 
 						if ( user instanceof Kickable )
 						{

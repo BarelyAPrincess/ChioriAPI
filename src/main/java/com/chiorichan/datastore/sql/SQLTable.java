@@ -14,7 +14,7 @@ import com.chiorichan.datastore.sql.query.SQLQueryDelete;
 import com.chiorichan.datastore.sql.query.SQLQueryInsert;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
 import com.chiorichan.datastore.sql.query.SQLQueryUpdate;
-import com.chiorichan.zutils.ZObjects;
+import com.chiorichan.utils.UtilObjects;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 import java.sql.DatabaseMetaData;
@@ -67,7 +67,7 @@ public class SQLTable extends SQLBase<SQLTable>
 		if ( columns.contains( colName ) )
 			throw new SQLException( "There already exists a column by the name of '" + colName + "'" );
 
-		String defString = def == null ? "NULL" : "NOT NULL DEFAULT '" + ZObjects.castToString( def ) + "'";
+		String defString = def == null ? "NULL" : "NOT NULL DEFAULT '" + UtilObjects.castToString( def ) + "'";
 
 		if ( exists() )
 			query( String.format( "ALTER TABLE `%s` ADD `%s` %s %s;", table, colName, colType, defString ), true );

@@ -7,16 +7,16 @@
  *
  * All Rights Reserved.
  */
-package com.chiorichan.zutils;
+package com.chiorichan.utils;
 
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
-public class ZLists
+public class UtilLists
 {
-	private ZLists()
+	private UtilLists()
 	{
 	}
 
@@ -61,7 +61,7 @@ public class ZLists
 	 */
 	public static <V> V findAndReplace( List<V> list, Function<? super V, ? extends V> function )
 	{
-		ZObjects.notNull( function );
+		UtilObjects.notNull( function );
 
 		for ( V oldValue : list )
 		{
@@ -82,7 +82,7 @@ public class ZLists
 
 	public static <V> V find( List<V> list, Function<? super V, Boolean> function )
 	{
-		ZObjects.notNull( function );
+		UtilObjects.notNull( function );
 
 		for ( V value : list )
 			if ( function.apply( value ) )
@@ -104,8 +104,8 @@ public class ZLists
 
 	public static <V> V add( List<V> list, V obj )
 	{
-		ZObjects.notNull( list );
-		ZObjects.notNull( obj );
+		UtilObjects.notNull( list );
+		UtilObjects.notNull( obj );
 
 		list.add( obj );
 		return obj;
