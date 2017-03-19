@@ -1,22 +1,16 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
-import com.chiorichan.utils.UtilStrings;
-import org.apache.commons.lang3.Validate;
-
 import com.chiorichan.AppConfig;
+import com.chiorichan.Versioning;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.event.EventBus;
@@ -24,9 +18,18 @@ import com.chiorichan.event.account.KickEvent;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.utils.UtilEncryption;
-import com.chiorichan.Versioning;
+import com.chiorichan.utils.UtilObjects;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.Validate;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Provides Account Management to the Server
@@ -163,102 +166,75 @@ public final class AccountManager extends AccountEvents
 		return found;
 	}
 
-	public Set<AccountMeta> getAccounts()
+	public List<AccountMeta> getAccounts()
 	{
-		return Collections.unmodifiableSet( getAccounts0() );
+		return Collections.unmodifiableList( getAccounts0() );
 	}
 
-	public Set<AccountMeta> getAccounts( String query )
+	public List<AccountMeta> getAccounts( String query )
 	{
 		Validate.notNull( query );
 
-		Set<AccountMeta> results = Sets.newHashSet();
-
 		if ( query.contains( "|" ) )
 		{
+			List<AccountMeta> result = new ArrayList<>();
 			for ( String s : Splitter.on( "|" ).split( query ) )
 				if ( s != null && !s.isEmpty() )
-					results.addAll( getAccounts( s ) );
-
-			return results;
+					result.addAll( getAccounts( s ) );
+			return result;
 		}
 
 		boolean isLower = query.toLowerCase().equals( query ); // Is query string all lower case?
 
-		for ( AccountMeta meta : accounts.toSet() )
+		return accounts.stream().filter( m ->
 		{
-			String id = isLower ? meta.getId().toLowerCase() : meta.getId();
+			String id = isLower ? m.getId().toLowerCase() : m.getId();
+			if ( !UtilObjects.isEmpty( id ) && id.contains( query ) )
+				return true;
 
-			if ( !id.isEmpty() && id.contains( query ) )
-			{
-				results.add( meta );
-				continue;
-			}
-
-			id = isLower ? meta.getDisplayName().toLowerCase() : meta.getDisplayName();
-
-			if ( !id.isEmpty() && id.contains( query ) )
-			{
-				results.add( meta );
-				continue;
-			}
+			id = isLower ? m.getDisplayName().toLowerCase() : m.getDisplayName();
+			return !UtilObjects.isEmpty( id ) && id.contains( query );
 
 			// TODO Figure out how to further check these values.
 			// Maybe send the check into the Account Creator
-		}
-
-		return results;
+		} ).collect( Collectors.toList() );
 	}
 
-	public Set<AccountMeta> getAccounts( String key, String value )
+	public List<AccountMeta> getAccounts( String key, String value )
 	{
 		Validate.notNull( key );
 		Validate.notNull( value );
 
-		Set<AccountMeta> results = Sets.newHashSet();
-
 		if ( value.contains( "|" ) )
 		{
+			List<AccountMeta> result = new ArrayList<>();
 			for ( String s : Splitter.on( "|" ).split( value ) )
 				if ( s != null && !s.isEmpty() )
-					results.addAll( getAccounts( key, s ) );
-
-			return results;
+					result.addAll( getAccounts( key, s ) );
+			return result;
 		}
 
 		boolean isLower = value.toLowerCase().equals( value ); // Is query string all lower case?
 
-		for ( AccountMeta meta : accounts.toSet() )
+		return accounts.stream().filter( m ->
 		{
-			String str = isLower ? meta.getString( key ).toLowerCase() : meta.getString( key );
-
-			if ( str != null && !str.isEmpty() && str.contains( value ) )
-			{
-				results.add( meta );
-				continue;
-			}
-		}
-
-		return results;
+			String str = isLower ? m.getString( key ).toLowerCase() : m.getString( key );
+			return !UtilObjects.isEmpty( str ) && str.contains( value );
+		} ).collect( Collectors.toList() );
 	}
 
-	Set<AccountMeta> getAccounts0()
+	List<AccountMeta> getAccounts0()
 	{
-		return accounts.toSet();
+		return accounts.list();
 	}
 
-	public Set<AccountMeta> getAccountsByLocation( AccountLocation collective )
+	public List<AccountMeta> getAccountsByLocation( AccountLocation collective )
 	{
 		Validate.notNull( collective );
-		Set<AccountMeta> results = Sets.newHashSet();
-		for ( AccountMeta meta : accounts.toSet() )
-			if ( meta.getLocation() == collective )
-				results.add( meta );
-
-		return results;
+		return accounts.stream().filter( m -> m.getLocation() == collective ).collect( Collectors.toList() );
 	}
 
-	public Set<AccountMeta> getAccountsByLocation( String locationId )
+	public List<AccountMeta> getAccountsByLocation( String locationId )
 	{
 		LocationService service = AppManager.getService( AccountLocation.class );
 		return getAccountsByLocation( service.getLocation( locationId ) );
@@ -321,8 +297,7 @@ public final class AccountManager extends AccountEvents
 	/**
 	 * Gets all Account Permissibles by crawling the {@link AccountMeta} and {@link AccountInstance}
 	 *
-	 * @return
-	 *         A set of AccountPermissibles
+	 * @return A set of AccountPermissibles
 	 */
 	public Collection<AccountAttachment> getPermissibles()
 	{

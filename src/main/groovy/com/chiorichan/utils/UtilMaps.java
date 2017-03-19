@@ -9,14 +9,25 @@
  */
 package com.chiorichan.utils;
 
+import com.chiorichan.helpers.Pair;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class UtilMaps
 {
 	private UtilMaps()
 	{
+	}
+
+	public static <T> Map<Integer, List<T>> paginate( List<T> list, int perPage )
+	{
+		return IntStream.iterate( 0, i -> i + perPage ).limit( ( list.size() + perPage - 1 ) / perPage ).boxed().collect( Collectors.toMap( i -> i / perPage, i -> list.subList( i, Math.min( i + perPage, list.size() ) ) ) );
 	}
 
 	public static Map<String, Object> flattenMap( Map<String, Object> map )
@@ -66,5 +77,27 @@ public class UtilMaps
 				put( key, val );
 			}
 		};
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static <T> T first( Map<?, T> map )
+	{
+		if ( map.size() == 0 )
+			return null;
+		return ( T ) map.values().toArray()[0];
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static <T> T last( Map<?, T> map )
+	{
+		if ( map.size() == 0 )
+			return null;
+		return ( T ) map.values().toArray()[map.size() - 1];
+	}
+
+	public static <T> Map<String, T> indexMap( List<T> list )
+	{
+		AtomicInteger inx = new AtomicInteger();
+		return list.stream().map( l -> new Pair<>( Integer.toString( inx.getAndIncrement() ), l ) ).collect( Collectors.toMap( p -> p.getKey(), p -> p.getValue() ) );
 	}
 }

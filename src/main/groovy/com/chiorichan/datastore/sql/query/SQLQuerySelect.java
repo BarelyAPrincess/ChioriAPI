@@ -20,6 +20,7 @@ import com.chiorichan.datastore.sql.skel.SQLWhereElement;
 import com.chiorichan.datastore.sql.skel.SQLWhereElementSep;
 import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
 import com.chiorichan.datastore.sql.skel.SQLWhereKeyValue;
+import com.chiorichan.utils.UtilLists;
 import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -224,19 +225,15 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	}
 
 	@Override
-	public SQLQuerySelect orderBy( Collection<String> columns, String dir )
+	public SQLQuerySelect orderBy( String column )
 	{
-		orderBy.addAll( columns );
+		return orderBy( UtilLists.newArrayList( column ) );
+	}
 
-		if ( dir.trim().equalsIgnoreCase( "asc" ) )
-			orderAsc();
-		else if ( dir.trim().equalsIgnoreCase( "desc" ) )
-			orderDesc();
-		else
-			throw new IllegalArgumentException( dir + " is not a valid sorting direction." );
-
-		needsUpdate = true;
-		return this;
+	@Override
+	public SQLQuerySelect orderBy( String column, String dir )
+	{
+		return orderBy( UtilLists.newArrayList( column ), dir );
 	}
 
 	@Override
@@ -248,17 +245,17 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	}
 
 	@Override
-	public SQLQuerySelect orderBy( String... columns )
+	public SQLQuerySelect orderBy( Collection<String> columns, String dir )
 	{
-		orderBy.addAll( Arrays.asList( columns ) );
-		needsUpdate = true;
-		return this;
-	}
+		orderBy.addAll( columns );
 
-	@Override
-	public SQLQuerySelect orderBy( String column )
-	{
-		orderBy.add( column );
+		if ( dir.trim().equalsIgnoreCase( "asc" ) )
+			orderAsc();
+		else if ( dir.trim().equalsIgnoreCase( "desc" ) )
+			orderDesc();
+		else
+			throw new IllegalArgumentException( dir + " is not a valid sorting direction." );
+
 		needsUpdate = true;
 		return this;
 	}
@@ -487,8 +484,6 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 	{
 		return new SQLWhereKeyValue<SQLQuerySelect>( this, key ).matches( value );
 	}
-
-	// TODO Consider adding whereLessThan, whereMoreThan, whereLike, whereLikeWild, whereBetween, whereNotLike, whereNot, whereRegEx methods, unless this is lazy!
 
 	@Override
 	public SQLQuerySelect clone()

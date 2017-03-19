@@ -1,20 +1,20 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.bases;
 
-import java.net.ConnectException;
-import java.sql.SQLException;
-
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.datastore.sql.SQLWrapper;
 import com.chiorichan.lang.StartupException;
+
+import java.net.ConnectException;
+import java.sql.SQLException;
 
 
 /**
@@ -22,7 +22,9 @@ import com.chiorichan.lang.StartupException;
  */
 public class MySQLDatastore extends SQLDatastore
 {
-	String user, pass, connection;
+	private String user;
+	private String pass;
+	private String connection;
 
 	public MySQLDatastore( String db, String user, String pass, String host, String port ) throws StartupException
 	{
@@ -58,5 +60,10 @@ public class MySQLDatastore extends SQLDatastore
 		}
 
 		DatastoreManager.getLogger().info( "We successfully connected to the sql database using '" + connection + "'." );
+	}
+
+	public String getConnectionString()
+	{
+		return connection;
 	}
 }

@@ -20,7 +20,7 @@ public interface SQLSkelOrderBy<T>
 
 	T orderBy( Collection<String> columns );
 
-	T orderBy( String... columns );
+	T orderBy( String column, String dir );
 
 	T orderBy( String column );
 

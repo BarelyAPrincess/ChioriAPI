@@ -1,8 +1,11 @@
 package com.chiorichan.helpers
 
-public class EscapeTranslator
+import groovy.transform.CompileStatic
+
+@CompileStatic
+class EscapeTranslator
 {
-	private static final ISO8859_1_ESCAPE =
+	private static final Map ISO8859_1_ESCAPE =
 			["\u00A0": "&nbsp;", // non-breaking space
 			 "\u00A1": "&iexcl;", // inverted exclamation mark
 			 "\u00A2": "&cent;", // cent sign
@@ -101,7 +104,7 @@ public class EscapeTranslator
 			 "\u00FF": "&yuml;", // � - lowercase y, umlaut
 			]
 
-	private static final HTML_ESCAPE =
+	private static final Map HTML_ESCAPE =
 			[// <!-- Latin Extended-B -->
 			 "\u0192": "&fnof;", // latin small f with hook = function= florin, U+0192 ISOtech -->
 			 // <!-- Greek -->
@@ -298,66 +301,66 @@ public class EscapeTranslator
 			 "\u20AC": "&euro;", // -- euro sign, U+20AC NEW -->
 			]
 
-	private static final BASIC_ESCAPE =
-			["\"", "&quot;", // " - double-quote
-			 "&", "&amp;", // & - ampersand
-			 "<", "&lt;", // < - less-than
-			 ">", "&gt;", // > - greater-than
+	private static final Map BASIC_ESCAPE =
+			["\"": "&quot;", // " - double-quote
+			 "&" : "&amp;", // & - ampersand
+			 "<" : "&lt;", // < - less-than
+			 ">" : "&gt;", // > - greater-than
 			]
 
-	private static final JAVA_CTRL_CHARS_ESCAPE =
+	private static final Map JAVA_CTRL_CHARS_ESCAPE =
 			["\b": "\\b",
 			 "\n": "\\n",
 			 "\t": "\\t",
 			 "\f": "\\f",
 			 "\r": "\\r"]
 
-	public static EscapeTranslator ISO8859_1_ESCAPE()
+	static EscapeTranslator ISO8859_1_ESCAPE()
 	{
 		return new EscapeTranslator( ISO8859_1_ESCAPE )
 	}
 
-	public static EscapeTranslator ISO8859_1_UNESCAPE()
+	static EscapeTranslator ISO8859_1_UNESCAPE()
 	{
 		return new EscapeTranslator( invert( ISO8859_1_ESCAPE ) )
 	}
 
-	public static EscapeTranslator HTML_ESCAPE()
+	static EscapeTranslator HTML_ESCAPE()
 	{
 		return new EscapeTranslator( ISO8859_1_ESCAPE, HTML_ESCAPE )
 	}
 
-	public static EscapeTranslator HTML_UNESCAPE()
+	static EscapeTranslator HTML_UNESCAPE()
 	{
 		return new EscapeTranslator( invert( ISO8859_1_ESCAPE ), invert( HTML_ESCAPE ) )
 	}
 
-	public static EscapeTranslator BASIC_ESCAPE()
+	static EscapeTranslator BASIC_ESCAPE()
 	{
 		return new EscapeTranslator( BASIC_ESCAPE )
 	}
 
-	public static EscapeTranslator BASIC_UNESCAPE()
+	static EscapeTranslator BASIC_UNESCAPE()
 	{
 		return new EscapeTranslator( invert( BASIC_ESCAPE ) )
 	}
 
-	public static EscapeTranslator APOS_ESCAPE()
+	static EscapeTranslator APOS_ESCAPE()
 	{
-		return new EscapeTranslator( [["'": "&apos;"]] )
+		return new EscapeTranslator( [["'": "&apos;"]] as Map )
 	}
 
-	public static EscapeTranslator APOS_UNESCAPE()
+	static EscapeTranslator APOS_UNESCAPE()
 	{
-		return new EscapeTranslator( [["&apos;": "'"]] )
+		return new EscapeTranslator( [["&apos;": "'"]] as Map )
 	}
 
-	public static EscapeTranslator JAVA_CTRL_CHARS_ESCAPE()
+	static EscapeTranslator JAVA_CTRL_CHARS_ESCAPE()
 	{
 		return new EscapeTranslator( JAVA_CTRL_CHARS_ESCAPE )
 	}
 
-	public static EscapeTranslator JAVA_CTRL_CHARS_UNESCAPE()
+	static EscapeTranslator JAVA_CTRL_CHARS_UNESCAPE()
 	{
 		return new EscapeTranslator( invert( JAVA_CTRL_CHARS_ESCAPE ) )
 	}
@@ -367,11 +370,11 @@ public class EscapeTranslator
 	 *
 	 * @return inverted array
 	 */
-	static invert( final Map origMap )
+	static Map invert( final Map origMap )
 	{
-		def newMap = [:]
+		Map newMap = [:]
 		origMap.each {k, v -> newMap[v] = k}
-		return newMap;
+		return newMap
 	}
 
 	private final int longest
@@ -379,12 +382,12 @@ public class EscapeTranslator
 
 	private EscapeTranslator( Map... escapeArray )
 	{
-		escapeArray.each {l -> ( escapes + l )}
+		escapeArray.each {l -> escapes.putAll( l as Map )}
 		escapes.sort {s1, s2 -> Math.abs( ( s1 as String ).length() ) - Math.abs( ( s2 as String ).length() )}
 		longest = ( escapes.keySet().first() as String ).length()
 	}
 
-	public final String translate( final CharSequence input )
+	final String translate( final CharSequence input )
 	{
 		if ( input == null )
 			return null

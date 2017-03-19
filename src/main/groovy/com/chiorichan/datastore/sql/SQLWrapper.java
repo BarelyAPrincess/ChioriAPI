@@ -1,26 +1,25 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql;
+
+import com.chiorichan.datastore.DatastoreManager;
+import com.chiorichan.datastore.sql.bases.SQLDatastore;
+import com.mysql.jdbc.CommunicationsException;
+import com.mysql.jdbc.exceptions.MySQLNonTransientConnectionException;
+import org.apache.commons.lang3.Validate;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.apache.commons.lang3.Validate;
-
-import com.chiorichan.datastore.DatastoreManager;
-import com.chiorichan.datastore.sql.bases.SQLDatastore;
-import com.mysql.jdbc.CommunicationsException;
-import com.mysql.jdbc.exceptions.MySQLNonTransientConnectionException;
 
 /**
  * Wraps the SQL Connection
@@ -222,5 +221,10 @@ public class SQLWrapper
 			DatastoreManager.getLogger().severe( "There was an error reconnecting. Connection: " + savedConnection, e );
 		}
 		return false;
+	}
+
+	public String getConnectionString()
+	{
+		return savedConnection;
 	}
 }
