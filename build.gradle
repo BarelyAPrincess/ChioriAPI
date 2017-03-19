@@ -3,9 +3,9 @@ import java.text.SimpleDateFormat
 defaultTasks 'clean', 'build'
 
 apply plugin: 'eclipse'
-apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'groovy'
 apply plugin: 'license'
-// apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'checkstyle'
 apply from: 'etc/publish.gradle'
 
@@ -120,18 +120,18 @@ license {
 	mapping 'yaml', 'SCRIPT_STYLE'
 	mapping 'yml', 'SCRIPT_STYLE'
 	excludes( ['**/*.md5',
-			'**/*.txt',
-			'**/*.bmp',
-			'**/*.png',
-			'**/*.jpg',
-			'**/*.yaml',
-			'**/*.yml',
-			'**/*.properties',
-			'**/config.yaml',
-			'**/joptsimple/**',
-			'**/org/yaml/snakeyaml/**',
-			'**/org/fusesource/jansi/**',
-			'**/org/fusesource/hawtjni/**'] )
+	           '**/*.txt',
+	           '**/*.bmp',
+	           '**/*.png',
+	           '**/*.jpg',
+	           '**/*.yaml',
+	           '**/*.yml',
+	           '**/*.properties',
+	           '**/config.yaml',
+	           '**/joptsimple/**',
+	           '**/org/yaml/snakeyaml/**',
+	           '**/org/fusesource/jansi/**',
+	           '**/org/fusesource/hawtjni/**'] )
 	ext.year = Calendar.getInstance().get( Calendar.YEAR )
 	ext.name = 'Chiori Greene a.k.a. Chiori-chan'
 	ext.email = 'me@chiorichan.com'
@@ -154,6 +154,9 @@ dependencies {
 
 	// Used to Parse Console Input
 	// compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.1'
+
+	// Used to evaluate GroovyScripts server-side
+	compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.9'
 
 	// Used to Make Database Connections
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.35'
@@ -234,6 +237,5 @@ task wrapper( type: Wrapper ) {gradleVersion = '3.3'}
 
 jar.dependsOn writeApiPropertiesFile
 
-artifacts {archives sourcesArchive, javadocArchive}
-// shadowJar
-
+artifacts {jar}
+// sourcesArchive, javadocArchive
