@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.utils;
@@ -25,17 +25,6 @@ public class UtilFiles
 
 	}
 
-	public static String convertStreamToString( InputStream is ) throws IOException
-	{
-		BufferedReader reader = new BufferedReader( new InputStreamReader( is ) );
-		StringBuilder sb = new StringBuilder();
-		String line;
-		while ( ( line = reader.readLine() ) != null )
-			sb.append( line ).append( "\n" );
-		reader.close();
-		return sb.toString();
-	}
-
 	public static String getStringFromFile( String filePath ) throws IOException
 	{
 		return getStringFromFile( new File( filePath ) );
@@ -51,7 +40,7 @@ public class UtilFiles
 		try
 		{
 			FileInputStream fin = new FileInputStream( file );
-			String ret = convertStreamToString( fin );
+			String ret = UtilIO.inputStream2String( fin );
 			fin.close();
 			return ret;
 		}

@@ -1,24 +1,13 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.event;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-
-import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.AppConfig;
 import com.chiorichan.AppController;
@@ -33,11 +22,21 @@ import com.chiorichan.plugin.PluginManager;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.services.ObjectContext;
 import com.chiorichan.services.ServiceManager;
-import com.google.common.collect.Maps;
+import com.chiorichan.utils.UtilObjects;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 public class EventBus implements ServiceManager, LogSource
 {
-	private static Map<Class<? extends AbstractEvent>, EventHandlers> handlers = Maps.newConcurrentMap();
+	private static Map<Class<? extends AbstractEvent>, EventHandlers> handlers = new ConcurrentHashMap<>();
 
 	public static Log getLogger()
 	{
@@ -123,15 +122,15 @@ public class EventBus implements ServiceManager, LogSource
 
 	public Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> createRegisteredListeners( Listener listener, final ObjectContext context )
 	{
-		Validate.notNull( context, "Context can not be null" );
-		Validate.notNull( listener, "Listener can not be null" );
+		UtilObjects.notNull( context, "Context can not be null" );
+		UtilObjects.notNull( listener, "Listener can not be null" );
 
-		Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> ret = new HashMap<Class<? extends AbstractEvent>, Set<RegisteredListener>>();
+		Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> ret = new HashMap<>();
 		Set<Method> methods;
 		try
 		{
 			Method[] publicMethods = listener.getClass().getMethods();
-			methods = new HashSet<Method>( publicMethods.length, Float.MAX_VALUE );
+			methods = new HashSet<>( publicMethods.length, Float.MAX_VALUE );
 			for ( Method method : publicMethods )
 				methods.add( method );
 			for ( Method method : listener.getClass().getDeclaredMethods() )
@@ -159,7 +158,7 @@ public class EventBus implements ServiceManager, LogSource
 			Set<RegisteredListener> eventSet = ret.get( eventClass );
 			if ( eventSet == null )
 			{
-				eventSet = new HashSet<RegisteredListener>();
+				eventSet = new HashSet<>();
 				ret.put( eventClass, eventSet );
 			}
 
@@ -320,10 +319,10 @@ public class EventBus implements ServiceManager, LogSource
 	 */
 	public void registerEvent( Class<? extends AbstractEvent> event, Listener listener, EventPriority priority, EventExecutor executor, ObjectContext context, boolean ignoreCancelled )
 	{
-		Validate.notNull( listener, "Listener cannot be null" );
-		Validate.notNull( priority, "Priority cannot be null" );
-		Validate.notNull( executor, "Executor cannot be null" );
-		Validate.notNull( context, "Creator cannot be null" );
+		UtilObjects.notNull( listener, "Listener cannot be null" );
+		UtilObjects.notNull( priority, "Priority cannot be null" );
+		UtilObjects.notNull( executor, "Executor cannot be null" );
+		UtilObjects.notNull( context, "Creator cannot be null" );
 
 		if ( useTimings )
 			getEventListeners( event ).register( new TimedRegisteredListener( listener, executor, priority, context, ignoreCancelled ) );

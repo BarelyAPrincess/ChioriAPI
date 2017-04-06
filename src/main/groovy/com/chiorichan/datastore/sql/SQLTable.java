@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql;
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interfaces with MySQL Table
@@ -213,6 +214,11 @@ public class SQLTable extends SQLBase<SQLTable>
 	public SQLQuerySelect select( Collection<String> fields )
 	{
 		return select().fields( fields );
+	}
+
+	public Map<String, Object> selectOne( Map<String, Object> where ) throws SQLException
+	{
+		return new SQLQuerySelect( sql, table ).whereMatches( where ).limit( 1 ).first();
 	}
 
 	@Override

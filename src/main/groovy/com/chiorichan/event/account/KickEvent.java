@@ -1,16 +1,17 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.event.account;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
@@ -99,7 +100,7 @@ public class KickEvent extends AccountEvent implements Cancellable, SelfHandling
 		if ( isCancelled() )
 			return;
 
-		Set<String> kicked = Sets.newHashSet();
+		Set<String> kicked = new HashSet<>();
 
 		for ( Kickable kickable : kickables )
 			if ( !kicked.contains( kickable.getId() ) )

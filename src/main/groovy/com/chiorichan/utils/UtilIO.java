@@ -544,6 +544,11 @@ public class UtilIO
 		return inputStream2ByteArray( is ).toByteArray();
 	}
 
+	public static String inputStream2String( InputStream is ) throws IOException
+	{
+		return new String( inputStream2Bytes( is ) );
+	}
+
 	public static boolean isAbsolute( String dir )
 	{
 		return dir.startsWith( "/" ) || dir.startsWith( ":\\", 1 );

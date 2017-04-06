@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.event;
@@ -16,26 +16,22 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.ListIterator;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 /**
  * A list of event handlers, stored per-event.
  */
 public class EventHandlers extends AbstractList<RegisteredListener>
 {
-	private static final List<EventHandlers> handlers = Lists.newArrayList();
+	private static final List<EventHandlers> handlers = new ArrayList<>();
 
 	/**
 	 * Get a specific creator's registered listeners associated with this handler list
 	 *
-	 * @param source
-	 *            the source to get the listeners of
+	 * @param source the source to get the listeners of
 	 * @return the list of registered listeners
 	 */
 	public static ArrayList<RegisteredListener> getRegisteredListeners( Object source )
 	{
-		ArrayList<RegisteredListener> listeners = new ArrayList<RegisteredListener>();
+		ArrayList<RegisteredListener> listeners = new ArrayList<>();
 		synchronized ( handlers )
 		{
 			for ( EventHandlers handler : handlers )
@@ -69,8 +65,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	/**
 	 * Unregister a specific creator's listeners from all handler lists.
 	 *
-	 * @param creator
-	 *            creator to unregister
+	 * @param creator creator to unregister
 	 */
 	public static void unregisterAll( EventRegistrar creator )
 	{
@@ -84,8 +79,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	/**
 	 * Unregister a specific listener from all handler lists.
 	 *
-	 * @param listener
-	 *            listener to unregister
+	 * @param listener listener to unregister
 	 */
 	public static void unregisterAll( Listener listener )
 	{
@@ -96,12 +90,12 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 		}
 	}
 
-	private final EnumMap<EventPriority, List<RegisteredListener>> listeners = Maps.newEnumMap( EventPriority.class );
+	private final EnumMap<EventPriority, List<RegisteredListener>> listeners = new EnumMap<>( EventPriority.class );
 
 	public EventHandlers()
 	{
 		for ( EventPriority o : EventPriority.values() )
-			listeners.put( o, new ArrayList<RegisteredListener>() );
+			listeners.put( o, new ArrayList<>() );
 	}
 
 	@Override
@@ -112,7 +106,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 
 	public List<RegisteredListener> getRegisteredListeners()
 	{
-		List<RegisteredListener> registeredListeners = Lists.newArrayList();
+		List<RegisteredListener> registeredListeners = new ArrayList<>();
 		for ( List<RegisteredListener> listOfListeners : listeners.values() )
 			registeredListeners.addAll( listOfListeners );
 		return registeredListeners;
@@ -121,8 +115,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	/**
 	 * Register a new listener in this handler list
 	 *
-	 * @param listener
-	 *            listener to register
+	 * @param listener listener to register
 	 */
 	public synchronized void register( RegisteredListener listener )
 	{
@@ -134,8 +127,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	/**
 	 * Register a collection of new listeners in this handler list
 	 *
-	 * @param listeners
-	 *            listeners to register
+	 * @param listeners listeners to register
 	 */
 	public void registerAll( Collection<RegisteredListener> listeners )
 	{
@@ -152,8 +144,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	/**
 	 * Remove a specific listener from this handler
 	 *
-	 * @param listener
-	 *            listener to remove
+	 * @param listener listener to remove
 	 */
 	public synchronized void unregister( Listener listener )
 	{
@@ -166,8 +157,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	/**
 	 * Remove a specific creator's listeners from this handler
 	 *
-	 * @param source
-	 *            creator to remove
+	 * @param source creator to remove
 	 */
 	public synchronized void unregister( Object source )
 	{
@@ -180,8 +170,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	/**
 	 * Remove a listener from a specific order slot
 	 *
-	 * @param listener
-	 *            listener to remove
+	 * @param listener listener to remove
 	 */
 	public synchronized void unregister( RegisteredListener listener )
 	{

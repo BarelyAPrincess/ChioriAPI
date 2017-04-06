@@ -1,13 +1,19 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.tasks;
+
+import com.chiorichan.AppController;
+import com.chiorichan.logger.Log;
+import com.chiorichan.services.AppManager;
+import com.chiorichan.services.ServiceManager;
+import com.chiorichan.utils.UtilObjects;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,20 +31,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
-import org.apache.commons.lang3.Validate;
-
-import com.chiorichan.AppController;
-import com.chiorichan.logger.Log;
-import com.chiorichan.services.AppManager;
-import com.chiorichan.services.ServiceManager;
-import com.google.common.collect.Maps;
-
 /**
  * Manages task scheduled in the main thread
  */
 public class TaskManager implements ServiceManager
 {
 	private static final int RECENT_TICKS;
+
 	static
 	{
 		RECENT_TICKS = 20;
@@ -57,15 +56,13 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Checks in the provided creator and task are valid
 	 *
-	 * @param creator
-	 *             The object owning this task
-	 * @param task
-	 *             The task to validate
+	 * @param creator The object owning this task
+	 * @param task    The task to validate
 	 */
 	private static void validate( final TaskRegistrar creator, final Object task )
 	{
-		Validate.notNull( creator, "TaskCreator cannot be null" );
-		Validate.notNull( task, "Task cannot be null" );
+		UtilObjects.notNull( creator, "TaskCreator cannot be null" );
+		UtilObjects.notNull( task, "Task cannot be null" );
 
 		if ( !creator.isEnabled() )
 		{
@@ -85,7 +82,7 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Holds tasks that are awaiting for there owners to be enabled
 	 */
-	private final Map<Long, Task> backlogTasks = Maps.newConcurrentMap();
+	private final Map<Long, Task> backlogTasks = new ConcurrentHashMap<>();
 	/**
 	 * Tail of a linked-list. AtomicReference only matters when adding to queue
 	 */
@@ -149,12 +146,9 @@ public class TaskManager implements ServiceManager
 	 * <p>
 	 * Note: The Future.get() methods must NOT be called from the main thread. Note2: There is at least an average of 10ms latency until the isDone() method returns true.
 	 *
-	 * @param <T>
-	 *             The callable's return type
-	 * @param creator
-	 *             TaskCreator that owns the task
-	 * @param task
-	 *             Task to be executed
+	 * @param <T>     The callable's return type
+	 * @param creator TaskCreator that owns the task
+	 * @param task    Task to be executed
 	 * @return Future Future object related to the task
 	 */
 	public <T> Future<T> callSyncMethod( final TaskRegistrar creator, final Callable<T> task )
@@ -204,8 +198,7 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Removes task from scheduler.
 	 *
-	 * @param taskId
-	 *             Id number of task to be removed
+	 * @param taskId Id number of task to be removed
 	 */
 	public void cancelTask( final int taskId )
 	{
@@ -217,8 +210,7 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Removes the task based on the runnable.
 	 *
-	 * @param runnable
-	 *             The runnable assigned to the task
+	 * @param runnable The runnable assigned to the task
 	 */
 	public void cancelTask( Runnable runnable )
 	{
@@ -229,10 +221,9 @@ public class TaskManager implements ServiceManager
 
 	public void cancelTask( Task task )
 	{
-		Validate.notNull( task );
-		int taskId = task.getTaskId();
-		if ( task != null )
-			task.cancel0();
+		UtilObjects.notNull( task );
+		final int taskId = task.getTaskId();
+		task.cancel0();
 		task = new Task( new Runnable()
 		{
 			private boolean check( final Iterable<Task> collection )
@@ -273,12 +264,11 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Removes all tasks associated with a particular creator from the scheduler.
 	 *
-	 * @param creator
-	 *             Owner of tasks to be removed
+	 * @param creator Owner of tasks to be removed
 	 */
 	public void cancelTasks( final TaskRegistrar creator )
 	{
-		Validate.notNull( creator, "Cannot cancel tasks of null creator" );
+		UtilObjects.notNull( creator, "Cannot cancel tasks of null creator" );
 		final Task task = new Task( new Runnable()
 		{
 			void check( final Iterable<Task> collection )
@@ -355,13 +345,13 @@ public class TaskManager implements ServiceManager
 	 */
 	public List<Task> getPendingTasks()
 	{
-		final ArrayList<Task> truePending = new ArrayList<Task>();
+		final ArrayList<Task> truePending = new ArrayList<>();
 		for ( Task task = head.getNext(); task != null; task = task.getNext() )
 			if ( task.getTaskId() != -1 )
 				// -1 is special code
 				truePending.add( task );
 
-		final ArrayList<Task> pending = new ArrayList<Task>();
+		final ArrayList<Task> pending = new ArrayList<>();
 		for ( Task task : runners.values() )
 			if ( task.getPeriod() >= -1L )
 				pending.add( task );
@@ -385,7 +375,7 @@ public class TaskManager implements ServiceManager
 	public void heartbeat( final int currentTick )
 	{
 		if ( Thread.currentThread() != AppController.primaryThread )
-			throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the ServerBus thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
+			throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the primary thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
 
 		this.currentTick = currentTick;
 		final List<Task> temp = this.temp;
@@ -458,9 +448,8 @@ public class TaskManager implements ServiceManager
 	 * <p>
 	 * Explicitly, a task is running if there exists a thread for it, and that thread is alive.
 	 *
-	 * @param taskId
-	 *             The task to check.
-	 *             <p>
+	 * @param taskId The task to check.
+	 *               <p>
 	 * @return If the task is currently running.
 	 */
 	public boolean isCurrentlyRunning( final int taskId )
@@ -480,9 +469,8 @@ public class TaskManager implements ServiceManager
 	 * <p>
 	 * If a repeating task is currently running, it might not be queued now but could be in the future. A task that is not queued, and not running, will not be queued again.
 	 *
-	 * @param taskId
-	 *             The task to check.
-	 *             <p>
+	 * @param taskId The task to check.
+	 *               <p>
 	 * @return If the task is queued to be run.
 	 */
 	public boolean isQueued( final int taskId )
@@ -532,15 +520,11 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Returns a task that will run on the next server tick.
 	 *
-	 * @param creator
-	 *             the reference to the creator scheduling task
-	 * @param runnable
-	 *             the task to be run
+	 * @param creator  the reference to the creator scheduling task
+	 * @param runnable the task to be run
 	 * @return a {@link Task} that contains the id number
-	 * @throws IllegalArgumentException
-	 *              if creator is null
-	 * @throws IllegalArgumentException
-	 *              if task is null
+	 * @throws IllegalArgumentException if creator is null
+	 * @throws IllegalArgumentException if task is null
 	 */
 	public Task runTask( TaskRegistrar creator, Runnable runnable )
 	{
@@ -552,15 +536,11 @@ public class TaskManager implements ServiceManager
 	 * <br>
 	 * Returns a task that will run asynchronously.
 	 *
-	 * @param creator
-	 *             the reference to the creator scheduling task
-	 * @param runnable
-	 *             the task to be run
+	 * @param creator  the reference to the creator scheduling task
+	 * @param runnable the task to be run
 	 * @return a ChioriTask that contains the id number
-	 * @throws IllegalArgumentException
-	 *              if creator is null
-	 * @throws IllegalArgumentException
-	 *              if task is null
+	 * @throws IllegalArgumentException if creator is null
+	 * @throws IllegalArgumentException if task is null
 	 */
 	public Task runTaskAsynchronously( TaskRegistrar creator, Runnable runnable )
 	{
@@ -570,17 +550,12 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Returns a task that will run after the specified number of server ticks.
 	 *
-	 * @param creator
-	 *             the reference to the creator scheduling task
-	 * @param delay
-	 *             the ticks to wait before running the task
-	 * @param runnable
-	 *             the task to be run
+	 * @param creator  the reference to the creator scheduling task
+	 * @param delay    the ticks to wait before running the task
+	 * @param runnable the task to be run
 	 * @return a {@link Task} that contains the id number
-	 * @throws IllegalArgumentException
-	 *              if creator is null
-	 * @throws IllegalArgumentException
-	 *              if task is null
+	 * @throws IllegalArgumentException if creator is null
+	 * @throws IllegalArgumentException if task is null
 	 */
 	public Task runTaskLater( TaskRegistrar creator, long delay, Runnable runnable )
 	{
@@ -592,17 +567,12 @@ public class TaskManager implements ServiceManager
 	 * <br>
 	 * Returns a task that will run asynchronously after the specified number of server ticks.
 	 *
-	 * @param creator
-	 *             the reference to the creator scheduling task
-	 * @param delay
-	 *             the ticks to wait before running the task
-	 * @param runnable
-	 *             the task to be run
+	 * @param creator  the reference to the creator scheduling task
+	 * @param delay    the ticks to wait before running the task
+	 * @param runnable the task to be run
 	 * @return a ChioriTask that contains the id number
-	 * @throws IllegalArgumentException
-	 *              if creator is null
-	 * @throws IllegalArgumentException
-	 *              if task is null
+	 * @throws IllegalArgumentException if creator is null
+	 * @throws IllegalArgumentException if task is null
 	 */
 	public Task runTaskLaterAsynchronously( TaskRegistrar creator, long delay, Runnable runnable )
 	{
@@ -612,19 +582,13 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Returns a task that will repeatedly run until cancelled, starting after the specified number of server ticks.
 	 *
-	 * @param creator
-	 *             the reference to the creator scheduling task
-	 * @param delay
-	 *             the ticks to wait before running the task
-	 * @param period
-	 *             the ticks to wait between runs
-	 * @param runnable
-	 *             the task to be run
+	 * @param creator  the reference to the creator scheduling task
+	 * @param delay    the ticks to wait before running the task
+	 * @param period   the ticks to wait between runs
+	 * @param runnable the task to be run
 	 * @return a ChioriTask that contains the id number
-	 * @throws IllegalArgumentException
-	 *              if creator is null
-	 * @throws IllegalArgumentException
-	 *              if task is null
+	 * @throws IllegalArgumentException if creator is null
+	 * @throws IllegalArgumentException if task is null
 	 */
 	public Task runTaskTimer( TaskRegistrar creator, long delay, long period, Runnable runnable )
 	{
@@ -650,19 +614,13 @@ public class TaskManager implements ServiceManager
 	 * <br>
 	 * Returns a task that will repeatedly run asynchronously until cancelled, starting after the specified number of server ticks.
 	 *
-	 * @param creator
-	 *             the reference to the creator scheduling task
-	 * @param delay
-	 *             the ticks to wait before running the task for the first time
-	 * @param period
-	 *             the ticks to wait between runs
-	 * @param runnable
-	 *             the task to be run
+	 * @param creator  the reference to the creator scheduling task
+	 * @param delay    the ticks to wait before running the task for the first time
+	 * @param period   the ticks to wait between runs
+	 * @param runnable the task to be run
 	 * @return a ChioriTask that contains the id number
-	 * @throws IllegalArgumentException
-	 *              if creator is null
-	 * @throws IllegalArgumentException
-	 *              if task is null
+	 * @throws IllegalArgumentException if creator is null
+	 * @throws IllegalArgumentException if task is null
 	 */
 	public Task runTaskTimerAsynchronously( TaskRegistrar creator, long delay, long period, Runnable runnable )
 	{
@@ -697,7 +655,7 @@ public class TaskManager implements ServiceManager
 
 		int cnt = 0;
 
-		for ( ;; )
+		for ( ; ; )
 		{
 			cnt++;
 
@@ -723,12 +681,9 @@ public class TaskManager implements ServiceManager
 	 * <br>
 	 * Schedules a once off task to occur after a delay. This task will be executed by a thread managed by the scheduler.
 	 *
-	 * @param creator
-	 *             TaskCreator that owns the task
-	 * @param task
-	 *             Task to be executed
-	 * @param delay
-	 *             Delay in server ticks before executing task
+	 * @param creator TaskCreator that owns the task
+	 * @param task    Task to be executed
+	 * @param delay   Delay in server ticks before executing task
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public int scheduleAsyncDelayedTask( final TaskRegistrar creator, final long delay, final Runnable task )
@@ -741,10 +696,8 @@ public class TaskManager implements ServiceManager
 	 * <br>
 	 * Schedules a once off task to occur as soon as possible. This task will be executed by a thread managed by the scheduler.
 	 *
-	 * @param creator
-	 *             TaskCreator that owns the task
-	 * @param task
-	 *             Task to be executed
+	 * @param creator TaskCreator that owns the task
+	 * @param task    Task to be executed
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public int scheduleAsyncDelayedTask( final TaskRegistrar creator, final Runnable task )
@@ -757,14 +710,10 @@ public class TaskManager implements ServiceManager
 	 * <br>
 	 * Schedules a repeating task. This task will be executed by a thread managed by the scheduler.
 	 *
-	 * @param creator
-	 *             TaskCreator that owns the task
-	 * @param delay
-	 *             Delay in server ticks before executing first repeat
-	 * @param period
-	 *             Period in server ticks of the task
-	 * @param runnable
-	 *             Task to be executed
+	 * @param creator  TaskCreator that owns the task
+	 * @param delay    Delay in server ticks before executing first repeat
+	 * @param period   Period in server ticks of the task
+	 * @param runnable Task to be executed
 	 * @return Task id number (-1 if scheduling failed), calling {@link #cancelTask(int)} will cancel it
 	 */
 	public int scheduleAsyncRepeatingTask( final TaskRegistrar creator, long delay, long period, final Runnable runnable )
@@ -775,12 +724,9 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Schedules a once off task to occur after a delay. This task will be executed by the main server thread.
 	 *
-	 * @param creator
-	 *             TaskCreator that owns the task
-	 * @param task
-	 *             Task to be executed
-	 * @param delay
-	 *             Delay in server ticks before executing task
+	 * @param creator TaskCreator that owns the task
+	 * @param task    Task to be executed
+	 * @param delay   Delay in server ticks before executing task
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public int scheduleSyncDelayedTask( final TaskRegistrar creator, final long delay, final Runnable task )
@@ -791,10 +737,8 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Schedules a once off task to occur as soon as possible. This task will be executed by the main server thread.
 	 *
-	 * @param creator
-	 *             TaskCreator that owns the task
-	 * @param task
-	 *             Task to be executed
+	 * @param creator TaskCreator that owns the task
+	 * @param task    Task to be executed
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public int scheduleSyncDelayedTask( final TaskRegistrar creator, final Runnable task )
@@ -805,14 +749,10 @@ public class TaskManager implements ServiceManager
 	/**
 	 * Schedules a repeating task. This task will be executed by the main server thread.
 	 *
-	 * @param creator
-	 *             TaskCreator that owns the task
-	 * @param delay
-	 *             Delay in server ticks before executing first repeat
-	 * @param period
-	 *             Period in server ticks of the task
-	 * @param runnable
-	 *             Task to be executed
+	 * @param creator  TaskCreator that owns the task
+	 * @param delay    Delay in server ticks before executing first repeat
+	 * @param period   Period in server ticks of the task
+	 * @param runnable Task to be executed
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public int scheduleSyncRepeatingTask( final TaskRegistrar creator, long delay, long period, final Runnable runnable )

@@ -207,7 +207,7 @@ public class ExceptionReport
 		 * Handle the remainder unhandled run of the mill exceptions
 		 * NullPointerException, ArrayIndexOutOfBoundsException, IOException, StackOverflowError, ClassFormatError
 		 */
-		Log.get().severe( String.format( "The exception %s went unhandled in the EvalFactory.", cause.getClass().getName() ), cause );
+		Log.get().severe( String.format( "The exception %s went unhandled in the ScriptingFactory.", cause.getClass().getName() ), cause );
 		addException( ReportingLevel.E_UNHANDLED, cause );
 		return true;
 	}

@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.lang;
@@ -14,15 +14,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
 /**
  * Represents the current error reporting level
  */
 public enum ReportingLevel
 {
 	E_ALL( 0xff, false ),
-
 	L_ERROR( 0xf6, false ),
 	L_DENIED( 0xf5, false ),
 	L_EXPIRED( 0xf4, false ),
@@ -30,7 +27,6 @@ public enum ReportingLevel
 	L_PERMISSION( 0xf2, false ),
 	L_SUCCESS( 0xf1, true ),
 	L_DEFAULT( 0xf0, true ),
-
 	E_UNHANDLED( 0x10, false ),
 	E_DEPRECATED( 0x09, true ),
 	E_IGNORABLE( 0x08, true ),
@@ -81,7 +77,7 @@ public enum ReportingLevel
 
 	public static ReportingLevel[] parse( ReportingLevel... level )
 	{
-		List<ReportingLevel> levels = Lists.newArrayList();
+		List<ReportingLevel> levels = new ArrayList<>();
 		for ( ReportingLevel er : level )
 			levels.addAll( Arrays.asList( parse( er ) ) );
 		return levels.toArray( new ReportingLevel[0] );
@@ -94,7 +90,7 @@ public enum ReportingLevel
 			case E_ALL:
 				return ReportingLevel.values();
 			case E_IGNORABLE:
-				List<ReportingLevel> levels = Lists.newArrayList();
+				List<ReportingLevel> levels = new ArrayList<>();
 				for ( ReportingLevel l : ReportingLevel.values() )
 					if ( l.isIgnorable() )
 						levels.add( l );
@@ -106,7 +102,7 @@ public enum ReportingLevel
 
 	public static ReportingLevel[] parse( String level )
 	{
-		List<ReportingLevel> levels = Lists.newArrayList();
+		List<ReportingLevel> levels = new ArrayList<>();
 		level = level.replaceAll( "&", "" );
 		for ( String s : level.split( " " ) )
 			if ( s != null )

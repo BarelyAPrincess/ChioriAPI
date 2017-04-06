@@ -1,20 +1,13 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.bases;
-
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.Validate;
 
 import com.chiorichan.database.DatabaseEngineLegacy;
 import com.chiorichan.datastore.Datastore;
@@ -25,6 +18,12 @@ import com.chiorichan.datastore.sql.query.SQLQueryDelete;
 import com.chiorichan.datastore.sql.query.SQLQueryInsert;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
 import com.chiorichan.datastore.sql.query.SQLQueryUpdate;
+import org.apache.commons.lang3.Validate;
+
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base for SQL Datastore
@@ -140,7 +139,7 @@ public class SQLDatastore extends Datastore
 	 */
 	public Map<String, Object> selectOne( String table, Map<String, Object> where ) throws SQLException
 	{
-		return select( table, where ).first();
+		return select( table, where ).limit( 1 ).first();
 	}
 
 	/**
@@ -153,7 +152,7 @@ public class SQLDatastore extends Datastore
 			{
 				put( key, value );
 			}
-		} ).first();
+		} ).limit( 1 ).first();
 	}
 
 	public SQLTable table( String table ) throws SQLException
