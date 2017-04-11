@@ -9,11 +9,12 @@
  */
 package com.chiorichan.account;
 
-import java.util.List;
-
 import com.chiorichan.account.lang.AccountException;
+import com.chiorichan.account.lang.AccountResolveResult;
 import com.chiorichan.account.lang.AccountResult;
 import com.chiorichan.permission.PermissibleEntity;
+
+import java.util.List;
 
 /**
  * Specifies which methods are required for a class to manage accounts
@@ -105,15 +106,17 @@ public interface AccountCreator
 	 * @param acctId The Account Id to check
 	 * @return True is it exists
 	 */
-	boolean exists( String acctId );
+	boolean accountExists( String locId, String acctId );
 
 	/**
 	 * Create specified account within the {@link AccountType} data
 	 *
+	 * @param locId  The site Id associated with this new Account, e.g., % = All Sites
 	 * @param acctId The account Id associated with this new Account
-	 * @param siteId The site Id associated with this new Account, e.g., % = All Sites
 	 * @return The new AccountContext
 	 * @throws AccountException If there are issues handling the account
 	 */
-	AccountContext createAccount( String acctId, String siteId ) throws AccountException;
+	AccountContext createAccount( String locId, String acctId ) throws AccountException;
+
+	AccountResolveResult resolveAccount( String locId, String acctId );
 }

@@ -9,40 +9,43 @@
  */
 package com.chiorichan.account.types;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.chiorichan.ApplicationTerminal;
 import com.chiorichan.account.AccountContext;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.AccountPermissible;
 import com.chiorichan.account.AccountType;
-import com.chiorichan.account.event.AccountLoadEvent;
-import com.chiorichan.account.event.AccountLookupEvent;
+import com.chiorichan.account.lang.AccountResolveResult;
 import com.chiorichan.account.lang.AccountResult;
+import com.chiorichan.event.EventBus;
 import com.chiorichan.event.EventHandler;
+import com.chiorichan.event.Listener;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.PermissionDefault;
 import com.chiorichan.permission.event.PermissibleEntityEvent;
 import com.chiorichan.permission.event.PermissibleEntityEvent.Action;
 import com.chiorichan.tasks.Timings;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Handles Memory Accounts, e.g., Root and None
  */
-public class MemoryTypeCreator extends AccountTypeCreator
+public class MemoryTypeCreator extends AccountTypeCreator implements Listener
 {
 	public static final MemoryTypeCreator INSTANCE = new MemoryTypeCreator();
 
 	MemoryTypeCreator()
 	{
 		super();
+
+		EventBus.instance().registerEvents( this, this );
 	}
 
 	@Override
-	public AccountContext createAccount( String acctId, String siteId )
+	public AccountContext createAccount( String locId, String acctId )
 	{
-		AccountContext context = new AccountContextImpl( this, AccountType.SQL, acctId, siteId );
+		AccountContext context = new AccountContextImpl( this, AccountType.SQL, acctId, locId );
 
 		context.setValue( "date", Timings.epoch() );
 
@@ -50,7 +53,7 @@ public class MemoryTypeCreator extends AccountTypeCreator
 	}
 
 	@Override
-	public boolean exists( String acctId )
+	public boolean accountExists( String locId, String acctId )
 	{
 		return "none".equals( acctId ) || "root".equals( acctId );
 	}
@@ -84,16 +87,10 @@ public class MemoryTypeCreator extends AccountTypeCreator
 		return true; // Always
 	}
 
-	@EventHandler()
-	public void onAccountLoadEvent( AccountLoadEvent event )
+	@Override
+	public AccountResolveResult resolveAccount( String locId, String acctId )
 	{
-		// Do Nothing
-	}
-
-	@EventHandler
-	public void onAccountLookupEvent( AccountLookupEvent event )
-	{
-		// Do Nothing
+		return null;
 	}
 
 	@EventHandler
@@ -130,14 +127,14 @@ public class MemoryTypeCreator extends AccountTypeCreator
 	@Override
 	public void successInit( AccountMeta meta, PermissibleEntity entity )
 	{
-		if ( meta.context().creator() == this && AccountType.isRootAccount( meta ) )
+		if ( meta.getContext().creator() == this && AccountType.isRootAccount( meta ) )
 		{
 			entity.addPermission( PermissionDefault.OP.getNode(), true, null );
 			entity.setVirtual( true );
 			meta.instance().registerAttachment( ApplicationTerminal.terminal() );
 		}
 
-		if ( meta.context().creator() == this && AccountType.isNoneAccount( meta ) )
+		if ( meta.getContext().creator() == this && AccountType.isNoneAccount( meta ) )
 			entity.setVirtual( true );
 	}
 

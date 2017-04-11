@@ -9,11 +9,7 @@
  */
 package com.chiorichan.terminal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
-
+import com.chiorichan.Versioning;
 import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountPermissible;
@@ -22,12 +18,15 @@ import com.chiorichan.account.LocationService;
 import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
-import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.messaging.MessageSender;
-import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.services.AppManager;
-import com.chiorichan.Versioning;
+import com.chiorichan.utils.UtilObjects;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Used to interact with commands and logs
@@ -43,7 +42,7 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 
 		try
 		{
-			loginWithException( AccountAuthenticator.NULL, AccountType.ACCOUNT_NONE.getId() );
+			loginWithException( AccountAuthenticator.NULL, AccountType.ACCOUNT_NONE.getLocId(), AccountType.ACCOUNT_NONE.getId() );
 		}
 		catch ( AccountException e )
 		{
@@ -63,12 +62,6 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 
 	public abstract void finish();
 
-	@Override
-	public PermissibleEntity getEntity()
-	{
-		return meta().getEntity();
-	}
-
 	public TerminalHandler getHandler()
 	{
 		return handler;
@@ -81,15 +74,22 @@ public abstract class TerminalEntity extends AccountPermissible implements Termi
 	}
 
 	@Override
-	public Collection<String> getIpAddresses()
+	public List<String> getIpAddresses()
 	{
 		return Arrays.asList( getIpAddress() );
+	}
+
+	public String getLocId()
+	{
+		LocationService locationService = AppManager.getService( LocationService.class );
+		return locationService == null ? null : locationService.getDefaultLocation().getId();
 	}
 
 	@Override
 	public AccountLocation getLocation()
 	{
-		return ( ( LocationService ) AppManager.getService( AccountLocation.class ) ).getDefaultLocation();
+		LocationService locationService = AppManager.getService( LocationService.class );
+		return locationService == null ? null : locationService.getDefaultLocation();
 	}
 
 	@Override

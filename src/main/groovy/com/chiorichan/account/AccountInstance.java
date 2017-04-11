@@ -55,9 +55,9 @@ public final class AccountInstance implements Account
 	}
 
 	@Override
-	public PermissibleEntity getEntity()
+	public PermissibleEntity getPermissibleEntity()
 	{
-		return meta().getEntity();
+		return meta().getPermissibleEntity();
 	}
 
 	@Override

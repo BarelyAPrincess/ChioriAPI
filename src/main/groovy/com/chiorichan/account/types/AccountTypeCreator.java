@@ -9,19 +9,45 @@
  */
 package com.chiorichan.account.types;
 
+import com.chiorichan.AppConfig;
+import com.chiorichan.account.AccountContext;
 import com.chiorichan.account.AccountCreator;
 import com.chiorichan.account.AccountMeta;
+import com.chiorichan.account.AccountType;
 import com.chiorichan.account.lang.AccountException;
-import com.chiorichan.event.Listener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Used as Account Type Creator
  */
-public abstract class AccountTypeCreator implements Listener, AccountCreator
+public abstract class AccountTypeCreator implements AccountCreator
 {
+	private final List<String> additionalAccountFields = AppConfig.get().getStringList( "accounts.fields", new ArrayList<>() );
+
+	@Override
+	public List<String> getLoginKeys()
+	{
+		return additionalAccountFields;
+	}
+
 	@Override
 	public void save( AccountMeta meta ) throws AccountException
 	{
-		save( meta.context() );
+		save( meta.getContext() );
+	}
+
+	@Override
+	public AccountContext createAccount( String locId, String acctId ) throws AccountException
+	{
+		AccountContext context = new AccountContextImpl( this, AccountType.SQL, acctId, locId );
+
+		context.setValue( "numLoginFail", 0 );
+		context.setValue( "lastLoginFail", 0 );
+		context.setValue( "actkey", "" );
+
+		save( context );
+		return context;
 	}
 }

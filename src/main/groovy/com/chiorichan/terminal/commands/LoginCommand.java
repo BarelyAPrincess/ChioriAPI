@@ -57,7 +57,7 @@ class LoginCommand extends BuiltinCommand
 				{
 					// TODO Unregister Terminal from NONE account, for that matter unregister before overriding any account
 					
-					AccountResult result = sender.getPermissible().loginWithException( AccountAuthenticator.PASSWORD, user, pass );
+					AccountResult result = sender.getPermissible().loginWithException( AccountAuthenticator.PASSWORD, "%", user, pass );
 					
 					if ( !sender.getPermissible().checkPermission( PermissionDefault.QUERY.getNode() ).isTrue() )
 						throw new AccountException( AccountDescriptiveReason.UNAUTHORIZED, sender.meta() );
@@ -75,7 +75,7 @@ class LoginCommand extends BuiltinCommand
 				sender.sendMessage( EnumColor.YELLOW + l.getMessage() );
 				
 				if ( !AccountType.isNoneAccount( sender ) )
-					sender.getPermissible().login( AccountAuthenticator.NULL, AccountType.ACCOUNT_NONE.getId() );
+					sender.getPermissible().login( AccountAuthenticator.NULL, AccountType.ACCOUNT_NONE.getLocId(), AccountType.ACCOUNT_NONE.getId() );
 				
 				return true;
 			}

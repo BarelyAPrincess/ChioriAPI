@@ -9,10 +9,6 @@
  */
 package com.chiorichan.account;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Set;
-
 import com.chiorichan.AppConfig;
 import com.chiorichan.account.auth.AccountAuthenticator;
 import com.chiorichan.account.auth.AccountCredentials;
@@ -26,11 +22,14 @@ import com.chiorichan.event.EventBus;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.permission.Permissible;
-import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.tasks.Timings;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Used on classes that can support Account Logins
@@ -42,6 +41,20 @@ public abstract class AccountPermissible extends Permissible implements Account
 	 */
 	protected AccountInstance account = null;
 
+	private boolean checkAccount()
+	{
+		if ( account == null )
+			account = AccountType.ACCOUNT_NONE.instance();
+
+		return !AccountType.isNoneAccount( account );
+	}
+
+	public final AccountInstance getAccount()
+	{
+		checkAccount();
+		return account;
+	}
+
 	protected abstract void failedLogin( AccountResult result );
 
 	@Override
@@ -51,25 +64,9 @@ public abstract class AccountPermissible extends Permissible implements Account
 	}
 
 	@Override
-	public PermissibleEntity getEntity()
-	{
-		return meta().getEntity();
-	}
-
-	/**
-	 * Reports if there is an Account logged in
-	 *
-	 * @return True is there is
-	 */
-	public boolean isLoginPresent()
-	{
-		return account != null;
-	}
-
-	@Override
 	public boolean isInitialized()
 	{
-		return account != null && account.isInitialized();
+		return account != null;
 	}
 
 	@Override
@@ -82,20 +79,17 @@ public abstract class AccountPermissible extends Permissible implements Account
 	}
 
 	/**
-	 * Used by {@link #login()} and {@link #login(AccountAuthenticator, String, Object...)} to save persistent login information
+	 * Used by {@link #login()} and {@link #login(AccountAuthenticator, String, String, Object...)} to maintain persistent login information
 	 *
-	 * @param key
-	 *             The key to get
-	 * @return
-	 *         The String result
+	 * @param key The key to get
+	 * @return The String result
 	 */
 	public abstract String getVariable( String key );
 
 	/**
 	 * See {@link #getVariable(String)}
 	 *
-	 * @param def
-	 *             Specifies a default value to return if the requested key is null
+	 * @param def Specifies a default value to return if the requested key is null
 	 */
 	public abstract String getVariable( String key, String def );
 
@@ -110,9 +104,6 @@ public abstract class AccountPermissible extends Permissible implements Account
 	@Override
 	public AccountInstance instance()
 	{
-		// if ( account == null )
-		// throw new AccountException( LoginDescriptiveReason.ACCOUNT_NOT_INITIALIZED, AccountType.ACCOUNT_NONE );
-
 		return account;
 	}
 
@@ -122,18 +113,19 @@ public abstract class AccountPermissible extends Permissible implements Account
 	public void login()
 	{
 		String authName = getVariable( "auth" );
+		String locId = getVariable( "locId" );
 		String acctId = getVariable( "acctId" );
 
 		if ( authName != null && !authName.isEmpty() )
 		{
 			AccountAuthenticator auth = AccountAuthenticator.byName( authName );
-			login( auth, acctId, this );
+			login( auth, locId, acctId, this );
 		}
 	}
 
-	public AccountResult loginWithException( AccountAuthenticator auth, String acctId, Object... credObjs ) throws AccountException
+	public AccountResult loginWithException( AccountAuthenticator auth, String locId, String acctId, Object... credObjs ) throws AccountException
 	{
-		AccountResult result = login( auth, acctId, credObjs );
+		AccountResult result = login( auth, locId, acctId, credObjs );
 
 		if ( !result.isSuccess() )
 			throw new AccountException( result.getDescriptiveReason(), result );
@@ -144,18 +136,14 @@ public abstract class AccountPermissible extends Permissible implements Account
 	/**
 	 * Attempts to authenticate the Account Id using the specified {@link AccountAuthenticator} and Credentials
 	 *
-	 * @param auth
-	 *             The {@link AccountAuthenticator}
-	 * @param acctId
-	 *             The Account Id
-	 * @param credObjs
-	 *             The Account Credentials. Exact credentials depend on what AccountAuthenticator was provided.
-	 * @return
-	 *         The {@link AccountResult}
+	 * @param auth     The {@link AccountAuthenticator}
+	 * @param acctId   The Account Id
+	 * @param credObjs The Account Credentials. Exact credentials depend on what AccountAuthenticator was provided.
+	 * @return The {@link AccountResult}
 	 */
-	public AccountResult login( AccountAuthenticator auth, String acctId, Object... credObjs )
+	public AccountResult login( AccountAuthenticator auth, String locId, String acctId, Object... credObjs )
 	{
-		AccountResult result = new AccountResult( acctId );
+		AccountResult result = new AccountResult( locId, acctId );
 		AccountMeta meta = null;
 
 		try
@@ -170,7 +158,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 					return result;
 				}
 
-				meta.context().creator().preLogin( meta, this, acctId, credObjs );
+				meta.getContext().creator().preLogin( meta, this, acctId, credObjs );
 				AccountPreLoginEvent event = new AccountPreLoginEvent( meta, this, acctId, credObjs );
 
 				EventBus.instance().callEvent( event );
@@ -182,7 +170,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 				}
 
 				AccountCredentials credentials = auth.authorize( meta, credObjs );
-				meta.context().credentials = credentials;
+				meta.getContext().credentials = credentials;
 
 				if ( credentials.getDescriptiveReason().getReportingLevel().isSuccess() )
 				{
@@ -190,13 +178,12 @@ public abstract class AccountPermissible extends Permissible implements Account
 
 					AccountInstance acct = meta.instance();
 
-					// TODO Single login per via method checks?
 					if ( acct.countAttachments() > 1 && AppConfig.get().getBoolean( "accounts.singleLogin" ) )
 						for ( AccountAttachment ap : acct.getAttachments() )
 							if ( ap instanceof Kickable )
 								( ( Kickable ) ap ).kick( AppConfig.get().getString( "accounts.singleLoginMessage", "You logged in from another location." ) );
 
-					meta.set( "lastLoginTime", Timings.epoch() );
+					meta.set( "lastLogin", Timings.epoch() );
 
 					// XXX Should we track all past IPs or only the current ones and what about local logins?
 					Set<String> ips = Sets.newLinkedHashSet();
@@ -205,7 +192,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 					ips.addAll( getIpAddresses() );
 
 					if ( ips.size() > 5 )
-						meta.set( "lastLoginIp", Joiner.on( "|" ).join( new LinkedList<String>( ips ).subList( ips.size() - 5, ips.size() ) ) );
+						meta.set( "lastLoginIp", Joiner.on( "|" ).join( new LinkedList<>( ips ).subList( ips.size() - 5, ips.size() ) ) );
 					else if ( ips.size() > 0 )
 						meta.set( "lastLoginIp", Joiner.on( "|" ).join( ips ) );
 					setVariable( "acctId", meta.getId() );
@@ -215,7 +202,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 					account = acct;
 
 					successfulLogin();
-					meta.context().creator().successLogin( meta );
+					meta.getContext().creator().successLogin( meta );
 					EventBus.instance().callEvent( new AccountSuccessfulLoginEvent( meta, this, result ) );
 				}
 				else
@@ -245,7 +232,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 		{
 			failedLogin( result );
 			if ( meta != null )
-				meta.context().creator().failedLogin( meta, result );
+				meta.getContext().creator().failedLogin( meta, result );
 			EventBus.instance().callEvent( new AccountFailedLoginEvent( meta, result ) );
 		}
 
@@ -262,35 +249,36 @@ public abstract class AccountPermissible extends Permissible implements Account
 
 	protected void registerAttachment( AccountAttachment attachment )
 	{
-		if ( account != null )
-			account.registerAttachment( attachment );
+		checkAccount();
+		account.registerAttachment( attachment );
 	}
 
 	protected void unregisterAttachment( AccountAttachment attachment )
 	{
-		if ( account != null )
-			account.unregisterAttachment( attachment );
+		checkAccount();
+		account.unregisterAttachment( attachment );
 	}
 
-	public abstract Collection<String> getIpAddresses();
+	public abstract List<String> getIpAddresses();
 
 	public AccountResult logout()
 	{
-		AccountResult result = new AccountResult( account == null ? AccountType.ACCOUNT_NONE : account.meta(), AccountDescriptiveReason.LOGOUT_SUCCESS );
-
-		if ( account != null )
+		if ( !AccountType.isNoneAccount( account ) )
 		{
 			AccountManager.getLogger().info( EnumColor.GREEN + "Successful Logout: [id='" + account.getId() + "',locId='" + ( account.getLocation() == null ? "null" : account.getLocation().getId() ) + "',displayName='" + account.getDisplayName() + "',ipAddresses='" + account.getIpAddresses() + "']" );
+
 			account = null;
+			checkAccount();
+			destroyEntity();
+
+			setVariable( "auth", null );
+			setVariable( "locId", null );
+			setVariable( "acctId", null );
+			setVariable( "token", null );
+
+			return new AccountResult( account.meta(), AccountDescriptiveReason.LOGOUT_SUCCESS );
 		}
-
-		destroyEntity();
-
-		setVariable( "auth", null );
-		setVariable( "acctId", null );
-		setVariable( "token", null );
-
-		return result;
+		return new AccountResult( account.meta(), AccountDescriptiveReason.ACCOUNT_MISSING );
 	}
 
 	@Override
@@ -302,4 +290,9 @@ public abstract class AccountPermissible extends Permissible implements Account
 	public abstract void setVariable( String key, String value );
 
 	protected abstract void successfulLogin() throws AccountException;
+
+	public boolean hasLogin()
+	{
+		return checkAccount();
+	}
 }

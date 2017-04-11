@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
+ *
  * All Rights Reserved.
  */
 package com.chiorichan.permission;
@@ -21,7 +21,7 @@ import com.chiorichan.utils.UtilObjects;
  */
 public class PermissionResult
 {
-	public static final PermissionResult DUMMY = new PermissionResult( AccountType.ACCOUNT_NONE.getEntity(), PermissionDefault.DEFAULT.getNode() );
+	public static final PermissionResult DUMMY = new PermissionResult( AccountType.ACCOUNT_NONE.getPermissibleEntity(), PermissionDefault.DEFAULT.getNode() );
 
 	private ChildPermission childPerm = null;
 	private final PermissibleEntity entity;
@@ -132,8 +132,7 @@ public class PermissionResult
 	/**
 	 * Returns a final object based on assignment of permission.
 	 *
-	 * @return
-	 *         Unassigned will return the default value.
+	 * @return Unassigned will return the default value.
 	 */
 	@SuppressWarnings( "unchecked" )
 	public <T> T getValueObject()
@@ -212,8 +211,7 @@ public class PermissionResult
 	/**
 	 * A safe version of isTrueWithException() in case you don't care to know if the permission is of type Boolean or not
 	 *
-	 * @param allowOps
-	 *            Return true if the entity is a server operator
+	 * @param allowOps Return true if the entity is a server operator
 	 * @return is this permission true
 	 */
 	public boolean isTrue( boolean allowOps )
@@ -232,8 +230,7 @@ public class PermissionResult
 	 * Used strictly for BOOLEAN permission nodes.
 	 *
 	 * @return is this permission true
-	 * @throws IllegalAccessException
-	 *             Thrown if this permission node is not of type Boolean
+	 * @throws IllegalAccessException Thrown if this permission node is not of type Boolean
 	 */
 	public boolean isTrueWithException() throws PermissionException
 	{
@@ -243,11 +240,9 @@ public class PermissionResult
 	/**
 	 * Used strictly for BOOLEAN permission nodes.
 	 *
-	 * @param allowOps
-	 *            Return true if the entity is a server operator
+	 * @param allowOps Return true if the entity is a server operator
 	 * @return is this permission true
-	 * @throws IllegalAccessException
-	 *             Thrown if this permission node is not of type Boolean
+	 * @throws IllegalAccessException Thrown if this permission node is not of type Boolean
 	 */
 	public boolean isTrueWithException( boolean allowOps ) throws PermissionException
 	{

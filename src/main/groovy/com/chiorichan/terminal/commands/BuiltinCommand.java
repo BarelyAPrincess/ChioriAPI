@@ -179,7 +179,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				if ( sender.getEntity().isOp() )
+				if ( sender.getPermissibleEntity().isOp() )
 					AppController.reloadApplication( "The application is reloading by request of acct " + sender.getId() );
 				else
 					sender.sendMessage( EnumColor.RED + "Only server operators can request the server to restart." );
@@ -192,7 +192,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				if ( sender.getEntity().isOp() )
+				if ( sender.getPermissibleEntity().isOp() )
 					AppController.stopApplication( "The application is shutting down by request of acct " + sender.getId() );
 				else
 					sender.sendMessage( EnumColor.RED + "Only server operators can request the server to stop." );
@@ -205,7 +205,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				if ( sender.getEntity().isOp() )
+				if ( sender.getPermissibleEntity().isOp() )
 				{
 					if ( args.length < 1 )
 						sender.sendMessage( EnumColor.RED + "You must specify which account you wish to deop." );
@@ -230,7 +230,7 @@ public abstract class BuiltinCommand extends Command
 			@Override
 			public boolean execute( AccountAttachment sender, String command, String[] args )
 			{
-				if ( sender.getEntity().isOp() )
+				if ( sender.getPermissibleEntity().isOp() )
 				{
 					if ( args.length < 1 )
 						sender.sendMessage( EnumColor.RED + "You must specify which account you wish to op." );

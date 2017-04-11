@@ -126,7 +126,7 @@ public class AppManager<T extends ServiceManager>
 			List<RegisteredServiceProvider<?, ServiceProvider>> registered = providers.get( service );
 			if ( registered == null )
 			{
-				registered = new ArrayList<RegisteredServiceProvider<?, ServiceProvider>>();
+				registered = new ArrayList<>();
 				providers.put( service, registered );
 			}
 

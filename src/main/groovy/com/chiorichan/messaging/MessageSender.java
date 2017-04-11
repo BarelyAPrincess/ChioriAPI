@@ -20,5 +20,5 @@ public interface MessageSender
 	
 	String getId();
 	
-	PermissibleEntity getEntity();
+	PermissibleEntity getPermissibleEntity();
 }

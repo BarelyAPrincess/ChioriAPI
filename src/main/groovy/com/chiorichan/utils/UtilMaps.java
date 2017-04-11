@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
+ *
  * All Rights Reserved.
  */
 package com.chiorichan.utils;
@@ -14,6 +14,7 @@ import com.chiorichan.helpers.Pair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -98,6 +99,6 @@ public class UtilMaps
 	public static <T> Map<String, T> indexMap( List<T> list )
 	{
 		AtomicInteger inx = new AtomicInteger();
-		return list.stream().map( l -> new Pair<>( Integer.toString( inx.getAndIncrement() ), l ) ).collect( Collectors.toMap( p -> p.getKey(), p -> p.getValue() ) );
+		return list.stream().filter( Objects::nonNull ).map( l -> new Pair<>( Integer.toString( inx.getAndIncrement() ), l ) ).collect( Collectors.toMap( Pair::getKey, Pair::getValue ) );
 	}
 }

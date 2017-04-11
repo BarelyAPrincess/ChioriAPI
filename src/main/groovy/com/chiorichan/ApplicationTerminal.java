@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
+ *
  * All Rights Reserved.
  */
 package com.chiorichan;
@@ -33,8 +33,10 @@ import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -78,12 +80,6 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	}
 
 	@Override
-	public PermissibleEntity getEntity()
-	{
-		return AccountType.ACCOUNT_ROOT.getEntity();
-	}
-
-	@Override
 	public String getId()
 	{
 		return AccountType.ACCOUNT_ROOT.getId();
@@ -96,9 +92,9 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	}
 
 	@Override
-	public Collection<String> getIpAddresses()
+	public List<String> getIpAddresses()
 	{
-		return Lists.newArrayList();
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -150,15 +146,15 @@ public class ApplicationTerminal extends AccountPermissible implements AccountAt
 	}
 
 	@Override
-	public AccountResult login( AccountAuthenticator auth, String acctId, Object... credObjs )
+	public AccountResult login( AccountAuthenticator auth, String locId, String acctId, Object... credObjs )
 	{
-		return new AccountResult( acctId, AccountDescriptiveReason.FEATURE_DISABLED );
+		return new AccountResult( locId, acctId, AccountDescriptiveReason.FEATURE_DISABLED );
 	}
 
 	@Override
-	public AccountResult loginWithException( AccountAuthenticator auth, String acctId, Object... credObjs ) throws AccountException
+	public AccountResult loginWithException( AccountAuthenticator auth, String locId, String acctId, Object... credObjs ) throws AccountException
 	{
-		throw new AccountException( AccountDescriptiveReason.FEATURE_DISABLED, acctId );
+		throw new AccountException( AccountDescriptiveReason.FEATURE_DISABLED, locId, acctId );
 	}
 
 	@Override

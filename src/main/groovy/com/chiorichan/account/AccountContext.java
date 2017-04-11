@@ -52,16 +52,16 @@ public class AccountContext
 		loginKeys.add( "acctId" );
 	}
 
-	protected AccountContext( AccountCreator creator, AccountType type, String acctId, String locId )
+	protected AccountContext( AccountCreator creator, AccountType type, String locId, String acctId )
 	{
 		this( creator, type );
 		this.acctId = acctId;
 		this.locId = locId;
 	}
 
-	protected AccountContext( AccountCreator creator, AccountType type, String acctId, String locId, boolean keepLoaded )
+	protected AccountContext( AccountCreator creator, AccountType type, String locId, String acctId, boolean keepLoaded )
 	{
-		this( creator, type, acctId, locId );
+		this( creator, type, locId, acctId );
 		this.keepLoaded = keepLoaded;
 	}
 
@@ -90,7 +90,7 @@ public class AccountContext
 		return acctId;
 	}
 
-	public String getLocationId()
+	public String getLocId()
 	{
 		if ( locId == null || locId.isEmpty() )
 			return "%";

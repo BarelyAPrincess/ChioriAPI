@@ -9,17 +9,8 @@
  */
 package com.chiorichan.permission.commands;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.chiorichan.AppConfig;
 import com.chiorichan.account.AccountAttachment;
-import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.account.LocationService;
@@ -38,6 +29,13 @@ import com.chiorichan.terminal.commands.AdvancedCommand;
 import com.chiorichan.terminal.commands.advanced.AutoCompleteChoicesException;
 import com.chiorichan.terminal.commands.advanced.CommandListener;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public abstract class PermissionBaseCommand implements CommandListener
 {
@@ -156,9 +154,7 @@ public abstract class PermissionBaseCommand implements CommandListener
 
 		LocationService service = AppManager.getService( LocationService.class );
 		if ( service != null )
-			for ( AccountLocation location : service.getLocations() )
-				if ( location != null && location.getId().toLowerCase().startsWith( ref.toLowerCase() ) )
-					refs.add( location.getId() );
+			service.getLocations().filter( l -> l != null && l.getId().toLowerCase().startsWith( ref.toLowerCase() ) ).forEach( l -> refs.add( l.getId() ) );
 
 		if ( refs.size() > 1 )
 			throw new AutoCompleteChoicesException( refs.toArray( new String[0] ), argName );
@@ -220,7 +216,7 @@ public abstract class PermissionBaseCommand implements CommandListener
 	{
 		if ( ref == null )
 		{
-			AccountMeta meta = AccountManager.instance().getAccount( acctId );
+			AccountMeta meta = AccountManager.instance().resolveAccount( "%", acctId );
 
 			if ( meta == null )
 				ref = References.format( ( ( LocationService ) AppManager.getService( LocationService.class ) ).getDefaultLocation().getId() );
@@ -248,7 +244,7 @@ public abstract class PermissionBaseCommand implements CommandListener
 		if ( !AppConfig.get().getBoolean( "permissions.informEntities.changes", false ) )
 			return; // User informing is disabled
 
-		AccountMeta meta = AccountManager.instance().getAccount( entityId );
+		AccountMeta meta = AccountManager.instance().resolveAccount( "%", entityId );
 		if ( meta == null )
 			return;
 

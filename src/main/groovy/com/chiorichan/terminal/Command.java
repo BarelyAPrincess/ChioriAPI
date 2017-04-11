@@ -238,7 +238,7 @@ public abstract class Command
 
 		// TODO split permissions
 		for ( String p : permission.split( ";" ) )
-			if ( target.getEntity().checkPermission( p ).isTrue() )
+			if ( target.getPermissibleEntity().checkPermission( p ).isTrue() )
 				return true;
 
 		return false;

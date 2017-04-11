@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
+ *
  * All Rights Reserved.
  */
 package com.chiorichan.permission;
@@ -42,6 +42,7 @@ import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -124,11 +125,11 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 	private PermissionBackend backend = null;
 
-	private Map<String, PermissibleGroup> defaultGroups = Maps.newHashMap();
+	private Map<String, PermissibleGroup> defaultGroups = new HashMap<>();
 
-	private Map<String, PermissibleEntity> entities = Maps.newHashMap();
+	private Map<String, PermissibleEntity> entities = new HashMap<>();
 
-	private Map<String, PermissibleGroup> groups = Maps.newHashMap();
+	private Map<String, PermissibleGroup> groups = new HashMap<>();
 
 	private boolean hasWhitelist = false;
 
@@ -349,33 +350,6 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 		return getEntitiesWithPermission( getNode( perm ) );
 	}
 
-	/**
-	 * Return entity's object
-	 *
-	 * @param permissible get PermissibleEntity with given name
-	 * @return PermissibleEntity instance
-	 */
-	public PermissibleEntity getEntity( Permissible permissible )
-	{
-		if ( permissible == null )
-			throw new IllegalArgumentException( "Null entity passed!" );
-
-		if ( permissible.getId() == null || permissible.getId().isEmpty() )
-			return null;
-
-		if ( AccountType.isNoneAccount( permissible.entity ) )
-			if ( entities.containsKey( permissible.getId() ) )
-				permissible.entity = entities.get( permissible.getId() );
-			else
-			{
-				PermissibleEntity entity = backend.getEntity( permissible.getId() );
-				entities.put( permissible.getId(), entity );
-				permissible.entity = entity;
-			}
-
-		return permissible.entity;
-	}
-
 	public PermissibleEntity getEntity( String id )
 	{
 		return getEntity( id, true );
@@ -383,8 +357,7 @@ public class PermissionManager implements EventRegistrar, TaskRegistrar, Service
 
 	public PermissibleEntity getEntity( String id, boolean create )
 	{
-		if ( id == null || id.isEmpty() )
-			throw new IllegalArgumentException( "Null id passed!" );
+		UtilObjects.notEmpty( id );
 
 		if ( entities.containsKey( id ) )
 			return entities.get( id );

@@ -59,7 +59,7 @@ public interface Account extends MessageSender, MessageChannel, ProviderChild
 	 * @return The PermissibleEntity
 	 */
 	@Override
-	PermissibleEntity getEntity();
+	PermissibleEntity getPermissibleEntity();
 
 	boolean isInitialized();
 }

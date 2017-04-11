@@ -86,14 +86,20 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 
 		this.context = context;
 		acctId = context.getAcctId();
-		locId = context.getLocationId();
+		locId = context.getLocId();
+
+		if ( !acctId.matches( "[a-zA-Z0-9]*" ) )
+			throw new IllegalStateException( "The acctId must only contain the characters [a-zA-Z0-9]." );
+
+		if ( !locId.matches( "[a-zA-Z0-9]*" ) )
+			throw new IllegalStateException( "The locId must only contain the characters [a-zA-Z0-9]." );
 
 		metadata.putAll( context.getValues() );
 
 		/**
 		 * Populate the PermissibleEntity for reasons... and notify the Account Creator
 		 */
-		context.creator().successInit( this, getEntity() );
+		context.creator().successInit( this, getPermissibleEntity() );
 	}
 
 	public boolean containsKey( String key )
@@ -104,10 +110,9 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	/**
 	 * Returns the {@link AccountContext} responsible for our existence
 	 *
-	 * @return
-	 *         Instance of AccountContext
+	 * @return Instance of AccountContext
 	 */
-	public AccountContext context()
+	public AccountContext getContext()
 	{
 		return context;
 	}
@@ -132,14 +137,14 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	}
 
 	@Override
-	public PermissibleEntity getEntity()
+	public PermissibleEntity getPermissibleEntity()
 	{
 		if ( permissibleEntity == null || permissibleEntity.get() == null )
 		{
 			PermissionManager mgr = AppManager.getService( PermissibleEntity.class );
 			if ( mgr == null )
 				throw new UncaughtException( "PermissibleEntity provider is not available, check load order!" );
-			permissibleEntity = new WeakReference<PermissibleEntity>( mgr.getEntity( getId() ) );
+			permissibleEntity = new WeakReference<>( mgr.getEntity( getId() ) );
 		}
 
 		return permissibleEntity.get();
@@ -172,8 +177,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	/**
 	 * Get the associated AccountLocation
 	 *
-	 * @return
-	 *         The {@link AccountLocation} for the associated locationId, will return null if no service is registered
+	 * @return The {@link AccountLocation} for the associated locationId, will return null if no service is registered
 	 */
 	@Override
 	public AccountLocation getLocation()
@@ -182,6 +186,11 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 		if ( service == null )
 			return null;
 		return service.getLocation( locId );
+	}
+
+	public String getLocId()
+	{
+		return locId;
 	}
 
 	public String getLogoffMessage()
@@ -248,8 +257,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	 * Returns if the Account is will be kept in memory
 	 * If you want to know if the Account is currently being kept in memory, See {@link #keptInMemory()}
 	 *
-	 * @return
-	 *         Will be kept in memory?
+	 * @return Will be kept in memory?
 	 */
 	public boolean keepInMemory()
 	{
@@ -259,8 +267,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	/**
 	 * Sets if the Account should stay loaded in the VM memory
 	 *
-	 * @param state
-	 *             Stay in memory?
+	 * @param state Stay in memory?
 	 */
 	public void keepInMemory( boolean state )
 	{
@@ -272,8 +279,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 	 * Returns if the Account is being kept in memory
 	 * If you want to know if the Account will be kept in memory, See {@link #keepInMemory()}
 	 *
-	 * @return
-	 *         Is being kept in memory? Will always return false if the Account is not initialized.
+	 * @return Is being kept in memory? Will always return false if the Account is not initialized.
 	 */
 	public boolean keptInMemory()
 	{

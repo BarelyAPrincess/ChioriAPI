@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
+ *
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql;
@@ -66,7 +66,8 @@ public class SQLTable extends SQLBase<SQLTable>
 		SQLTableColumns columns = columns();
 
 		if ( columns.contains( colName ) )
-			throw new SQLException( "There already exists a column by the name of '" + colName + "'" );
+			return this;
+			// throw new SQLException( "There already exists a column by the name of '" + colName + "'" );
 
 		String defString = def == null ? "NULL" : "NOT NULL DEFAULT '" + UtilObjects.castToString( def ) + "'";
 
@@ -106,7 +107,7 @@ public class SQLTable extends SQLBase<SQLTable>
 	public SQLTable addColumnVar( String colName, int i, String def ) throws SQLException
 	{
 		if ( i > 256 )
-			throw new SQLException( "VARCHAR does not support more than 256 bytes" );
+			throw new SQLException( "VARCHAR does not support more than 256 characters in length, use TEXT instead." );
 		if ( def != null && def.length() > i )
 			throw new SQLException( "Default is more than max size" );
 

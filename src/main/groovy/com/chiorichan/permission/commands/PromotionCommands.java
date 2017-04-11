@@ -38,7 +38,7 @@ public class PromotionCommands extends PermissionBaseCommand
 		if ( args.containsKey( "ladder" ) )
 			ladder = args.get( "ladder" );
 
-		PermissibleEntity demoter = sender.getEntity();
+		PermissibleEntity demoter = sender.getPermissibleEntity();
 		String demoterName = sender.getDisplayName();
 
 		// TODO Get reference based on connection method, e.g., Telnet Query
@@ -86,7 +86,7 @@ public class PromotionCommands extends PermissionBaseCommand
 		if ( args.containsKey( "ladder" ) )
 			ladder = args.get( "ladder" );
 
-		PermissibleEntity promoter = sender.getEntity();
+		PermissibleEntity promoter = sender.getPermissibleEntity();
 		String promoterName = sender.getDisplayName();
 
 		// TODO Get reference based on connection method, e.g., Telnet Query

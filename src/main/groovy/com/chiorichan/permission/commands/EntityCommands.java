@@ -400,7 +400,7 @@ public class EntityCommands extends PermissionBaseCommand
 
 			for ( int i = 0; i < groupsNames.length; i++ )
 			{
-				if ( !sender.getPermissible().isLoginPresent() || !sender.getEntity().checkPermission( "permissions.manage.membership." + groupsNames[i].toLowerCase() ).isTrue() )
+				if ( !sender.getPermissible().hasLogin() || !sender.getPermissibleEntity().checkPermission( "permissions.manage.membership." + groupsNames[i].toLowerCase() ).isTrue() )
 				{
 					sender.sendMessage( EnumColor.RED + "Don't have enough permission for group " + groupsNames[i] );
 					return;
@@ -416,7 +416,7 @@ public class EntityCommands extends PermissionBaseCommand
 
 			if ( groupName != null )
 			{
-				if ( !sender.getPermissible().isLoginPresent() || !sender.getEntity().checkPermission( "permissions.manage.membership." + groupName.toLowerCase() ).isTrue() )
+				if ( !sender.getPermissible().hasLogin() || !sender.getPermissibleEntity().checkPermission( "permissions.manage.membership." + groupName.toLowerCase() ).isTrue() )
 				{
 					sender.sendMessage( EnumColor.RED + "Don't have enough permission for group " + groupName );
 					return;

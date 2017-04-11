@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- * <p>
+ *
  * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
+ *
  * All Rights Reserved.
  */
 package com.chiorichan.account;
@@ -13,13 +13,12 @@ import com.chiorichan.AppConfig;
 import com.chiorichan.Versioning;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
-import com.chiorichan.event.EventBus;
+import com.chiorichan.account.lang.AccountResolveResult;
 import com.chiorichan.event.account.KickEvent;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.utils.UtilEncryption;
 import com.chiorichan.utils.UtilObjects;
-import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
@@ -27,6 +26,7 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,97 +53,99 @@ public final class AccountManager extends AccountEvents
 
 	final AccountList accounts = new AccountList();
 
-	boolean isDebug = false;
+	private boolean isDebug = false;
 
-	int maxAccounts = -1;
+	private int maxLogins = -1;
 
 	public AccountManager()
 	{
 
 	}
 
-	public AccountMeta createAccount( String acctId, String siteId ) throws AccountException
+	public AccountMeta createAccount( String locId ) throws AccountException
 	{
-		return createAccount( acctId, siteId, AccountType.getDefaultType() );
+		String acctId;
+
+		do
+			acctId = UtilEncryption.rand( 8, true, true );
+		while ( accountExists( locId, acctId ) );
+
+		return createAccount( locId, acctId );
 	}
 
-	public AccountMeta createAccount( String acctId, String siteId, AccountType type ) throws AccountException
+	public AccountMeta createAccount( String locId, String acctId ) throws AccountException
+	{
+		return createAccount( locId, acctId, AccountType.getDefaultType() );
+	}
+
+	public AccountMeta createAccount( String locId, String acctId, AccountType type ) throws AccountException
 	{
 		if ( !type.isEnabled() )
-			throw new AccountException( AccountDescriptiveReason.FEATURE_DISABLED, acctId );
+			throw new AccountException( AccountDescriptiveReason.FEATURE_DISABLED, locId, acctId );
 
-		AccountContext context = type.getCreator().createAccount( acctId, siteId );
-
-		return new AccountMeta( context );
+		return new AccountMeta( type.getCreator().createAccount( locId, acctId ) );
 	}
 
-	private boolean exists( String acctId )
+	public AccountMeta resolveAccount( String locId, String acctId )
 	{
-		if ( accounts.keySet().contains( acctId ) )
-			return true;
+		try
+		{
+			return resolveAccountWithException( locId, acctId );
+		}
+		catch ( AccountException e )
+		{
+			return null;
+		}
+	}
+
+	public AccountMeta resolveAccountWithException( String locId, String acctId ) throws AccountException
+	{
+		if ( "none".equals( acctId ) || "default".equals( acctId ) )
+			return AccountType.ACCOUNT_NONE;
+
+		if ( "root".equals( acctId ) )
+			return AccountType.ACCOUNT_ROOT;
+
+		for ( AccountMeta am : accounts )
+			for ( String key : am.getContext().loginKeys )
+				if ( acctId.equals( am.getString( key ) ) && ( "%".equals( locId ) || locId.equals( am.getLocId() ) ) )
+					return am;
 
 		for ( AccountType type : AccountType.getAccountTypes() )
-			if ( type.getCreator().exists( acctId ) )
+		{
+			AccountResolveResult result = type.getCreator().resolveAccount( locId, acctId );
+			if ( result != null && result.getDescriptiveReason().getReportingLevel().isSuccess() )
+			{
+				AccountMeta meta = new AccountMeta( result.getContext() );
+				accounts.put( meta );
+				return meta;
+			}
+			else if ( result != null && !result.getDescriptiveReason().getReportingLevel().isIgnorable() )
+			{
+				throw new AccountException( result.getDescriptiveReason(), locId, acctId );
+			}
+		}
+
+		throw new AccountException( AccountDescriptiveReason.INCORRECT_LOGIN, locId, acctId );
+	}
+
+	private boolean accountExists( String locId, String acctId )
+	{
+		if ( "none".equals( acctId ) || "default".equals( acctId ) || "root".equals( acctId ) )
+			return true;
+
+		for ( AccountMeta am : accounts )
+			for ( String key : am.getContext().loginKeys )
+				if ( acctId.equals( am.getString( key ) ) && ( "%".equals( locId ) || locId.equals( am.getLocId() ) ) )
+					return true;
+
+		for ( AccountType type : AccountType.getAccountTypes() )
+			if ( type.getCreator().accountExists( locId, acctId ) )
 				return true;
 		return false;
 	}
 
-	public String generateAcctId( String seed )
-	{
-		String acctId = "";
-
-		if ( seed == null || seed.isEmpty() )
-			acctId = "ab123C";
-		else
-		{
-			seed = seed.replaceAll( "[\\W\\d]", "" );
-
-			acctId = UtilStrings.randomChars( seed, 2 ).toLowerCase();
-			String sum = UtilStrings.removeLetters( UtilEncryption.md5( seed ) );
-			acctId += sum.length() < 3 ? UtilEncryption.randomize( "123" ) : sum.substring( 0, 3 );
-			acctId += UtilStrings.randomChars( seed, 1 ).toUpperCase();
-		}
-
-		if ( acctId == null || acctId.isEmpty() )
-			acctId = "ab123C";
-
-		int tries = 1;
-		do
-		{
-			Validate.notEmpty( acctId );
-			Validate.validState( acctId.length() == 6 );
-			Validate.validState( acctId.matches( "[a-z]{2}[0-9]{3}[A-Z]" ) );
-
-			// When our tries are divisible by 25 we attempt to randomize the last letter for more chances.
-			if ( tries % 25 == 0 )
-				acctId = acctId.substring( 0, 4 ) + UtilEncryption.randomize( acctId.substring( 5 ) );
-
-			acctId = acctId.substring( 0, 2 ) + UtilEncryption.randomize( "123" ) + acctId.substring( 5 );
-
-			tries++;
-		}
-		while ( exists( acctId ) );
-
-		return acctId;
-	}
-
-	public AccountMeta getAccount( String acctId )
-	{
-		AccountMeta acct = accounts.get( acctId );
-
-		if ( acct == null )
-		{
-			acct = fireAccountLookup( acctId );
-
-			if ( acct == null )
-				return null;
-
-			accounts.put( acct );
-		}
-
-		return acct;
-	}
-
+	@Deprecated
 	public AccountMeta getAccountPartial( String partial ) throws AccountException
 	{
 		Validate.notNull( partial );
@@ -166,11 +168,13 @@ public final class AccountManager extends AccountEvents
 		return found;
 	}
 
+	@Deprecated
 	public List<AccountMeta> getAccounts()
 	{
 		return Collections.unmodifiableList( getAccounts0() );
 	}
 
+	@Deprecated
 	public List<AccountMeta> getAccounts( String query )
 	{
 		Validate.notNull( query );
@@ -200,6 +204,7 @@ public final class AccountManager extends AccountEvents
 		} ).collect( Collectors.toList() );
 	}
 
+	@Deprecated
 	public List<AccountMeta> getAccounts( String key, String value )
 	{
 		Validate.notNull( key );
@@ -223,50 +228,36 @@ public final class AccountManager extends AccountEvents
 		} ).collect( Collectors.toList() );
 	}
 
+	@Deprecated
 	List<AccountMeta> getAccounts0()
 	{
 		return accounts.list();
 	}
 
-	public List<AccountMeta> getAccountsByLocation( AccountLocation collective )
+	public List<AccountMeta> getAccountsByLocation( AccountLocation loc )
 	{
-		Validate.notNull( collective );
-		return accounts.stream().filter( m -> m.getLocation() == collective ).collect( Collectors.toList() );
+		Validate.notNull( loc );
+		return accounts.stream().filter( m -> m.getLocation() == loc ).collect( Collectors.toList() );
 	}
 
-	public List<AccountMeta> getAccountsByLocation( String locationId )
+	public List<AccountMeta> getAccountsByLocation( String locId )
 	{
 		LocationService service = AppManager.getService( AccountLocation.class );
-		return getAccountsByLocation( service.getLocation( locationId ) );
-	}
-
-	public AccountMeta getAccountWithException( String acctId ) throws AccountException
-	{
-		AccountMeta acct = accounts.get( acctId );
-
-		if ( acct == null )
-		{
-			acct = fireAccountLookupWithException( acctId );
-
-			Validate.notNull( acct );
-			accounts.put( acct );
-		}
-
-		return acct;
+		return service == null ? null : getAccountsByLocation( service.getLocation( locId ) );
 	}
 
 	public Set<Account> getBanned()
 	{
-		Set<Account> accts = Sets.newHashSet();
+		Set<Account> accts = new HashSet<>();
 		for ( AccountMeta meta : accounts )
-			if ( meta.getEntity().isBanned() )
+			if ( meta.getPermissibleEntity().isBanned() )
 				accts.add( meta );
 		return accts;
 	}
 
 	public Set<Account> getInitializedAccounts()
 	{
-		Set<Account> accts = Sets.newHashSet();
+		Set<Account> accts = new HashSet<>();
 		for ( AccountMeta meta : accounts )
 			if ( meta.isInitialized() )
 				accts.add( meta );
@@ -287,9 +278,9 @@ public final class AccountManager extends AccountEvents
 
 	public Set<Account> getOperators()
 	{
-		Set<Account> accts = Sets.newHashSet();
+		Set<Account> accts = new HashSet<>();
 		for ( AccountMeta meta : accounts )
-			if ( meta.getEntity().isOp() )
+			if ( meta.getPermissibleEntity().isOp() )
 				accts.add( meta );
 		return accts;
 	}
@@ -301,7 +292,7 @@ public final class AccountManager extends AccountEvents
 	 */
 	public Collection<AccountAttachment> getPermissibles()
 	{
-		Set<AccountAttachment> accts = Sets.newHashSet();
+		Set<AccountAttachment> accts = new HashSet<>();
 		for ( AccountMeta meta : accounts )
 			if ( meta.isInitialized() )
 				accts.addAll( meta.instance().getAttachments() );
@@ -310,9 +301,9 @@ public final class AccountManager extends AccountEvents
 
 	public Set<Account> getWhitelisted()
 	{
-		Set<Account> accts = Sets.newHashSet();
+		Set<Account> accts = new HashSet<>();
 		for ( AccountMeta meta : accounts )
-			if ( meta.getEntity().isWhitelisted() )
+			if ( meta.getPermissibleEntity().isWhitelisted() )
 				accts.add( meta );
 		return accts;
 	}
@@ -321,11 +312,7 @@ public final class AccountManager extends AccountEvents
 	public void init()
 	{
 		isDebug = AppConfig.get().getBoolean( "accounts.debug" );
-		maxAccounts = AppConfig.get().getInt( "accounts.maxLogins", -1 );
-
-		EventBus.instance().registerEvents( AccountType.MEMORY.getCreator(), this );
-		EventBus.instance().registerEvents( AccountType.SQL.getCreator(), this );
-		EventBus.instance().registerEvents( AccountType.FILE.getCreator(), this );
+		maxLogins = AppConfig.get().getInt( "accounts.maxLogins", -1 );
 	}
 
 	public boolean isDebug()

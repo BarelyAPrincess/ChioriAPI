@@ -9,14 +9,6 @@
  */
 package com.chiorichan.account;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang3.Validate;
-
 import com.chiorichan.AppConfig;
 import com.chiorichan.account.types.AccountTypeCreator;
 import com.chiorichan.account.types.FileTypeCreator;
@@ -24,14 +16,21 @@ import com.chiorichan.account.types.MemoryTypeCreator;
 import com.chiorichan.account.types.SqlTypeCreator;
 import com.chiorichan.messaging.MessageSender;
 import com.chiorichan.permission.PermissibleEntity;
-import com.google.common.collect.Maps;
+import org.apache.commons.lang3.Validate;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Tracks AccountsTypes available on this server and their handler classes
  */
 public final class AccountType
 {
-	private static final Map<String, AccountType> types = Maps.newConcurrentMap();
+	private static final Map<String, AccountType> types = new ConcurrentHashMap<>();
 
 	/**
 	 * Loads Accounts from a SQL Table
@@ -52,12 +51,12 @@ public final class AccountType
 	/**
 	 * References the builtin no login Account with NO PERMISSIONS
 	 */
-	public static final AccountMeta ACCOUNT_NONE = new AccountMeta( new AccountContext( MemoryTypeCreator.INSTANCE, MEMORY, "none", "%", true ) );
+	public static final AccountMeta ACCOUNT_NONE = new AccountMeta( new AccountContext( MemoryTypeCreator.INSTANCE, MEMORY, "%", "none", true ) );
 
 	/**
 	 * References the builtin root Account with ALL PERMISSIONS and then some!
 	 */
-	public static final AccountMeta ACCOUNT_ROOT = new AccountMeta( new AccountContext( MemoryTypeCreator.INSTANCE, MEMORY, "root", "%", true ) );
+	public static final AccountMeta ACCOUNT_ROOT = new AccountMeta( new AccountContext( MemoryTypeCreator.INSTANCE, MEMORY, "%", "root", true ) );
 
 	static
 	{
@@ -73,16 +72,17 @@ public final class AccountType
 	public static AccountType getDefaultType()
 	{
 		for ( AccountType type : getAccountTypes() )
-			if ( type.isEnabled() && type.isDefault() )
+			if ( type.isDefault() )
 				return type;
 
-		AccountManager.getLogger().warning( "We could not find a default AccountType, please check the server configuration." );
+
+		AccountManager.getLogger().warning( "No valid default AccountType was found, please check your configuration." );
 		return MEMORY;
 	}
 
 	public static Set<AccountType> getEnabledAccountTypes()
 	{
-		Set<AccountType> typesAll = new HashSet<AccountType>( types.values() );
+		Set<AccountType> typesAll = new HashSet<>( types.values() );
 		for ( AccountType at : typesAll )
 			if ( !at.isEnabled() )
 				typesAll.remove( at );
@@ -93,10 +93,8 @@ public final class AccountType
 	 * Tries to find an AccountType based on name alone<br>
 	 * Handy for non-builtin types that register with the AccountPipeline
 	 *
-	 * @param name
-	 *             The name to find
-	 * @return
-	 *         The matching AccountType, null if none exist
+	 * @param name The name to find
+	 * @return The matching AccountType, null if none exist
 	 */
 	public static AccountType getTypeByName( String name )
 	{
@@ -142,8 +140,7 @@ public final class AccountType
 	/**
 	 * Registers a new non-builtin AccountType
 	 *
-	 * @param name
-	 *             The AccountType name
+	 * @param name The AccountType name
 	 */
 	public AccountType( String name, AccountTypeCreator creator )
 	{
@@ -179,8 +176,7 @@ public final class AccountType
 	/**
 	 * Gets the name of this AccountType
 	 *
-	 * @return
-	 *         The AccountType name
+	 * @return The AccountType name
 	 */
 	public String getName()
 	{
@@ -190,8 +186,7 @@ public final class AccountType
 	/**
 	 * Is this a builtin AccountType, i.e., SQL, FILE, or MEMORY
 	 *
-	 * @return
-	 *         Is it builtin?
+	 * @return Is it builtin?
 	 */
 	public boolean isBuiltin()
 	{
@@ -201,8 +196,7 @@ public final class AccountType
 	/**
 	 * Checks if this type is default per server configuration
 	 *
-	 * @return
-	 *         True if it is default
+	 * @return True if it is default
 	 */
 	public boolean isDefault()
 	{
@@ -210,10 +204,10 @@ public final class AccountType
 		if ( this == AccountType.MEMORY )
 			return false;
 
-		boolean def = AppConfig.get().getBoolean( "accounts." + getName() + "Type.default", true );
+		boolean def = AppConfig.get().getBoolean( "accounts.defaultType", false );
 
 		if ( def && !isEnabled() )
-			AccountManager.getLogger().warning( "Your default Account Type is '" + getName() + "' and it's not enabled, possibly due to failure to start, account creation will most likely fail." );
+			throw new IllegalStateException( "Your default Account Type is '" + getName() + "' and it's not enabled, possibly due to a startup failure." );
 
 		return def;
 	}
@@ -221,19 +215,15 @@ public final class AccountType
 	/**
 	 * Checks if this type was enabled in the server configuration
 	 *
-	 * @return
-	 *         True if it is enabled
+	 * @return True if it is enabled
 	 */
 	public boolean isEnabled()
 	{
-		// Memory accounts are always enabled
+		/* Memory accounts are always enabled */
 		if ( this == AccountType.MEMORY )
 			return true;
 
-		/*
-		 * Lastly we ask the AccountCreator directly if it's enabled.
-		 * Returning false would be the answer if there was a problem enabling the creator.
-		 */
-		return AppConfig.get().getBoolean( "accounts." + getName() + "Type.enabled", true ) && getCreator().isEnabled();
+		/* Lastly we ask the AccountCreator directly if it's enabled. */
+		return getCreator().isEnabled();
 	}
 }

@@ -10,24 +10,29 @@
 package com.chiorichan.permission;
 
 import com.chiorichan.account.AccountType;
-import com.chiorichan.logger.Log;
 import com.chiorichan.permission.lang.PermissionDeniedException;
 import com.chiorichan.permission.lang.PermissionDeniedException.PermissionDeniedReason;
+import com.chiorichan.utils.UtilObjects;
 
 public abstract class Permissible
 {
 	/**
 	 * Used to reference the PermissibleEntity for the Permissible object.
 	 */
-	protected PermissibleEntity entity = null;
+	private PermissibleEntity entity = null;
 
-	public final boolean checkEntity()
+	private boolean checkEntity()
 	{
 		if ( AccountType.isNoneAccount( entity ) )
-			PermissionManager.instance().getEntity( this );
+		{
+			String id = getId();
+			if ( UtilObjects.isEmpty( id ) )
+				throw new IllegalStateException( "getId() must return a valid (non-empty) entity Id." );
+			entity = PermissionManager.instance().getEntity( id );
+		}
 
 		if ( entity == null )
-			entity = AccountType.ACCOUNT_NONE.getEntity();
+			entity = AccountType.ACCOUNT_NONE.getPermissibleEntity();
 
 		return !AccountType.isNoneAccount( entity );
 	}
@@ -40,7 +45,7 @@ public abstract class Permissible
 
 	public final void destroyEntity()
 	{
-		entity = AccountType.ACCOUNT_NONE.getEntity();
+		entity = AccountType.ACCOUNT_NONE.getPermissibleEntity();
 	}
 
 	public final boolean isBanned()
@@ -160,16 +165,10 @@ public abstract class Permissible
 		return result;
 	}
 
-	public boolean hasLogin()
-	{
-		return !getPermissibleEntity().isNoneAccount();
-	}
-
 	/**
 	 * Get the unique identifier for this Permissible
 	 *
-	 * @return String
-	 *         a unique identifier
+	 * @return String a unique identifier
 	 */
 	public abstract String getId();
 }

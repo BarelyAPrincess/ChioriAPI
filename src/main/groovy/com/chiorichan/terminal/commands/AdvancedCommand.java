@@ -77,7 +77,7 @@ public class AdvancedCommand extends Command
 					return true;
 				}
 				
-				if ( !selectedBinding.checkPermissions( handler.getEntity() ) )
+				if ( !selectedBinding.checkPermissions( handler.getPermissibleEntity() ) )
 				{
 					PermissionManager.getLogger().warning( "Entity " + handler.getId() + " tried to access command \"" + command + " " + arguments + "\", but doesn't have permission to do this." );
 					handler.sendMessage( EnumColor.RED + "Sorry, you don't have the required permissions." );

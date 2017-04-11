@@ -18,26 +18,23 @@ public interface MessageReceiver
 {
 	/**
 	 * Sends message/objects to any and all CommandSenders currently logged in, referencing to this Account
-	 * 
-	 * @param objs
-	 *            The objects to dispatch
+	 *
+	 * @param objs The objects to dispatch
 	 */
 	void sendMessage( Object... objs );
-	
+
 	/**
 	 * Sends message/objects to any and all CommandSenders currently logged in, referencing to this Account
 	 * Addresses the message from CommandSender
-	 * 
-	 * @param sender
-	 *            The CommandSender
-	 * @param objs
-	 *            The message/objects to deliver
+	 *
+	 * @param sender The CommandSender
+	 * @param objs   The message/objects to deliver
 	 */
 	void sendMessage( MessageSender sender, Object... objs );
-	
+
 	String getDisplayName();
-	
+
 	String getId();
-	
-	PermissibleEntity getEntity();
+
+	PermissibleEntity getPermissibleEntity();
 }

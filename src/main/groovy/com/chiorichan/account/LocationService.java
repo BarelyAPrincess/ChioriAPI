@@ -9,13 +9,13 @@
  */
 package com.chiorichan.account;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public interface LocationService
 {
-	AccountLocation getLocation( String locationId );
+	AccountLocation getLocation( String locId );
 
 	AccountLocation getDefaultLocation();
 
-	List<AccountLocation> getLocations();
+	Stream<AccountLocation> getLocations();
 }

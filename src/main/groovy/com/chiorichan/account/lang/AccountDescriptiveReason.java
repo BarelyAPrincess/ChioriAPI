@@ -24,6 +24,7 @@ public class AccountDescriptiveReason
 	public static final AccountDescriptiveReason UNAUTHORIZED = new AccountDescriptiveReason( "You are unauthorized to access this server resource.", ReportingLevel.L_DENIED );
 	public static final AccountDescriptiveReason NONCE_REQUIRED = new AccountDescriptiveReason( "Your login failed the NONCE validation.", ReportingLevel.L_SECURITY );
 
+	public static final AccountDescriptiveReason ACCOUNT_MISSING = new AccountDescriptiveReason( "That account was already logged out, this is likely a programming bug.", ReportingLevel.E_IGNORABLE );
 	public static final AccountDescriptiveReason ACCOUNT_NOT_INITIALIZED = new AccountDescriptiveReason( "That Account was not initialized, i.e., no logins are present in this state.", ReportingLevel.L_ERROR );
 	public static final AccountDescriptiveReason ACCOUNT_NOT_ACTIVATED = new AccountDescriptiveReason( "That account is not activated.", ReportingLevel.L_DENIED );
 	public static final AccountDescriptiveReason ACCOUNT_NOT_WHITELISTED = new AccountDescriptiveReason( "You are not whitelisted on this server.", ReportingLevel.L_SECURITY );

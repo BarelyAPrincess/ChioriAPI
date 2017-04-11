@@ -136,7 +136,7 @@ public class SQLTableColumns implements Iterable<String>
 		return rtn.iterator();
 	}
 
-	public void refresh() throws SQLException
+	public SQLTableColumns refresh() throws SQLException
 	{
 		ResultSet sqlColumns = sql.getMetaData().getColumns( null, null, table, null );
 		columns.clear();
@@ -151,5 +151,7 @@ public class SQLTableColumns implements Iterable<String>
 
 			columns.add( new SQLColumn( name, size, type, def, isNullable ) );
 		}
+
+		return this;
 	}
 }

@@ -9,11 +9,10 @@
  */
 package com.chiorichan.account.lang;
 
-import org.apache.commons.lang3.Validate;
-
 import com.chiorichan.account.AccountManager;
 import com.chiorichan.account.AccountMeta;
 import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.utils.UtilObjects;
 
 /**
  * Typically provides the results of an attempted account login
@@ -21,41 +20,48 @@ import com.chiorichan.lang.ReportingLevel;
 public class AccountResult
 {
 	private AccountDescriptiveReason reason = AccountDescriptiveReason.DEFAULT;
+	private String locId;
 	private String acctId;
 	private AccountMeta acct;
 	private Throwable cause;
 
 	public AccountResult( AccountMeta acct )
 	{
-		Validate.notNull( acct );
+		UtilObjects.notNull( acct );
 
+		locId = acct.getLocId();
 		acctId = acct.getId();
 		this.acct = acct;
 	}
 
 	public AccountResult( AccountMeta acct, AccountDescriptiveReason reason )
 	{
-		Validate.notNull( acct );
-		Validate.notNull( reason );
+		UtilObjects.notNull( acct );
+		UtilObjects.notNull( reason );
 
+		locId = acct.getLocId();
 		acctId = acct.getId();
 		this.reason = reason;
 		this.acct = acct;
 	}
 
-	public AccountResult( String acctId )
+	public AccountResult( String locId, String acctId )
 	{
-		Validate.notNull( acctId );
+		UtilObjects.notNull( locId );
+		UtilObjects.notNull( acctId );
 
+		this.locId = locId;
 		this.acctId = acctId;
 		acct = null;
 	}
 
-	public AccountResult( String acctId, AccountDescriptiveReason reason )
+	public AccountResult( String locId, String acctId, AccountDescriptiveReason reason )
 	{
-		Validate.notNull( acctId );
-		Validate.notNull( reason );
+		UtilObjects.notNull( locId );
+		UtilObjects.notNull( acctId );
+		UtilObjects.notNull( reason );
 
+		this.locId = locId;
 		this.acctId = acctId;
 		this.reason = reason;
 		acct = null;
@@ -70,8 +76,7 @@ public class AccountResult
 	}
 
 	/**
-	 * @param reason
-	 *             The new LoginDescriptiveReason
+	 * @param reason The new LoginDescriptiveReason
 	 * @return AccountException using the provided LoginDescriptiveReason
 	 */
 	public AccountException exception( AccountDescriptiveReason reason )
@@ -81,10 +86,8 @@ public class AccountResult
 	}
 
 	/**
-	 * @param reason
-	 *             Custom reason
-	 * @param level
-	 *             The desired ReportingLevel
+	 * @param reason Custom reason
+	 * @param level  The desired ReportingLevel
 	 * @return AccountException using a custom LoginDescriptiveReason
 	 */
 	public AccountException exception( String reason, ReportingLevel level )
@@ -98,11 +101,10 @@ public class AccountResult
 		if ( acct == null )
 			try
 			{
-				acct = AccountManager.instance().getAccountWithException( acctId );
+				acct = AccountManager.instance().resolveAccountWithException( locId, acctId );
 			}
 			catch ( AccountException e )
 			{
-				e.getReason();
 				cause = e;
 				return null;
 			}
@@ -115,16 +117,20 @@ public class AccountResult
 		if ( acct == null )
 			try
 			{
-				acct = AccountManager.instance().getAccountWithException( acctId );
+				acct = AccountManager.instance().resolveAccountWithException( locId, acctId );
 			}
 			catch ( AccountException e )
 			{
-				e.getReason();
 				cause = e;
 				throw e;
 			}
 
 		return acct;
+	}
+
+	public String getLocId()
+	{
+		return locId;
 	}
 
 	public String getAcctId()
