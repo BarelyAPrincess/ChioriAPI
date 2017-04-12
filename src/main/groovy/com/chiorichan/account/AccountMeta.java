@@ -91,7 +91,7 @@ public final class AccountMeta implements Account, Iterable<Entry<String, Object
 		if ( !acctId.matches( "[a-zA-Z0-9]*" ) )
 			throw new IllegalStateException( "The acctId must only contain the characters [a-zA-Z0-9]." );
 
-		if ( !locId.matches( "[a-zA-Z0-9]*" ) )
+		if ( !"%".equals( locId ) && !locId.matches( "[a-zA-Z0-9]*" ) )
 			throw new IllegalStateException( "The locId must only contain the characters [a-zA-Z0-9]." );
 
 		metadata.putAll( context.getValues() );
