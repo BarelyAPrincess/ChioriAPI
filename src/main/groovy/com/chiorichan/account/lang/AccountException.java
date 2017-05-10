@@ -14,7 +14,7 @@ import com.chiorichan.lang.ApplicationException;
 import com.chiorichan.lang.ExceptionContext;
 import com.chiorichan.lang.ExceptionReport;
 import com.chiorichan.lang.ReportingLevel;
-import org.apache.commons.lang3.Validate;
+import com.chiorichan.utils.UtilObjects;
 
 /**
  * Used to pass login errors to the requester.
@@ -35,7 +35,7 @@ public class AccountException extends ApplicationException
 	{
 		super( ReportingLevel.L_ERROR, result.getMessage() );
 
-		Validate.notNull( result );
+		UtilObjects.notNull( result );
 
 		if ( result.getCause() != null )
 			initCause( result.getCause() );
@@ -48,7 +48,7 @@ public class AccountException extends ApplicationException
 	{
 		super( ReportingLevel.L_ERROR, reason.getMessage() );
 
-		Validate.notNull( result );
+		UtilObjects.notNull( result );
 
 		if ( result.getCause() != null )
 			initCause( result.getCause() );
@@ -79,9 +79,9 @@ public class AccountException extends ApplicationException
 	{
 		super( ReportingLevel.L_ERROR, cause );
 
-		Validate.notNull( reason );
-		Validate.notNull( cause );
-		Validate.notNull( result );
+		UtilObjects.notNull( reason );
+		UtilObjects.notNull( cause );
+		UtilObjects.notNull( result );
 
 		result.setCause( cause );
 
@@ -103,8 +103,8 @@ public class AccountException extends ApplicationException
 	{
 		super( ReportingLevel.L_ERROR, cause );
 
-		Validate.notNull( cause );
-		Validate.notNull( result );
+		UtilObjects.notNull( cause );
+		UtilObjects.notNull( result );
 
 		result.setCause( cause );
 

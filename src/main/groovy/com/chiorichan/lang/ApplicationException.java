@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
+ * <p>
  * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.lang;
@@ -55,6 +55,11 @@ public abstract class ApplicationException extends Exception implements IExcepti
 	{
 		return super.getMessage();
 		// return String.format( "Exception %s thrown in file '%s' at line %s: '%s'", getClass().getName(), getStackTrace()[0].getFileName(), getStackTrace()[0].getLineNumber(), super.getMessage() );
+	}
+
+	public boolean hasCause()
+	{
+		return getCause() != null;
 	}
 
 	@Override
