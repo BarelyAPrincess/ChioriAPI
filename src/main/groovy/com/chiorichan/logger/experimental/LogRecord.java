@@ -1,22 +1,24 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.logger.experimental;
 
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.logging.Level;
-
+import com.chiorichan.Versioning;
 import com.chiorichan.lang.EnumColor;
 import com.chiorichan.lang.IException;
 import com.chiorichan.logger.Log;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.logging.Level;
 
 class LogRecord implements ILogEvent
 {
@@ -48,13 +50,18 @@ class LogRecord implements ILogEvent
 	public void exceptions( Throwable... throwables )
 	{
 		for ( Throwable t : throwables )
+		{
 			if ( t instanceof IException )
 			{
 				if ( ( ( IException ) t ).reportingLevel().isEnabled() )
-					log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + t.getMessage() );
+					log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + t.getClass().getSimpleName() + ": " + t.getMessage() );
 			}
 			else
-				log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + t.getMessage() );
+				log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + t.getClass().getSimpleName() + ": " + t.getMessage() );
+
+			if ( Versioning.isDevelopment() )
+				log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + ExceptionUtils.getStackTrace( t ) );
+		}
 	}
 
 	@Override

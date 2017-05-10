@@ -1,20 +1,23 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql;
 
+import com.chiorichan.Versioning;
 import com.chiorichan.datastore.DatastoreManager;
 import com.chiorichan.utils.UtilDB;
+import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Joiner;
 import com.mysql.jdbc.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.util.TextUtils;
 
 import java.io.NotSerializableException;
 import java.sql.PreparedStatement;
@@ -33,7 +36,7 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 	protected ResultSet resultSetCache = null;
 	protected PreparedStatement stmt = null;
 	protected boolean isFirstCall = true;
-	protected boolean debug = false;
+	protected boolean debug = Versioning.isDevelopment(); // XXX Temporary. Will change in future.
 	protected boolean autoExecute;
 	protected SQLWrapper sql;
 
@@ -153,10 +156,13 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 
 						if ( !e.getMessage().startsWith( "Parameter index out of range" ) )
 							throw e;
+
+						if ( Versioning.isDevelopment() )
+							e.printStackTrace();
 					}
 					catch ( ArrayIndexOutOfBoundsException e )
 					{
-						DatastoreManager.getLogger().warning( String.format( "SQL Query '%s' is missing enough replace points (?) to satisfy the argument '%s', index '%s'", sqlQuery, s, x ) );
+						DatastoreManager.getLogger().warning( String.format( "SQL Query '%s' is lacking replace points (?) to satisfy the argument '%s', index '%s'", sqlQuery, s, x ) );
 					}
 
 			try
@@ -178,9 +184,9 @@ public abstract class SQLBase<T extends SQLBase> implements SQLResultSkel, Clone
 				setStatement( stmt );
 
 			if ( debug && save )
-				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + UtilDB.toString( stmt ) + "\" " + ( isUpdate ? "affected" : "returned" ) + " " + rowCount() + " results" );
+				DatastoreManager.getLogger().fine( "SQL query \"" + sqlQuery + "\" with values [" + Joiner.on( ", " ).join( sqlValues() ) + "] " + ( isUpdate ? "affected" : "returned" ) + " " + rowCount() + " results" );
 			else if ( debug )
-				DatastoreManager.getLogger().debug( "SQL query \"" + sqlQuery + "\" -> \"" + UtilDB.toString( stmt ) + "\"" );
+				DatastoreManager.getLogger().fine( "SQL query \"" + sqlQuery + "\" with values [" + Joiner.on( ", " ).join( sqlValues() ) + "]" );
 
 			setPass();
 			return stmt;

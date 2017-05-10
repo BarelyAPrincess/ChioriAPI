@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
  *
  * All Rights Reserved.
@@ -216,7 +216,7 @@ public abstract class PermissionBaseCommand implements CommandListener
 	{
 		if ( ref == null )
 		{
-			AccountMeta meta = AccountManager.instance().resolveAccount( "%", acctId );
+			AccountMeta meta = AccountManager.instance().getAccount( "%", acctId );
 
 			if ( meta == null )
 				ref = References.format( ( ( LocationService ) AppManager.getService( LocationService.class ) ).getDefaultLocation().getId() );
@@ -244,7 +244,7 @@ public abstract class PermissionBaseCommand implements CommandListener
 		if ( !AppConfig.get().getBoolean( "permissions.informEntities.changes", false ) )
 			return; // User informing is disabled
 
-		AccountMeta meta = AccountManager.instance().resolveAccount( "%", entityId );
+		AccountMeta meta = AccountManager.instance().getAccount( "%", entityId );
 		if ( meta == null )
 			return;
 

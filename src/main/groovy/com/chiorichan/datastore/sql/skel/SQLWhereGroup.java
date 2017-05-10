@@ -1,13 +1,16 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.skel;
+
+import com.chiorichan.datastore.DatastoreManager;
+import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,10 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.chiorichan.datastore.DatastoreManager;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import java.util.stream.Stream;
 
 /**
  *
@@ -100,7 +100,7 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 	@Override
 	public String toSqlQuery()
 	{
-		List<String> segments = Lists.newLinkedList();
+		List<String> segments = new LinkedList<>();
 
 		for ( SQLWhereElement e : elements )
 		{
@@ -113,6 +113,11 @@ public class SQLWhereGroup<B extends SQLSkelWhere<?, ?>, P> extends SQLWhereElem
 			return "";
 
 		return "(" + Joiner.on( " " ).join( segments ) + ")";
+	}
+
+	public Stream<Object> values()
+	{
+		return elements.stream().flatMap( SQLWhereElement::values );
 	}
 
 	@Override

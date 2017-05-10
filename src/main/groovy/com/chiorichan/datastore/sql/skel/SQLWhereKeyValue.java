@@ -1,15 +1,19 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.skel;
 
 import org.apache.commons.lang3.Validate;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -18,7 +22,15 @@ public final class SQLWhereKeyValue<T extends SQLSkelWhere<?, ?>> extends SQLWhe
 {
 	enum Operands
 	{
-		EQUAL( "=" ), NOT_EQUAL( "!=" ), LIKE( "LIKE" ), NOT_LIKE( "NOT LIKE" ), GREATER( ">" ), GREATEREQUAL( ">=" ), LESSER( "<" ), LESSEREQUAL( "<=" ), REGEXP( "REGEXP" );
+		EQUAL( "=" ),
+		NOT_EQUAL( "!=" ),
+		LIKE( "LIKE" ),
+		NOT_LIKE( "NOT LIKE" ),
+		GREATER( ">" ),
+		GREATEREQUAL( ">=" ),
+		LESSER( "<" ),
+		LESSEREQUAL( "<=" ),
+		REGEXP( "REGEXP" );
 
 		private String operator;
 
@@ -163,7 +175,7 @@ public final class SQLWhereKeyValue<T extends SQLSkelWhere<?, ?>> extends SQLWhe
 	@Override
 	public String toSqlQuery()
 	{
-		return String.format( "`%s` %s %%s", key, operator.stringValue() );
+		return "`" + key + "` " + operator.stringValue() + " ?";
 	}
 
 	@Override
@@ -173,8 +185,8 @@ public final class SQLWhereKeyValue<T extends SQLSkelWhere<?, ?>> extends SQLWhe
 	}
 
 	@Override
-	public Object value()
+	public Stream<Object> values()
 	{
-		return value;
+		return Stream.of( value == null ? "null" : value );
 	}
 }

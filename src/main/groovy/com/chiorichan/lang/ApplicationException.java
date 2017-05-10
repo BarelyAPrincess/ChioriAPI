@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
  *
  * All Rights Reserved.
@@ -30,7 +30,7 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		this.level = level;
 
 		if ( cause.getClass().isAssignableFrom( getClass() ) )
-			throw new IllegalArgumentException( "The cause argument can't be same class, cause was " + cause.getClass() + " and this is " + getClass() + "." );
+			throw new IllegalArgumentException( "The cause argument can't be same class. {cause: " + cause.getClass() + ", this: " + getClass() + "}" );
 	}
 
 	public ApplicationException( ReportingLevel level, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace )
@@ -38,7 +38,7 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		super( message, cause, enableSuppression, writableStackTrace );
 		this.level = level;
 		if ( cause.getClass().isAssignableFrom( getClass() ) )
-			throw new IllegalArgumentException( "The cause argument can't be same class, cause was " + cause.getClass() + " and this is " + getClass() + "." );
+			throw new IllegalArgumentException( "The cause argument can't be same class. {cause: " + cause.getClass() + ", this: " + getClass() + "}" );
 	}
 
 	public ApplicationException( ReportingLevel level, Throwable cause )
@@ -47,7 +47,7 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		this.level = level;
 
 		if ( cause.getClass().isAssignableFrom( getClass() ) )
-			throw new IllegalArgumentException( "The cause argument can't be same class, cause was " + cause.getClass() + " and this is " + getClass() + "." );
+			throw new IllegalArgumentException( "The cause argument can't be same class. {cause: " + cause.getClass() + ", this: " + getClass() + "}" );
 	}
 
 	@Override

@@ -1,15 +1,17 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.utils;
 
 import com.chiorichan.helpers.Pair;
+import com.chiorichan.lang.ExceptionReport;
+import com.chiorichan.lang.MapCollisionException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -100,5 +102,33 @@ public class UtilMaps
 	{
 		AtomicInteger inx = new AtomicInteger();
 		return list.stream().filter( Objects::nonNull ).map( l -> new Pair<>( Integer.toString( inx.getAndIncrement() ), l ) ).collect( Collectors.toMap( Pair::getKey, Pair::getValue ) );
+	}
+
+	@SafeVarargs
+	public static <T extends Object> void mergeMaps( Map<String, T> desc, Map<String, T>... maps ) throws Exception
+	{
+		if ( maps == null || maps.length == 0 )
+			return;
+
+		// It's important to note that each of these maps will overwrite the current map. If it's rewriteMap contains a key that exists in getMap, the ladder will be overwritten.
+
+		for ( Map<String, T> map : maps )
+		{
+			boolean hadConflicts = false;
+
+			for ( Map.Entry<String, T> entry : map.entrySet() )
+			{
+				if ( desc.containsKey( entry.getKey() ) )
+					hadConflicts = true;
+				desc.put( entry.getKey(), entry.getValue() );
+			}
+
+			if ( hadConflicts )
+			{
+				MapCollisionException e = new MapCollisionException();
+				ExceptionReport.throwExceptions( e );
+				// log.exceptions( e );
+			}
+		}
 	}
 }

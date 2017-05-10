@@ -1,16 +1,15 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account.types;
 
 import com.chiorichan.AppConfig;
-import com.chiorichan.Versioning;
 import com.chiorichan.account.AccountContext;
 import com.chiorichan.account.AccountLocation;
 import com.chiorichan.account.AccountMeta;
@@ -26,6 +25,7 @@ import com.chiorichan.datastore.sql.SQLTableColumns;
 import com.chiorichan.datastore.sql.query.SQLQuerySelect;
 import com.chiorichan.datastore.sql.skel.SQLWhereGroup;
 import com.chiorichan.lang.ReportingLevel;
+import com.chiorichan.logger.Log;
 import com.chiorichan.permission.PermissibleEntity;
 import com.chiorichan.permission.Permission;
 import com.chiorichan.permission.PermissionDefault;
@@ -33,6 +33,7 @@ import com.chiorichan.services.AppManager;
 import com.chiorichan.tasks.Timings;
 import com.chiorichan.utils.UtilDB;
 import com.chiorichan.utils.UtilObjects;
+import com.google.common.base.Joiner;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -83,14 +84,14 @@ public class SqlTypeCreator extends AccountTypeCreator
 		}
 		catch ( SQLException e )
 		{
-			if ( Versioning.isDevelopment() )
-				e.printStackTrace();
-
-			return new AccountResolveResult( null, AccountDescriptiveReason.INTERNAL_ERROR ).setCause( e );
+			return new AccountResolveResult( null, e );
 		}
 		catch ( AccountException e )
 		{
-			return new AccountResolveResult( null, e.getReason() );
+			if ( e.getReason() == AccountDescriptiveReason.INTERNAL_ERROR )
+				return new AccountResolveResult( null, e );
+			else
+				return new AccountResolveResult( null, e.getReason() );
 		}
 	}
 
@@ -101,7 +102,7 @@ public class SqlTypeCreator extends AccountTypeCreator
 			if ( meta.getInteger( "numLoginFail" ) > Timings.epoch() - 1800 )
 				throw new AccountException( AccountDescriptiveReason.UNDER_ATTACK, meta );
 
-		if ( !meta.getString( "actkey" ).equals( "" ) )
+		if ( !meta.getString( "actkey" ).equals( "" ) && !meta.getString( "actkey" ).equals( "0" ) )
 			throw new AccountException( AccountDescriptiveReason.ACCOUNT_NOT_ACTIVATED, meta );
 	}
 
@@ -137,11 +138,13 @@ public class SqlTypeCreator extends AccountTypeCreator
 
 		Set<String> accountColumnSet = new HashSet<>( table.columnNames() );
 
-		SQLQuerySelect select = table.select().group().whereMatches( "locId", locId ).or().whereMatches( "locId", "%" ).parent();
+		SQLQuerySelect select = table.select();
+		select.group().whereMatches( "locId", locId ).or().whereMatches( "locId", "%" );
+
 		SQLWhereGroup group = select.and().group();
 
 		for ( String loginKey : loginKeys )
-			if ( !loginKey.isEmpty() )
+			if ( !UtilObjects.isEmpty( loginKey ) )
 				if ( accountColumnSet.contains( loginKey ) )
 					group.or().where( loginKey ).matches( acctId );
 				else

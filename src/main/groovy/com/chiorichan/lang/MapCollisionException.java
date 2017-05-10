@@ -7,25 +7,21 @@
  *
  * All Rights Reserved.
  */
-package com.chiorichan.datastore.sql.skel;
+package com.chiorichan.lang;
 
 /**
- * 
+ * Thrown when two maps are joined and have conflicting keys
  */
-public enum SQLWhereElementSep
+public class MapCollisionException extends ApplicationException
 {
-	AND( "AND" ), OR( "OR" ), NONE( "" );
-	
-	private String seq;
-	
-	SQLWhereElementSep( String seq )
+	public MapCollisionException()
 	{
-		this.seq = seq;
+		super( ReportingLevel.E_IGNORABLE );
 	}
-	
+
 	@Override
-	public String toString()
+	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 	{
-		return seq;
+		return null;
 	}
 }

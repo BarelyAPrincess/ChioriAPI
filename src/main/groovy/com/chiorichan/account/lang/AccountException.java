@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account.lang;
@@ -31,12 +31,27 @@ public class AccountException extends ApplicationException
 		this( reason, meta.getLocId(), meta.getId() );
 	}
 
+	public AccountException( AccountResult result )
+	{
+		super( ReportingLevel.L_ERROR, result.getMessage() );
+
+		Validate.notNull( result );
+
+		if ( result.getCause() != null )
+			initCause( result.getCause() );
+
+		this.reason = result.getDescriptiveReason();
+		this.result = result;
+	}
+
 	public AccountException( AccountDescriptiveReason reason, AccountResult result )
 	{
 		super( ReportingLevel.L_ERROR, reason.getMessage() );
 
-		Validate.notNull( reason );
 		Validate.notNull( result );
+
+		if ( result.getCause() != null )
+			initCause( result.getCause() );
 
 		result.setReason( reason );
 		this.reason = reason;
@@ -46,7 +61,12 @@ public class AccountException extends ApplicationException
 	public AccountException( AccountDescriptiveReason reason, String locId, String acctId )
 	{
 		super( ReportingLevel.L_ERROR, reason.getMessage() );
+
+		if ( reason == AccountDescriptiveReason.INTERNAL_ERROR )
+			throw new IllegalArgumentException( "Wrong Constructor: AccountDescriptiveReason was an INTERNAL_ERROR but no cause was specified." );
+
 		this.reason = reason;
+
 		result = new AccountResult( locId, acctId, reason );
 	}
 
@@ -59,12 +79,11 @@ public class AccountException extends ApplicationException
 	{
 		super( ReportingLevel.L_ERROR, cause );
 
-		if ( cause instanceof AccountException )
-			throw new IllegalStateException( "Stacking AccountException is not recommended!" );
-
 		Validate.notNull( reason );
 		Validate.notNull( cause );
 		Validate.notNull( result );
+
+		result.setCause( cause );
 
 		this.reason = reason;
 		this.result = result;
@@ -84,11 +103,10 @@ public class AccountException extends ApplicationException
 	{
 		super( ReportingLevel.L_ERROR, cause );
 
-		if ( cause instanceof AccountException )
-			throw new IllegalStateException( "Stacking AccountException is not recommended!" );
-
 		Validate.notNull( cause );
 		Validate.notNull( result );
+
+		result.setCause( cause );
 
 		reason = new AccountDescriptiveReason( cause.getMessage(), ReportingLevel.L_ERROR );
 		this.result = result;
@@ -120,6 +138,12 @@ public class AccountException extends ApplicationException
 			result = result.setCause( this );
 
 		return result;
+	}
+
+	@Override
+	public Throwable getCause()
+	{
+		return super.getCause();// super.getCause() == null ? result.getCause() : super.getCause();
 	}
 
 	public boolean hasCause()

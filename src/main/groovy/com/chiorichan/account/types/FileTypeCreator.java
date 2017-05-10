@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account.types;
@@ -195,7 +195,10 @@ public class FileTypeCreator extends AccountTypeCreator
 		}
 		catch ( AccountException e )
 		{
-			return new AccountResolveResult( null, e.getReason() ).setCause( e );
+			if ( e.getReason() == AccountDescriptiveReason.INTERNAL_ERROR )
+				return new AccountResolveResult( null, e );
+			else
+				return new AccountResolveResult( null, e.getReason() );
 		}
 	}
 

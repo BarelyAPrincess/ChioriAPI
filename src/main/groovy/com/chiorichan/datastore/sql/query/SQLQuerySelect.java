@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.datastore.sql.query;
@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQLSkelWhere<SQLQuerySelect, SQLQuerySelect>, SQLSkelLimit<SQLQuerySelect>, SQLSkelOrderBy<SQLQuerySelect>, SQLSkelGroupBy<SQLQuerySelect>, Cloneable
 {
@@ -341,11 +342,8 @@ public final class SQLQuerySelect extends SQLBase<SQLQuerySelect> implements SQL
 				{
 					if ( e.seperator() != SQLWhereElementSep.NONE && e != elements.get( 0 ) )
 						segments.add( e.seperator().toString() );
-					segments.add( String.format( e.toSqlQuery(), "?" ) );
-					if ( e.value() == null )
-						sqlValues.add( "null" );
-					else
-						sqlValues.add( e.value() );
+					segments.add( e.toSqlQuery() );
+					sqlValues.addAll( e.values().collect( Collectors.toList() ) );
 				}
 			}
 

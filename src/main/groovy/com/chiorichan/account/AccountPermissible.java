@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account;
@@ -128,7 +128,7 @@ public abstract class AccountPermissible extends Permissible implements Account
 		AccountResult result = login( auth, locId, acctId, credObjs );
 
 		if ( !result.isSuccess() )
-			throw new AccountException( result.getDescriptiveReason(), result );
+			throw new AccountException( result );
 
 		return result;
 	}
@@ -150,13 +150,11 @@ public abstract class AccountPermissible extends Permissible implements Account
 		{
 			if ( auth != null )
 			{
-				meta = result.getAccountWithException();
+				AccountManager.instance().resolveAccount( result );
+				meta = result.getAccount();
 
 				if ( meta == null )
-				{
-					result.setReason( AccountDescriptiveReason.INCORRECT_LOGIN );
 					return result;
-				}
 
 				meta.getContext().creator().preLogin( meta, this, acctId, credObjs );
 				AccountPreLoginEvent event = new AccountPreLoginEvent( meta, this, acctId, credObjs );
@@ -224,8 +222,8 @@ public abstract class AccountPermissible extends Permissible implements Account
 		}
 		catch ( Throwable t )
 		{
-			result.setReason( AccountDescriptiveReason.INTERNAL_ERROR );
 			result.setCause( t );
+			result.setReason( AccountDescriptiveReason.INTERNAL_ERROR );
 		}
 
 		if ( !result.isSuccess() )

@@ -1,10 +1,10 @@
 /**
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
- *
- * Copyright (c) 2017 Chiori Greene a.k.a. Chiori-chan <me@chiorichan.com>
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
  * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- *
+ * <p>
  * All Rights Reserved.
  */
 package com.chiorichan.account;
@@ -14,7 +14,9 @@ import com.chiorichan.Versioning;
 import com.chiorichan.account.lang.AccountDescriptiveReason;
 import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResolveResult;
+import com.chiorichan.account.lang.AccountResult;
 import com.chiorichan.event.account.KickEvent;
+import com.chiorichan.lang.ReportingLevel;
 import com.chiorichan.logger.Log;
 import com.chiorichan.services.AppManager;
 import com.chiorichan.utils.UtilEncryption;
@@ -86,47 +88,93 @@ public final class AccountManager extends AccountEvents
 		return new AccountMeta( type.getCreator().createAccount( locId, acctId ) );
 	}
 
-	public AccountMeta resolveAccount( String locId, String acctId )
+	public AccountMeta getAccountWithException( String locId, String acctId ) throws AccountException
 	{
-		try
-		{
-			return resolveAccountWithException( locId, acctId );
-		}
-		catch ( AccountException e )
-		{
-			return null;
-		}
+		AccountResult result = new AccountResult( locId, acctId );
+		resolveAccount( result );
+		if ( result.hasCause() && !result.getDescriptiveReason().getReportingLevel().isIgnorable() )
+			throw result.getCause() instanceof AccountException ? ( AccountException ) result.getCause() : new AccountException( result );
+		if ( result.getAccount() == null )
+			throw new AccountException( result );
+		return result.getAccount();
 	}
 
-	public AccountMeta resolveAccountWithException( String locId, String acctId ) throws AccountException
+	public AccountMeta getAccount( String locId, String acctId )
 	{
+		AccountResult result = new AccountResult( locId, acctId );
+		resolveAccount( result );
+		return result.getAccount();
+	}
+
+	public void resolveAccount( AccountResult result )
+	{
+		UtilObjects.notNull( result );
+		result.setCause( null );
+
+		String locId = result.getLocId();
+		String acctId = result.getAcctId();
+
 		if ( "none".equals( acctId ) || "default".equals( acctId ) )
-			return AccountType.ACCOUNT_NONE;
+		{
+			result.setAccount( AccountType.ACCOUNT_NONE );
+			result.setReason( AccountDescriptiveReason.LOGIN_SUCCESS );
+			return;
+		}
 
 		if ( "root".equals( acctId ) )
-			return AccountType.ACCOUNT_ROOT;
+		{
+			result.setAccount( AccountType.ACCOUNT_ROOT );
+			result.setReason( AccountDescriptiveReason.LOGIN_SUCCESS );
+			return;
+		}
 
 		for ( AccountMeta am : accounts )
 			for ( String key : am.getContext().loginKeys )
 				if ( acctId.equals( am.getString( key ) ) && ( "%".equals( locId ) || locId.equals( am.getLocId() ) ) )
-					return am;
+				{
+					result.setAccount( am );
+					result.setReason( AccountDescriptiveReason.LOGIN_SUCCESS );
+					return;
+				}
+
+		List<AccountResolveResult> results = new ArrayList<>();
 
 		for ( AccountType type : AccountType.getAccountTypes() )
 		{
-			AccountResolveResult result = type.getCreator().resolveAccount( locId, acctId );
-			if ( result != null && result.getDescriptiveReason().getReportingLevel().isSuccess() )
+			AccountResolveResult resolveResult = type.getCreator().resolveAccount( locId, acctId );
+
+			if ( resolveResult == null )
+				continue;
+
+			if ( resolveResult.getDescriptiveReason().getReportingLevel().isSuccess() )
 			{
-				AccountMeta meta = new AccountMeta( result.getContext() );
+				AccountMeta meta = new AccountMeta( resolveResult.getContext() );
 				accounts.put( meta );
-				return meta;
+				result.setAccount( meta );
+				result.setReason( resolveResult.getDescriptiveReason() );
+				return;
 			}
-			else if ( result != null && !result.getDescriptiveReason().getReportingLevel().isIgnorable() )
-			{
-				throw new AccountException( result.getDescriptiveReason(), locId, acctId );
-			}
+
+			if ( Versioning.isDevelopment() )
+				Log.get( this ).info( "Account Creator (" + type.getName() + "): " + resolveResult.getDescriptiveReason().getMessage() + ( resolveResult.getCause() == null ? "" : ", Cause (" + resolveResult.getCause().getClass().getSimpleName() + "): " + resolveResult.getCause().getMessage() ) );
+			if ( Versioning.isDevelopment() && resolveResult.hasCause() )
+				resolveResult.getCause().printStackTrace();
+
+			results.add( resolveResult );
 		}
 
-		throw new AccountException( AccountDescriptiveReason.INCORRECT_LOGIN, locId, acctId );
+		// Iterate through results looking for the more severe result.
+		for ( ReportingLevel level : new ReportingLevel[] {ReportingLevel.E_ERROR, ReportingLevel.L_SECURITY, ReportingLevel.L_ERROR, ReportingLevel.L_EXPIRED, ReportingLevel.L_DENIED} )
+			for ( AccountResolveResult resolveResult : results )
+				if ( resolveResult.getDescriptiveReason().getReportingLevel().equals( level ) )
+				{
+					if ( resolveResult.hasCause() )
+						result.setCause( resolveResult.getCause() );
+					result.setReason( resolveResult.getDescriptiveReason() );
+					return;
+				}
+
+		result.setReason( AccountDescriptiveReason.INCORRECT_LOGIN );
 	}
 
 	private boolean accountExists( String locId, String acctId )
