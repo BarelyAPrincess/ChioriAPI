@@ -135,22 +135,6 @@ public class UtilHttp
 		return Versioning.getProductSimple() + "/" + Versioning.getVersion() + "/" + UtilSystem.getJavaVersion();
 	}
 
-	public static boolean isValidIPv4( String ip )
-	{
-		if ( ip == null )
-			return false;
-
-		return ip.matches( REGEX_IPV4 );
-	}
-
-	public static boolean isValidIPv6( String ip )
-	{
-		if ( ip == null )
-			return false;
-
-		return ip.matches( REGEX_IPV6 );
-	}
-
 	/**
 	 * Establishes an HttpURLConnection from a URL, with the correct configuration to receive content from the given URL.
 	 *

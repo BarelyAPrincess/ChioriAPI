@@ -165,12 +165,12 @@ public class UtilSystem
 		if ( !isUnixLikeOS() )
 			return false;
 
-		// Privileged Port range from 0 to 1024
-		if ( port > 1024 )
+		// Privileged Port range from 1 to 1024
+		if ( port <= 0 || port > 1024 )
 			return false;
 
 		// If we are trying to use a privileged port, We need to be running as root
-		return isAdminUser();
+		return !isAdminUser();
 	}
 
 	/**
